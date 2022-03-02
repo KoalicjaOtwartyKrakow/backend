@@ -24,6 +24,6 @@ repos:
         types: [python]
         exclude: test
         args:
-        [
-          "-rn", # Only display messages
-        ]
+          [
+            "-rn", # Only display messages
+          ]
