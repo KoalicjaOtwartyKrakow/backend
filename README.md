@@ -31,7 +31,6 @@ Sample response:
 Parameters:
 | Parameter       | Description                                                                                     |
 |-----------------|-------------------------------------------------------------------------------------------------|
-| id              | **(required)** id of the apartment to show                                                      |
 | city            | city in which apartment is located                                                              |
 | zip             | **(required)** zip code of apartment                                                            |
 | voivodeship     | voivodeship of apartment. Must be one of:                                                       |
