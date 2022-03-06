@@ -14,6 +14,9 @@ Please remember to develop on *dev* branch. Better readme to follow.
 
 `GET /apartments/:id`
 
+
+`POST /apartments`
+
 Parameters:
 | Parameter       | Description                                                                                     |
 |-----------------|-------------------------------------------------------------------------------------------------|
@@ -38,9 +41,6 @@ Sample response:
 ```
 
 ```
-
-`POST /apartments`
-
 
 `PUT /apartments`
 
