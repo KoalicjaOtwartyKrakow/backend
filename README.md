@@ -33,7 +33,7 @@ Parameters:
 |-----------------|-------------------------------------------------------------------------------------------------|
 | city            | city in which apartment is located                                                              |
 | zip             | **(required)** zip code of apartment                                                            |
-| voivodeship     | voivodeship of apartment. Must be one of:                                                       |
+| voivodeship     | voivodeship of apartment.                                                                       |
 | address_line    | **(required)** address of apartment                                                             |
 | vacancies_total | **(required)** total vacancies of apartment                                                     |
 | vacancies_free  | **(required)** vacancies left for apartment                                                     |
