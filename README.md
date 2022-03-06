@@ -15,11 +15,19 @@ Please remember to develop on *dev* branch. Better readme to follow.
 `GET /apartments/:id`
 
 Parameters:
-| Parameter | Description |
-|-----------|-------------|
-|           |             |
-|           |             |
-|           |             |
+| Parameter       | Description                                                                                     |
+|-----------------|-------------------------------------------------------------------------------------------------|
+| id              | **(required)** id of the apartment to show                                                          |
+| city            | city in which apartment is located                                                              |
+| zip             | **(required)** zip code of apartment                                                                |
+| voivodeship     | voivodeship of apartment. Must be one of:                                                       |
+| address_line    | **(required)** address of apartment                                                                 |
+| vacancies_total | **(required)** total vacancies of apartment                                                         |
+| vacancies_free  | **(required)** vacancies left for apartment                                                         |
+| have_pets       | True if apartment owner has pets, False otherwise                                               |
+| accept_pets     | True if apartment owner accepts pets, False otherwise                                           |
+| comments        | additional comments on apartment                                                                |
+| status          | apartment verification status. Must be one of: 'added', 'phone_verified', 'in_person_verified'. |
 
 Sample request:
 ```
