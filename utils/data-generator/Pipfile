@@ -8,6 +8,8 @@ pyrnalist = "*"
 click = "*"
 requests = "*"
 appdata = "*"
+psycopg2 = "*"
+python-dotenv = "*"
 
 [dev-packages]
 pre-commit = "==2.17.0"

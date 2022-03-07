@@ -73,9 +73,24 @@ CREATE TABLE IF NOT EXISTS public.host_languages (
             REFERENCES hosts(id)
 );
 
-CREATE TYPE public.voivodeship_enum AS ENUM ('Greater Poland','Kuyavia-Pomerania','Lesser Poland','Łódź',
-'Lower Silesia','Lublin','Lubusz','Masovia','Opole','Podlaskie','Pomerania','Silesia',
-'Subcarpathia','Holy Cross Province','Warmia-Masuria','West Pomerania');
+CREATE TYPE public.voivodeship_enum AS ENUM (
+    'DOLNOŚLĄSKIE',
+    'KUJAWSKO-POMORSKIE',
+    'LUBELSKIE',
+    'LUBUSKIE',
+    'ŁÓDZKIE',
+    'MAŁOPOLSKIE',
+    'MAZOWIECKIE',
+    'OPOLSKIE',
+    'PODKARPACKIE',
+    'PODLASKIE',
+    'POMORSKIE',
+    'ŚLĄSKIE',
+    'ŚWIĘTOKRZYSKIE',
+    'WARMIŃSKO-MAZURSKIE',
+    'WIELKOPOLSKIE',
+    'ZACHODNIOPOMORSKIE'
+);
 
 CREATE TYPE public.apartment_status AS ENUM ('created', 'verified', 'banned');
 
@@ -122,7 +137,7 @@ CREATE TABLE IF NOT EXISTS public.guests  (
     priority_date  timestamp DEFAULT now(),
     status guest_status NOT NULL DEFAULT 'created',
     finance_status varchar(255), /*could be enum ,bool , or text*/
-    how_long_to_state  varchar(255),
+    how_long_to_stay  varchar(255),
     volunteer_note text,
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now(),

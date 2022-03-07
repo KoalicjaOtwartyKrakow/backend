@@ -299,7 +299,7 @@ def generate_accomodation_unit():
     voivodeship = wojewodztwa[woj]
     big_apt = random.randint(0, 100) < 20
     vacancies_total = random.randint(10, 40) if big_apt else random.randint(1, 10)
-    vacancies_free = random.randint(0, vacancies_total/2) if random.randint(0, 100) < 40 else vacancies_total
+    vacancies_free = random.randint(0, int(vacancies_total/2)) if random.randint(0, 100) < 40 else vacancies_total
     have_pets = random.randint(0, 100) < 30
     accept_pets = random.randint(0, 100) < 20
     return {
@@ -322,17 +322,24 @@ def generate_guest():
     phone_number = generate_phone_number()
     people_in_group = random.randint(1, 15)
     does_have_men = random.randint(0, 100) < 30
-    adult_men_count = random.randint(1, people_in_group/3) if does_have_men else 0
-    adult_woman_count = random.randint(1, people_in_group/3)
+    adult_men_count = random.randint(1, max(1, int(people_in_group/3))) if does_have_men else 0
+    adult_woman_count = random.randint(1, max(1, int(people_in_group/3)))
     children_count = people_in_group - adult_men_count - adult_woman_count
-    children_ages = [random.randint(1, 17) for x in range(1, children_count)]
+    children_ages = [random.randint(1, 17) for x in range(0, children_count)] if children_count > 0 else []
     have_pets = random.randint(0, 100) < 40
     pets_description = random.choice(['dog', 'cat', 'parrot', 'rat', 'rabbit']) if have_pets else ''
     special_needs = ''
-    how_lon_to_stay = f'{random.randint(1, 10)} days' if random.randint(0, 100) < 70 else 'miesiąc'
+    how_long_to_stay = f'{random.randint(1, 10)} days' if random.randint(0, 100) < 70 else 'month'
     return {
         'full_name': ' '.join([first_name, last_name]),
         'phone_number': phone_number,
         'people_in_group': people_in_group,
-        'adult_men_'
+        'adult_male_count': adult_men_count,
+        'adult_female_count': adult_woman_count,
+        'children_count': children_count,
+        'children_ages': children_ages,
+        'have_pets': have_pets,
+        'pets_description': pets_description,
+        'special_needs': special_needs,
+        'how_long_to_stay': how_long_to_stay
     }
