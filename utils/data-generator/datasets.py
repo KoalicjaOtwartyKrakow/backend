@@ -1,7 +1,10 @@
 import requests
 from pyrnalist import report
 import os
+import sys
+import pathlib
 from appdata import AppDataPaths
+from zipfile import ZipFile
 
 DATA_GOV_PL_BASE_URL = 'https://api.dane.gov.pl/1.4/datasets/{}?lang=pl'
 
@@ -41,7 +44,6 @@ def download_data_gov_pl_dataset(temp_path, resource, resources_id):
                     for data in response.iter_content(chunk_size=chunk_size):
                         f.write(data)
                         tick()
-            tick.stop()
             report.verbose(f'Downloaded url={url}')
         report.verbose(f'Using id={id} file={file_name}')
         files[int(id)] = file_name
@@ -71,8 +73,51 @@ def download_last_names(temp_path):
     return last_names
 
 
-def get_datasets():
+def get_teryt_db_file_name(teryt_path, temp_path, db):
+    file_path = os.path.join(temp_path.app_data_path, f'{db}.csv')
+    if os.path.exists(file_path):
+        report.verbose(f'Using cached file: {file_path}')
+        return file_path
+
+    path = next(pathlib.Path(teryt_path).glob(f'**/{db}_*.zip'), None)
+    if not path:
+        report.error(f'Could not find Teryt database files at: {teryt_path}')
+        sys.exit(-1)
+    report.verbose(f'Extracting {path}')
+    stem = path.stem
+    with ZipFile(path, 'r') as zo:
+        list_of_files = zo.namelist()
+        csv_file = f'{stem}.csv'
+        if not csv_file in list_of_files:
+            report.error(f'Could not find Teryt database file={csv_file} in {path}')
+            sys.exit(-1)
+        zo.extract(csv_file, temp_path.app_data_path)
+        old_path = os.path.join(temp_path.app_data_path, csv_file)
+        os.rename(old_path, file_path)
+        report.verbose(f'Extracted file={file_path}')
+
+    return path
+
+
+def get_teryt_database(teryt_path, temp_path):
+    """unfortunately, Teyrt API needs registering, and page uses some ancient ASP.NET post-backs... """
+    wmrodz = get_teryt_db_file_name(teryt_path, temp_path, 'WMRODZ')
+    simc = get_teryt_db_file_name(teryt_path, temp_path, 'SIMC_Adresowy')
+    terc = get_teryt_db_file_name(teryt_path, temp_path, 'TERC_Adresowy')
+    ulic = get_teryt_db_file_name(teryt_path, temp_path, 'ULIC_Adresowy')
+    nts = get_teryt_db_file_name(teryt_path, temp_path, 'NTS')
+    return {
+        'nts': nts,
+        'wmrodz': wmrodz,
+        'simc': simc,
+        'terc': terc,
+        'ulic': ulic
+    }
+
+
+def get_datasets(teryt_path):
     temp_path = AppDataPaths('salamlab-testing')
     temp_path.setup()
-    datasets = {'last_names': download_last_names(temp_path), 'first_names': download_first_names(temp_path)}
+    datasets = {'last_names': download_last_names(temp_path), 'first_names': download_first_names(temp_path),
+                'teryt': get_teryt_database(teryt_path, temp_path)}
     return datasets
