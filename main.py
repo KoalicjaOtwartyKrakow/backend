@@ -13,7 +13,7 @@ db_user = os.environ.get("DB_USER")
 db_password = os.environ.get("DB_PASSWORD")
 db_name = os.environ.get("DB_NAME")
 
-CONNECTION_NAME = ""
+CONNECTION_NAME = "kok"
 query_string = {"unix_sock": f"/cloudsql/{CONNECTION_NAME}/.s.PGSQL.5432"}
 
 APARTMENTS_TABLE_NAME = ...
