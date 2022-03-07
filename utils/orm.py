@@ -5,7 +5,7 @@ import enum
 
 import sqlalchemy.sql.functions as func
 
-from sqlalchemy import Column, Integer, String, Enum, Boolean
+from sqlalchemy import Column, Integer, String, Enum, Boolean, Text
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
 from sqlalchemy.orm import declarative_base
 
@@ -46,7 +46,7 @@ class ApartmentStatus(enum.Enum):
 class Apartment(Base):
     """ORM for Apartments."""
 
-    __tablename__ = ""
+    __tablename__ = ...
 
     id = Column("id", Integer, primary_key=True)
     guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
@@ -67,3 +67,23 @@ class Apartment(Base):
 
     def __repr__(self):
         return f"Apartment: {self.__dict__}"
+
+
+class Host(Base):
+    """ORM for Hosts."""
+
+    __tablename__ = ...
+
+    id = Column("id", Integer, primary_key=True)
+    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
+    full_name = Column("full_name", String(256))
+    email = Column("email", String(100))
+    phone_number = Column("phone_number", String(20))
+    call_after = Column("call_after", String(20), nullable=True)
+    call_before = Column("call_before", String(20), nullable=True)
+    comments = Column("comments", Text, nullable=True)
+    created_at = Column("created_at", TIMESTAMP, server_default=func.now())
+    updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
+
+    def __repr__(self):
+        return f"Host: {self.__dict__}"
