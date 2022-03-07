@@ -9,8 +9,8 @@ RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-/*thouse who work with spreadsheet  */
-CREATE TABLE IF NOT EXISTS public.communicators (
+/* those who work with spreadsheet  */
+CREATE TABLE IF NOT EXISTS public.teammembers (
     id integer GENERATED ALWAYS AS IDENTITY,
     guid uuid DEFAULT uuid_generate_v4(),
     full_name varchar(20),
@@ -18,13 +18,14 @@ CREATE TABLE IF NOT EXISTS public.communicators (
     PRIMARY KEY(id)
 );
 
-CREATE TABLE IF NOT EXISTS public.languages (   
+CREATE TABLE IF NOT EXISTS public.languages (
     name varchar(20) NOT NULL,
     code2 varchar(2) NOT NULL, /*iso_639_1_code*/
     code3 varchar(3) NOT NULL, /*iso_639_2_code*/
     PRIMARY KEY(code2)
 );
 
+CREATE TYPE public.host_status AS ENUM ('created', 'verified', 'banned');
 
 CREATE TABLE IF NOT EXISTS public.hosts (
     id integer  GENERATED ALWAYS AS IDENTITY,
@@ -35,6 +36,7 @@ CREATE TABLE IF NOT EXISTS public.hosts (
     call_after varchar(20),
     call_before varchar(20),
     comments  text,
+    status host_status NOT NULL DEFAULT 'created',
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now(),
     PRIMARY KEY(id)
@@ -46,14 +48,14 @@ CREATE TRIGGER set_host_timestamp
     FOR EACH ROW
     EXECUTE PROCEDURE public.trigger_set_timestamp();
 
-CREATE TABLE IF NOT EXISTS public.host_communicators (    
-    communicator_id integer,
+CREATE TABLE IF NOT EXISTS public.host_teammembers (
+    teammember_id integer,
     host_id integer,
-    PRIMARY KEY(host_id,communicator_id),
-    CONSTRAINT fk_communicator
-        FOREIGN KEY(communicator_id)
-            REFERENCES communicators(id),
-    CONSTRAINT fk_landlord
+    PRIMARY KEY(host_id,teammember_id),
+    CONSTRAINT fk_teammember
+        FOREIGN KEY(teammember_id)
+            REFERENCES teammembers(id),
+    CONSTRAINT fk_host
         FOREIGN KEY(host_id)
             REFERENCES hosts(id)
 );
@@ -75,11 +77,10 @@ CREATE TYPE public.voivodeship_enum AS ENUM ('Greater Poland','Kuyavia-Pomerania
 'Lower Silesia','Lublin','Lubusz','Masovia','Opole','Podlaskie','Pomerania','Silesia',
 'Subcarpathia','Holy Cross Province','Warmia-Masuria','West Pomerania');
 
-CREATE TYPE public.apartment_status AS ENUM ('added', 'phone_verified', 'in_person_verified');
-
+CREATE TYPE public.apartment_status AS ENUM ('created', 'verified', 'banned');
 
 CREATE TABLE IF NOT EXISTS public.accommodation_units (
-    id integer PRIMARY KEY,
+    id integer GENERATED ALWAYS AS IDENTITY,
     guid uuid DEFAULT uuid_generate_v4(),
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now(),
@@ -92,7 +93,8 @@ CREATE TABLE IF NOT EXISTS public.accommodation_units (
     have_pets boolean,
     accept_pets boolean,
     comments varchar(255),
-    status apartment_status NOT NULL DEFAULT 'added'
+    status apartment_status NOT NULL DEFAULT 'created',
+    PRIMARY KEY(id)
 );
 
 
@@ -101,27 +103,34 @@ CREATE TRIGGER set_accommodation_units_timestamp
         UPDATE ON public.accommodation_units
     FOR EACH ROW
     EXECUTE PROCEDURE public.trigger_set_timestamp();
-    
+
+CREATE TYPE public.guest_status AS ENUM ('created', 'verified', 'banned');
+
 CREATE TABLE IF NOT EXISTS public.guests  (
-    id integer PRIMARY KEY,
+    id integer GENERATED ALWAYS AS IDENTITY,
     guid uuid DEFAULT uuid_generate_v4(),
     full_name varchar(255) NOT NULL,
     phone_number varchar(20) NULL,
     people_in_group smallint not null DEFAULT 1,
-    adult_man_count smallint not null,
-    adult_weman_count smallint not null,
-    childred_count smallint not null,
-    childred_ages smallint array null,
+    adult_male_count smallint not null,
+    adult_female_count smallint not null,
+    children_count smallint not null,
+    children_ages smallint array null,
     have_pets boolean,
     pets_description varchar(255),
     special_needs text,
     priority_date  timestamp DEFAULT now(),
-    status int /*should be enum*/,
+    status guest_status NOT NULL DEFAULT 'created',
     finance_status varchar(255), /*could be enum ,bool , or text*/
     how_long_to_state  varchar(255),
-    volonteer_note text,
+    volunteer_note text,
     created_at timestamp DEFAULT now(),
-    updated_at timestamp DEFAULT now()    
-    );
-    
-    
+    updated_at timestamp DEFAULT now(),
+    PRIMARY KEY(id)
+);
+
+CREATE TRIGGER set_guests_timestamp
+    BEFORE
+        UPDATE ON public.guests
+    FOR EACH ROW
+    EXECUTE PROCEDURE public.trigger_set_timestamp();
