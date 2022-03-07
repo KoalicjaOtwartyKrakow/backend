@@ -13,7 +13,7 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 
-class VoivodeshipEnum(enum.Enum):
+class Voivodeship(enum.Enum):
     """Class representing voivodeship enum in database."""
 
     GREATER_POL = "Greater Poland"
@@ -34,6 +34,14 @@ class VoivodeshipEnum(enum.Enum):
     WEST_POM = "West Pomerania"
 
 
+class ApartmentStatus(enum.Enum):
+    """Class representing apartment status enum in database."""
+
+    ADDED = "added"
+    PHONE_VERIFIED = "phone_verified"
+    IN_PERSON_VERIFIED = "in_person_verified"
+
+
 # pylint: disable=too-few-public-methods
 class Apartment(Base):
     """ORM for Apartments."""
@@ -46,11 +54,13 @@ class Apartment(Base):
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
     city = Column("city", String(50))
     zip = Column("zip", String(10), nullable=False)
-    voivodeship = Column("voivodeship", Enum(VoivodeshipEnum))
+    voivodeship = Column("voivodeship", Enum(Voivodeship))
     address_line = Column("address_line", String(512), nullable=False)
     vacancies_total = Column("vacancies_total", Integer, nullable=False)
     vacancies_free = Column("vacancies_free", Integer, nullable=False)
     have_pets = Column("have_pets", Boolean)
     accept_pets = Column("accept_pets", Boolean)
     comments = Column("comments", String(255))
-    status = Column("status", Enum(), default=..., nullable=False)
+    status = Column(
+        "status", Enum(ApartmentStatus), default=ApartmentStatus.ADDED, nullable=False
+    )
