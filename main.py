@@ -1,4 +1,4 @@
-# pylint: disable=fixme,invalid-name
+# pylint: disable=fixme,invalid-name,no-member
 """Module containing Google Cloud functions for deployment."""
 
 import os
@@ -6,6 +6,11 @@ import os
 import flask
 import functions_framework
 import sqlalchemy
+
+from sqlalchemy import exc
+from sqlalchemy.orm import sessionmaker
+
+from utils import orm
 
 
 DRIVER_NAME = "postgres+pg8000"
@@ -25,15 +30,11 @@ def post_apartment(request):
     # parse request
     request_json = request.get_json()
 
-    # check required attributes
-    if any(
-        attr not in request_json
-        for attr in ["zip", "address_line", "vacancies_total", "vacancies_free"]
-    ):
-        return flask.Response(status=400)
-
-    # sql statement
-    stmt = sqlalchemy.text("insert into ")
+    # create Apartment object from json
+    try:
+        apartment = orm.Apartment(**request_json)
+    except TypeError as e:
+        return (f"Received invalid parameter(s) for apartment: {e}", 400)
 
     # db connection
     db = sqlalchemy.create_engine(
@@ -45,14 +46,13 @@ def post_apartment(request):
             query=query_string,
         )
     )
+    session = sessionmaker(bind=db)
+    session.add(apartment)
 
-    # execute statement
+    # db transaction
     try:
-        with db.connect() as conn:
-            conn.execute(stmt)
-    # todo: catch more specific exception
-    # pylint: disable=broad-except
-    except Exception as e:
-        return e
+        session.commit()
+    except exc.SQLAlchemyError as e:
+        return (f"Transaction error: {e}", 400)
 
     return flask.Response(status=200)
