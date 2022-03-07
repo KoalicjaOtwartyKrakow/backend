@@ -1,4 +1,4 @@
-# pylint: disable=fixme,invalid-name,no-member
+# pylint: disable=fixme,invalid-name,no-member,unused-argument
 """Module containing Google Cloud functions for deployment."""
 
 import os
@@ -22,6 +22,11 @@ CONNECTION_NAME = "kok"
 query_string = {"unix_sock": f"/cloudsql/{CONNECTION_NAME}/.s.PGSQL.5432"}
 
 APARTMENTS_TABLE_NAME = ...
+
+
+@functions_framework.http
+def get_apartment(request):
+    """HTTP Cloud Function for getting apartment."""
 
 
 @functions_framework.http
@@ -56,3 +61,13 @@ def post_apartment(request):
         return (f"Transaction error: {e}", 400)
 
     return flask.Response(status=200)
+
+
+@functions_framework.http
+def put_apartment(request):
+    """HTTP Cloud Function for updating apartment."""
+
+
+@functions_framework.http
+def delete_apartment(request):
+    """HTTP Cloud Function for deleting apartment."""
