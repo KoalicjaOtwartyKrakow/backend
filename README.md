@@ -43,14 +43,24 @@ Parameters:
 | status          | apartment verification status. Must be one of: 'added', 'phone_verified', 'in_person_verified'. |
 
 Sample request:
+```json
+{
+    "city": "Kraków",
+    "zip": "30-337",
+    "voivodeship": "Lesser Poland",
+    "address_line": "ul. Żadna 3/4",
+    "vacancies_total": 9,
+    "vacancies_free": 9,
+    "have_pets": True,
+    "accept_pets": True,
+    "comments": "I love animals!",
+    "status": "in_person_verified"
+}
 ```
 
-```
-
-Sample response:
-```
-
-```
+Possible responses:
+- 200: apartment successfully added
+- 400: invalid request parameters or db transaction error
 
 `PUT /apartments`
 
