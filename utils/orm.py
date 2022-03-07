@@ -64,3 +64,6 @@ class Apartment(Base):
     status = Column(
         "status", Enum(ApartmentStatus), default=ApartmentStatus.ADDED, nullable=False
     )
+
+    def __repr__(self):
+        return f"Apartment: {self.__dict__}"
