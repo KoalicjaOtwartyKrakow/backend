@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pyrnalist = "*"
+click = "*"
+requests = "*"
+appdata = "*"
+
+[dev-packages]
+pre-commit = "==2.17.0"
+bandit = "==1.7.3"
+flake8 = "==4.0.1"
+pylint = "==2.12.2"
+
+[requires]
+python_version = "3.10"
