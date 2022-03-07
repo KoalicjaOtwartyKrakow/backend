@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS public.guests  (
     phone_number varchar(20) NULL,
     people_in_group smallint not null DEFAULT 1,
     adult_man_count smallint not null,
-    adult_weman_count smallint not null,
+    adult_women_count smallint not null,
     childred_count smallint not null,
     childred_ages smallint array null,
     have_pets boolean,

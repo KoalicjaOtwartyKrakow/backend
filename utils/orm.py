@@ -6,7 +6,7 @@ import enum
 import sqlalchemy.sql.functions as func
 
 from sqlalchemy import Column, Integer, String, Enum, Boolean, Text
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
+from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, ARRAY
 from sqlalchemy.orm import declarative_base
 
 
@@ -87,3 +87,29 @@ class Host(Base):
 
     def __repr__(self):
         return f"Host: {self.__dict__}"
+
+
+class Guest(Base):
+    """ORM for Guests."""
+
+    __tablename__ = ...
+
+    id = Column("id", Integer, primary_key=True)
+    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
+    full_name = Column("full_name", String(255))
+    phone_number = Column("phone_number", String(20))
+    people_in_group = Column("people_in_group", Integer, default=1)
+    adult_man_count = Column("adult_man_count", Integer)
+    adult_women_count = Column("adult_women_count", Integer)
+    children_count = Column("children_count", Integer)
+    children_ages = Column("children_ages", ARRAY)
+    have_pets = Column("have_pets", Boolean, nullable=True)
+    pets_description = Column("pets_description", String(255), nullable=True)
+    special_needs = Column("special_needs", Text, nullable=True)
+    priority_date = Column("priority_date", TIMESTAMP, server_default=func.now())
+    status = Column("status", Integer, nullable=True)
+    finance_status = Column("finance_status", String(255), nullable=True)
+    stay_length = Column("stay_length", String(255), nullable=True)
+    volunteer_note = Column("volunteer_note", Text, nullable=True)
+    created_at = Column("created_at", TIMESTAMP, server_default=func.now())
+    updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
