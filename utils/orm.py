@@ -5,7 +5,7 @@ import enum
 
 import sqlalchemy.sql.functions as func
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Enum, Boolean
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
 from sqlalchemy.orm import declarative_base
 
@@ -46,6 +46,11 @@ class Apartment(Base):
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
     city = Column("city", String(50))
     zip = Column("zip", String(10), nullable=False)
-    voivodeship = Column(
-        "voivodeship",
-    )
+    voivodeship = Column("voivodeship", Enum(VoivodeshipEnum))
+    address_line = Column("address_line", String(512), nullable=False)
+    vacancies_total = Column("vacancies_total", Integer, nullable=False)
+    vacancies_free = Column("vacancies_free", Integer, nullable=False)
+    have_pets = Column("have_pets", Boolean)
+    accept_pets = Column("accept_pets", Boolean)
+    comments = Column("comments", String(255))
+    status = Column("status", Enum(), default=..., nullable=False)
