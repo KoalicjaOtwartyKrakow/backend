@@ -13,6 +13,8 @@ host: "salamlab-cloudrun-i4omjkfpsa-lm.a.run.app"
 tags:
   - name: "host"
     description: "Information about the hosts"
+  - name: "accommodation"
+    description: "Information about the accommodation units"
 schemes:
   - "https"
 paths:
@@ -45,39 +47,6 @@ paths:
       security:
         - salamlab_auth:
             - "write:hosts"
-            - "read:hosts"
-  /host/findByAccomodationNeeds:
-    get:
-      tags:
-        - "host"
-      summary: "Finds Hosts by accomodation needs"
-      description: ""
-      operationId: "find_host_by_accomodation_needs"
-      x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/find_host_by_accomodation_needs
-        protocol: h2
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "Description of needs"
-          required: true
-          schema:
-            $ref: "#/definitions/AccomodationNeeds"
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Host"
-        "400":
-          description: "Invalid status value"
-      security:
-        - salamlab_auth:
             - "read:hosts"
   /host/{hostId}:
     get:
@@ -112,7 +81,7 @@ paths:
     post:
       tags:
         - "host"
-      summary: "Updates a pet in the store with form data"
+      summary: "Updates a host in the database"
       description: ""
       operationId: "update_host"
       x-google-backend:
@@ -121,7 +90,6 @@ paths:
       consumes:
         - "application/json"
       produces:
-        - "application/xml"
         - "application/json"
       parameters:
         - name: "hostId"
@@ -182,6 +150,171 @@ paths:
         - salamlab_auth:
             - "write:hosts"
             - "read:hosts"
+  /accommodation:
+    post:
+      tags:
+        - "accommodation"
+      summary: "Add new accommodation unit"
+      description: ""
+      operationId: "add_accommodation"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/add_accommodation
+        protocol: h2
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Accommodation Unit object that needs to be added to the database"
+          required: true
+          schema:
+            $ref: "#/definitions/AccommodationUnitCreate"
+      responses:
+        "405":
+          description: "Invalid input"
+        "201":
+          description: "Created"
+      security:
+        - salamlab_auth:
+            - "write:accommodations"
+            - "read:accommodations"
+  /accommodation/findByNeeds:
+    get:
+      tags:
+        - "accommodation"
+      summary: "Finds accommodation by needs"
+      description: ""
+      operationId: "find_accommodation_by_needs"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/find_accommodation_by_needs
+        protocol: h2
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Description of needs"
+          required: true
+          schema:
+            $ref: "#/definitions/AccommodationNeeds"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/AccommodationUnit"
+        "400":
+          description: "Invalid status value"
+      security:
+        - salamlab_auth:
+            - "read:hosts"
+  /accommodation/{accommodationId}:
+    get:
+      tags:
+        - "accommodation"
+      summary: "Find accommodation unit by ID"
+      description: "Returns a single accommodation unit"
+      operationId: "get_accommodation_by_id"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_accommodation_by_id
+        protocol: h2
+      produces:
+        - "application/json"
+      parameters:
+        - name: "accommodationId"
+          in: "path"
+          description: "ID of accommodation to return"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AccommodationUnit"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Accommodation Unit not found"
+      security:
+        - api_key: []
+    post:
+      tags:
+        - "accommodation"
+      summary: "Updates an accommodation unit"
+      description: ""
+      operationId: "update_accommodation"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/update_accommodation
+        protocol: h2
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "accommodationId"
+          in: "path"
+          description: "ID of host that needs to be updated"
+          required: true
+          type: "string"
+          format: "uuid"
+        - in: "body"
+          name: "body"
+          description: "Host information that needs to be updated in the database"
+          required: true
+          schema:
+            $ref: "#/definitions/AccommodationUnitUpdate"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AccommodationUnit"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Accommodation Unit not found"
+        "405":
+          description: "Invalid input"
+      security:
+        - salamlab_auth:
+            - "write:accommodations"
+            - "read:accommodations"
+    delete:
+      tags:
+        - "accommodation"
+      summary: "Deletes an Accommodation Unit"
+      description: ""
+      operationId: "delete_accommodation"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/delete_accommodation
+        protocol: h2
+      produces:
+        - "application/json"
+      parameters:
+        - name: "api_key"
+          in: "header"
+          required: false
+          type: "string"
+        - name: "accommodationId"
+          in: "path"
+          description: "Accommodation Unit id to delete"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Pet not found"
+      security:
+        - salamlab_auth:
+            - "write:accommodations"
+            - "read:accommodations"
 securityDefinitions:
   salamlab_auth:
     type: "oauth2"
@@ -190,6 +323,8 @@ securityDefinitions:
     scopes:
       write:hosts: "modify host information"
       read:hosts: "read host information"
+      write:accommodations: "modify accommodation information"
+      read:accommodations: "read accommodation information"
   api_key:
     type: "apiKey"
     name: "api_key"
@@ -225,9 +360,6 @@ definitions:
       - "email"
       - "phoneNumber"
     properties:
-      id:
-        type: "string"
-        format: "uuid"
       fullName:
         type: "string"
         example: "Cecylia Łukaszyk"
@@ -260,18 +392,15 @@ definitions:
               - "created"
               - "verified"
               - "rejected"
-          createdAt:
-            type: "string"
-            format: "date-time"
-          updatedAt:
-            type: "string"
-            format: "date-time"
 
   Host:
     allOf:
       - $ref: "#/definitions/HostUpdate"
       - type: "object"
         properties:
+          id:
+            type: "string"
+            format: "uuid"
           createdAt:
             type: "string"
             format: "date-time"
@@ -279,7 +408,90 @@ definitions:
             type: "string"
             format: "date-time"
 
-  AccomodationNeeds:
+  Voivodeship:
+    type: "string"
+    enum:
+      - "DOLNOŚLĄSKIE"
+      - "KUJAWSKO-POMORSKIE"
+      - "LUBELSKIE"
+      - "LUBUSKIE"
+      - "ŁÓDZKIE"
+      - "MAŁOPOLSKIE"
+      - "MAZOWIECKIE"
+      - "OPOLSKIE"
+      - "PODKARPACKIE"
+      - "PODLASKIE"
+      - "POMORSKIE"
+      - "ŚLĄSKIE"
+      - "ŚWIĘTOKRZYSKIE"
+      - "WARMIŃSKO-MAZURSKIE"
+      - "WIELKOPOLSKIE"
+      - "ZACHODNIOPOMORSKIE"
+
+  AccommodationUnitCreate:
+    type: "object"
+    required:
+      - "hostId"
+      - "city"
+      - "zip"
+      - "voivodeship"
+      - "addressLine"
+      - "vacanciesTotal"
+    properties:
+      hostId:
+        type: "string"
+        format: "uuid"
+      city:
+        type: "string"
+        description: "City name"
+      zip:
+        type: "string"
+        pattern: '^\d{2}-\d{3}'
+        description: "Zip code"
+      voivodeship:
+        $ref: "#/definitions/Voivodeship"
+      addressLine:
+        type: "string"
+      vacanciesTotal:
+        type: "integer"
+      havePets:
+        type: "boolean"
+      acceptsPets:
+        type: "boolean"
+      comments:
+        type: "string"
+
+  AccommodationUnitUpdate:
+    allOf:
+      - $ref: "#/definitions/AccommodationUnitCreate"
+      - type: "object"
+        properties:
+          vacanciesFree:
+            type: "integer"
+          status:
+            type: "string"
+            description: "Verification status of the Host"
+            enum:
+              - "created"
+              - "verified"
+              - "rejected"
+
+  AccommodationUnit:
+    allOf:
+      - $ref: "#/definitions/AccommodationUnitUpdate"
+      - type: "object"
+        properties:
+          id:
+            type: "string"
+            format: "uuid"
+          createdAt:
+            type: "string"
+            format: "date-time"
+          updatedAt:
+            type: "string"
+            format: "date-time"
+
+  AccommodationNeeds:
     type: "object"
     properties:
       vacancies_needed:
