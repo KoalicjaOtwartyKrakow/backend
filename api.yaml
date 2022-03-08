@@ -15,6 +15,10 @@ tags:
     description: "Information about the hosts"
   - name: "accommodation"
     description: "Information about the accommodation units"
+  - name: "guest"
+    description: "Information about the guests"
+  - name: "teammember"
+    description: "Information about the team members"
 schemes:
   - "https"
 paths:
@@ -315,6 +319,270 @@ paths:
         - salamlab_auth:
             - "write:accommodations"
             - "read:accommodations"
+  /guest:
+    post:
+      tags:
+        - "guest"
+      summary: "Add new guest"
+      description: ""
+      operationId: "add_guest"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/add_guest
+        protocol: h2
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Guest object that needs to be added to the database"
+          required: true
+          schema:
+            $ref: "#/definitions/GuestCreate"
+      responses:
+        "405":
+          description: "Invalid input"
+        "201":
+          description: "Created"
+      security:
+        - salamlab_auth:
+            - "write:guests"
+            - "read:guests"
+  /guest/{guestId}:
+    get:
+      tags:
+        - "guest"
+      summary: "Find guest by ID"
+      description: "Returns a single guest"
+      operationId: "get_guest_by_id"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_guest_by_id
+        protocol: h2
+      produces:
+        - "application/json"
+      parameters:
+        - name: "guestId"
+          in: "path"
+          description: "ID of guest to return"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Guest"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Guest not found"
+      security:
+        - api_key: []
+    post:
+      tags:
+        - "guest"
+      summary: "Updates a guest in the database"
+      description: ""
+      operationId: "update_guest"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/update_guest
+        protocol: h2
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "guestId"
+          in: "path"
+          description: "ID of guest that needs to be updated"
+          required: true
+          type: "string"
+          format: "uuid"
+        - in: "body"
+          name: "body"
+          description: "Guest information that needs to be updated in the database"
+          required: true
+          schema:
+            $ref: "#/definitions/GuestUpdate"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Guest"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Guest not found"
+        "405":
+          description: "Invalid input"
+      security:
+        - salamlab_auth:
+            - "write:guests"
+            - "read:guests"
+    delete:
+      tags:
+        - "guest"
+      summary: "Deletes a guest"
+      description: ""
+      operationId: "delete_guest"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/delete_guest
+        protocol: h2
+      produces:
+        - "application/json"
+      parameters:
+        - name: "api_key"
+          in: "header"
+          required: false
+          type: "string"
+        - name: "guestId"
+          in: "path"
+          description: "Guest id to delete"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Pet not found"
+      security:
+        - salamlab_auth:
+            - "write:guests"
+            - "read:guests"
+  /teammember:
+    post:
+      tags:
+        - "teammember"
+      summary: "Add new teammember"
+      description: ""
+      operationId: "add_teammember"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/add_teammember
+        protocol: h2
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Teammember object that needs to be added to the database"
+          required: true
+          schema:
+            $ref: "#/definitions/TeamMemberCreate"
+      responses:
+        "405":
+          description: "Invalid input"
+        "201":
+          description: "Created"
+      security:
+        - salamlab_auth:
+            - "write:teammembers"
+            - "read:teammembers"
+  /teammember/{teammemberId}:
+    get:
+      tags:
+        - "teammember"
+      summary: "Find teammember by ID"
+      description: "Returns a single teammember"
+      operationId: "get_teammember_by_id"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_teammember_by_id
+        protocol: h2
+      produces:
+        - "application/json"
+      parameters:
+        - name: "teammemberId"
+          in: "path"
+          description: "ID of teammember to return"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TeamMember"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Teammember not found"
+      security:
+        - api_key: []
+    post:
+      tags:
+        - "teammember"
+      summary: "Updates a teammember in the database"
+      description: ""
+      operationId: "update_teammember"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/update_teammember
+        protocol: h2
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "teammemberId"
+          in: "path"
+          description: "ID of teammember that needs to be updated"
+          required: true
+          type: "string"
+          format: "uuid"
+        - in: "body"
+          name: "body"
+          description: "Teammember information that needs to be updated in the database"
+          required: true
+          schema:
+            $ref: "#/definitions/TeamMemberUpdate"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TeamMember"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Teammember not found"
+        "405":
+          description: "Invalid input"
+      security:
+        - salamlab_auth:
+            - "write:teammembers"
+            - "read:teammembers"
+    delete:
+      tags:
+        - "teammember"
+      summary: "Deletes a teammember"
+      description: ""
+      operationId: "delete_teammember"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/delete_teammember
+        protocol: h2
+      produces:
+        - "application/json"
+      parameters:
+        - name: "api_key"
+          in: "header"
+          required: false
+          type: "string"
+        - name: "teammemberId"
+          in: "path"
+          description: "Teammember id to delete"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Pet not found"
+      security:
+        - salamlab_auth:
+            - "write:teammembers"
+            - "read:teammembers"
 securityDefinitions:
   salamlab_auth:
     type: "oauth2"
@@ -325,6 +593,10 @@ securityDefinitions:
       read:hosts: "read host information"
       write:accommodations: "modify accommodation information"
       read:accommodations: "read accommodation information"
+      write:guests: "modify guest information"
+      read:guests: "read guest information"
+      write:teammembers: "modify teammembers information"
+      read:teammembers: "read teammembers information"
   api_key:
     type: "apiKey"
     name: "api_key"
@@ -508,3 +780,97 @@ definitions:
           type: "integer"
       have_pets:
         type: "boolean"
+
+  GuestCreate:
+    type: "object"
+    required:
+      - "fullName"
+      - "email"
+      - "phoneNumber"
+    properties:
+      fullName:
+        type: "string"
+        example: "Cecylia Łukaszyk"
+      email:
+        type: "string"
+        format: "email"
+      phoneNumber:
+        $ref: "#/definitions/PhoneNumber"
+      peopleInGroup:
+        type: "integer"
+      adultMaleCount:
+        type: "integer"
+      adultFemaleCount:
+        type: "integer"
+      children:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            age:
+              type: "integer"
+      havePets:
+        type: "boolean"
+      petsDescription:
+        type: "string"
+      specialNeeds:
+        type: "string"
+      financeStatus:
+        type: "string"
+      howLongToStay:
+        type: "string"
+
+  GuestUpdate:
+    allOf:
+      - $ref: "#/definitions/GuestCreate"
+      - type: "object"
+        properties:
+          status:
+            type: "string"
+            enum:
+              - "created"
+              - "verified"
+              - "rejected"
+          priorityDate:
+            type: "string"
+            format: "date-time"
+
+  Guest:
+    allOf:
+      - $ref: "#/definitions/GuestUpdate"
+      - type: "object"
+        properties:
+          id:
+            type: "string"
+            format: "uuid"
+          createdAt:
+            type: "string"
+            format: "date-time"
+          updatedAt:
+            type: "string"
+            format: "date-time"
+
+  TeamMemberCreate:
+    type: "object"
+    required:
+      - "fullName"
+      - "phoneNumber"
+    properties:
+      fullName:
+        type: "string"
+        example: "Cecylia Łukaszyk"
+      phoneNumber:
+        $ref: "#/definitions/PhoneNumber"
+
+  TeamMemberUpdate:
+    $ref: "#/definitions/TeamMemberCreate"
+
+  TeamMember:
+    allOf:
+      - $ref: "#/definitions/TeamMemberUpdate"
+      - type: "object"
+        properties:
+          id:
+            type: "string"
+            format: "uuid"
+    
