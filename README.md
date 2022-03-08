@@ -1,32 +1,24 @@
-# backend
+# Backend for KOK
 
-Please remember to develop on *dev* branch. Better readme to follow.
+1. [Before you start](#before-you-start)
+2. [API Documentation](#api-documentation)
+    1. [Accommodation](#accommodation)
+    2. [Host](#host)
+    3. [Guest](#guest)
+    4. [Teammember](#teammember)
 
 ## Before you start
 
+0. Make sure you are developing on dev branch!
 1. Make a virtual environment.
 2. `pip install -r requirements.txt`
 3. `pre-commit install`
 
 ## API Documentation
 
-### Apartments
+### Accommodation
 
-`GET /apartments/:id`
-
-Parameters:
-
-Sample request:
-```
-
-```
-
-Sample response:
-```
-
-```
-
-`POST /apartments`
+`POST /accommodation`
 
 Parameters:
 | Parameter       | Description                                                                                     |
@@ -62,7 +54,7 @@ Possible responses:
 - 200: apartment successfully added
 - 400: invalid request parameters or db transaction error
 
-`PUT /apartments`
+`GET /accommodation/:accommodationId`
 
 Parameters:
 
@@ -76,7 +68,7 @@ Sample response:
 
 ```
 
-`DELETE /apartments/:id`
+`POST /accommodation/:accommodationId`
 
 Parameters:
 
@@ -90,11 +82,7 @@ Sample response:
 
 ```
 
----
-
-### Hosts
-
-`GET /hosts/:id`
+`DELETE /accommodation/:accommodationId`
 
 Parameters:
 
@@ -108,35 +96,7 @@ Sample response:
 
 ```
 
-`POST /hosts`
-
-Parameters:
-
-Sample request:
-```
-
-```
-
-Sample response:
-```
-
-```
-
-`PUT /hosts`
-
-Parameters:
-
-Sample request:
-```
-
-```
-
-Sample response:
-```
-
-```
-
-`DELETE /hosts/:id`
+`GET /accommodation/findByNeeds`
 
 Parameters:
 
@@ -151,23 +111,10 @@ Sample response:
 ```
 
 ---
-### Guests
 
-`GET /guests/:id`
+### Host
 
-Parameters:
-
-Sample request:
-```
-
-```
-
-Sample response:
-```
-
-```
-
-`POST /guests`
+`POST /host`
 
 Parameters:
 
@@ -181,7 +128,7 @@ Sample response:
 
 ```
 
-`PUT /guests`
+`GET /hosts/:hostId`
 
 Parameters:
 
@@ -195,7 +142,139 @@ Sample response:
 
 ```
 
-`DELETE /guests/:id`
+
+`POST /host/:hostId`
+
+Parameters:
+
+Sample request:
+```
+
+```
+
+Sample response:
+```
+
+```
+
+`DELETE /host/:hostId`
+
+Parameters:
+
+Sample request:
+```
+
+```
+
+Sample response:
+```
+
+```
+
+---
+### Guest
+
+`POST /guest`
+
+Parameters:
+
+Sample request:
+```
+
+```
+
+Sample response:
+```
+
+```
+
+`GET /guest/:guestId`
+
+Parameters:
+
+Sample request:
+```
+
+```
+
+Sample response:
+```
+
+```
+
+`POST /guest/:guestId`
+
+Parameters:
+
+Sample request:
+```
+
+```
+
+Sample response:
+```
+
+```
+
+`DELETE /guest/:guestId`
+
+Parameters:
+
+Sample request:
+```
+
+```
+
+Sample response:
+```
+
+```
+
+### Teammember
+
+`POST /teammember`
+
+Parameters:
+
+Sample request:
+```
+
+```
+
+Sample response:
+```
+
+```
+
+`GET /teammember/:teammemberId`
+
+Parameters:
+
+Sample request:
+```
+
+```
+
+Sample response:
+```
+
+```
+
+`POST /teammember/:teammemberId`
+
+Parameters:
+
+Sample request:
+```
+
+```
+
+Sample response:
+```
+
+```
+
+`DELETE /teammember/:teammember`
 
 Parameters:
 
