@@ -1,0 +1,298 @@
+swagger: "2.0"
+info:
+  description: "This is an API for a [SalamLab](http://salamlab.pl) workflow management system."
+  version: "0.1.0"
+  title: "SalamLab API"
+  termsOfService: "http://salamlab.pl/terms/"
+  contact:
+    email: "contact@salamlab.pl"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "salamlab-cloudrun-i4omjkfpsa-lm.a.run.app"
+tags:
+  - name: "host"
+    description: "Information about the hosts"
+schemes:
+  - "https"
+paths:
+  /host:
+    post:
+      tags:
+        - "host"
+      summary: "Add new host"
+      description: ""
+      operationId: "add_host"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/add_host
+        protocol: h2
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Host object that needs to be added to the database"
+          required: true
+          schema:
+            $ref: "#/definitions/HostCreate"
+      responses:
+        "405":
+          description: "Invalid input"
+        "201":
+          description: "Created"
+      security:
+        - salamlab_auth:
+            - "write:hosts"
+            - "read:hosts"
+  /host/findByAccomodationNeeds:
+    get:
+      tags:
+        - "host"
+      summary: "Finds Hosts by accomodation needs"
+      description: ""
+      operationId: "find_host_by_accomodation_needs"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/find_host_by_accomodation_needs
+        protocol: h2
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Description of needs"
+          required: true
+          schema:
+            $ref: "#/definitions/AccomodationNeeds"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Host"
+        "400":
+          description: "Invalid status value"
+      security:
+        - salamlab_auth:
+            - "read:hosts"
+  /host/{hostId}:
+    get:
+      tags:
+        - "host"
+      summary: "Find host by ID"
+      description: "Returns a single host"
+      operationId: "get_host_by_id"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_host_by_id
+        protocol: h2
+      produces:
+        - "application/json"
+      parameters:
+        - name: "hostId"
+          in: "path"
+          description: "ID of host to return"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Host"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Host not found"
+      security:
+        - api_key: []
+    post:
+      tags:
+        - "host"
+      summary: "Updates a pet in the store with form data"
+      description: ""
+      operationId: "update_host"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/update_host
+        protocol: h2
+      consumes:
+        - "application/json"
+      produces:
+        - "application/xml"
+        - "application/json"
+      parameters:
+        - name: "hostId"
+          in: "path"
+          description: "ID of host that needs to be updated"
+          required: true
+          type: "string"
+          format: "uuid"
+        - in: "body"
+          name: "body"
+          description: "Host information that needs to be updated in the database"
+          required: true
+          schema:
+            $ref: "#/definitions/HostUpdate"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Host"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Host not found"
+        "405":
+          description: "Invalid input"
+      security:
+        - salamlab_auth:
+            - "write:hosts"
+            - "read:hosts"
+    delete:
+      tags:
+        - "host"
+      summary: "Deletes a host"
+      description: ""
+      operationId: "delete_host"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/delete_host
+        protocol: h2
+      produces:
+        - "application/json"
+      parameters:
+        - name: "api_key"
+          in: "header"
+          required: false
+          type: "string"
+        - name: "hostId"
+          in: "path"
+          description: "Host id to delete"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Pet not found"
+      security:
+        - salamlab_auth:
+            - "write:hosts"
+            - "read:hosts"
+securityDefinitions:
+  salamlab_auth:
+    type: "oauth2"
+    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
+    flow: "implicit"
+    scopes:
+      write:hosts: "modify host information"
+      read:hosts: "read host information"
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+
+definitions:
+  Time:
+    type: "string"
+    pattern: '^\d{1,2}(:\d{2})?([AaPp][mM])?$'
+    description: >
+      Time can be given in 12h or 24h format.
+
+  PhoneNumber:
+    type: "string"
+    pattern: '^(\+\d{1,2} ?)?\d{3}[- \.]?\d{3}[- \.]?\d{3}$'
+    description: >
+      Phone number, can include optional national prefix `+48`. Triplets may be separated by
+      `-`, ` ` or `.`.
+
+  Language:
+    type: "string"
+    enum:
+      - "En"
+      - "Pl"
+      - "Uk"
+      - "Ru"
+    description: "2 letter ISO-639-1 compliant code"
+
+  HostCreate:
+    type: "object"
+    required:
+      - "fullName"
+      - "email"
+      - "phoneNumber"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      fullName:
+        type: "string"
+        example: "Cecylia Łukaszyk"
+      email:
+        type: "string"
+        format: "email"
+      phoneNumber:
+        $ref: "#/definitions/PhoneNumber"
+      callAfter:
+        $ref: "#/definitions/Time"
+      callBefore:
+        $ref: "#/definitions/Time"
+      comments:
+        type: "string"
+        description: "Free text comments from Host"
+      languagesSpoken:
+        type: "array"
+        items:
+          $ref: "#/definitions/Language"
+
+  HostUpdate:
+    allOf:
+      - $ref: "#/definitions/HostCreate"
+      - type: "object"
+        properties:
+          status:
+            type: "string"
+            description: "Verification status of the Host"
+            enum:
+              - "created"
+              - "verified"
+              - "rejected"
+          createdAt:
+            type: "string"
+            format: "date-time"
+          updatedAt:
+            type: "string"
+            format: "date-time"
+
+  Host:
+    allOf:
+      - $ref: "#/definitions/HostUpdate"
+      - type: "object"
+        properties:
+          createdAt:
+            type: "string"
+            format: "date-time"
+          updatedAt:
+            type: "string"
+            format: "date-time"
+
+  AccomodationNeeds:
+    type: "object"
+    properties:
+      vacancies_needed:
+        type: "integer"
+      adult_male_count:
+        type: "integer"
+      adult_female_count:
+        type: "integer"
+      children_count:
+        type: "integer"
+      children_ages:
+        type: "array"
+        items:
+          type: "integer"
+      have_pets:
+        type: "boolean"
