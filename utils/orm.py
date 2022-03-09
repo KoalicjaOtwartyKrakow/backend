@@ -69,6 +69,15 @@ class Apartment(Base):
         return f"Apartment: {self.__dict__}"
 
 
+class Language(enum.Enum):
+    """Class representing language enum in database."""
+
+    ENGLISH = "En"
+    POLISH = "Pl"
+    UKRAINIAN = "Uk"
+    RUSSIAN = "Ru"
+
+
 class Host(Base):
     """ORM for Hosts."""
 
