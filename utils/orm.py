@@ -78,6 +78,14 @@ class Language(enum.Enum):
     RUSSIAN = "Ru"
 
 
+class HostStatus(enum.Enum):
+    """Class representing host status enum in database."""
+
+    CREATED = "created"
+    VERIFIED = "verified"
+    REJECTED = "rejected"
+
+
 class Host(Base):
     """ORM for Hosts."""
 
@@ -92,6 +100,7 @@ class Host(Base):
     call_before = Column("call_before", String(20), nullable=True)
     comments = Column("comments", Text, nullable=True)
     languages_spoken = Column("languages_spoken", ARRAY(Language), nullable=True)
+    status = Column("status")
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
