@@ -6,9 +6,9 @@ import enum
 
 import sqlalchemy.sql.functions as func
 
-from sqlalchemy import Column, Integer, String, Enum, Boolean, Text
+from sqlalchemy import Column, Integer, String, Enum, Boolean, Text, Table, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, ARRAY
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 
 
 Base = declarative_base()
@@ -43,10 +43,26 @@ class HostStatus(enum.Enum):
     REJECTED = "rejected"
 
 
+# this will be useful in the future
+# host_teammembers = Table('host_teammembers', Base.metadata,
+#     Column('teammember_id', ForeignKey('teammembers.id'), primary_key=True),
+#     Column('host_id', ForeignKey('hosts.id'), primary_key=True)
+# )
+
+
+host_languages = Table(
+    "host_languages",
+    Base.metadata,
+    Column("language_code", ForeignKey("languages.id")),
+    Column("host_id", ForeignKey("hosts.id")),
+    Column("id", Integer, primary_key=True),
+)
+
+
 class Host(Base):
     """ORM for Hosts."""
 
-    __tablename__ = ...
+    __tablename__ = "hosts"
 
     id = Column("id", Integer, primary_key=True)
     guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
@@ -57,6 +73,7 @@ class Host(Base):
     call_before = Column("call_before", String(20), nullable=True)
     comments = Column("comments", Text, nullable=True)
     status = Column("status")
+    languages_spoken = relationship("Language", secondary=host_languages)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
