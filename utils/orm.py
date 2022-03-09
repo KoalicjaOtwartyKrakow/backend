@@ -35,6 +35,35 @@ class Language(Base):
     code3 = Column("code3", String(3))
 
 
+class HostStatus(enum.Enum):
+    """Class representing host status enum in database."""
+
+    CREATED = "created"
+    VERIFIED = "verified"
+    REJECTED = "rejected"
+
+
+class Host(Base):
+    """ORM for Hosts."""
+
+    __tablename__ = ...
+
+    id = Column("id", Integer, primary_key=True)
+    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
+    full_name = Column("full_name", String(256))
+    email = Column("email", String(100))
+    phone_number = Column("phone_number", String(20))
+    call_after = Column("call_after", String(20), nullable=True)
+    call_before = Column("call_before", String(20), nullable=True)
+    comments = Column("comments", Text, nullable=True)
+    status = Column("status")
+    created_at = Column("created_at", TIMESTAMP, server_default=func.now())
+    updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
+
+    def __repr__(self):
+        return f"Host: {self.__dict__}"
+
+
 class Voivodeship(enum.Enum):
     """Class representing voivodeship enum in database."""
 
@@ -98,36 +127,6 @@ class LanguageEnum(enum.Enum):
     POLISH = "Pl"
     UKRAINIAN = "Uk"
     RUSSIAN = "Ru"
-
-
-class HostStatus(enum.Enum):
-    """Class representing host status enum in database."""
-
-    CREATED = "created"
-    VERIFIED = "verified"
-    REJECTED = "rejected"
-
-
-class Host(Base):
-    """ORM for Hosts."""
-
-    __tablename__ = ...
-
-    id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
-    full_name = Column("full_name", String(256))
-    email = Column("email", String(100))
-    phone_number = Column("phone_number", String(20))
-    call_after = Column("call_after", String(20), nullable=True)
-    call_before = Column("call_before", String(20), nullable=True)
-    comments = Column("comments", Text, nullable=True)
-    languages_spoken = Column("languages_spoken", ARRAY(LanguageEnum), nullable=True)
-    status = Column("status")
-    created_at = Column("created_at", TIMESTAMP, server_default=func.now())
-    updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
-
-    def __repr__(self):
-        return f"Host: {self.__dict__}"
 
 
 class Guest(Base):
