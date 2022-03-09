@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.languages (
     PRIMARY KEY(code2)
 );
 
-CREATE TYPE public.host_status AS ENUM ('created', 'verified', 'rejected');
+CREATE TYPE public.host_status AS ENUM ('created', 'verified', 'banned');
 
 CREATE TABLE IF NOT EXISTS public.hosts (
     id integer  GENERATED ALWAYS AS IDENTITY,

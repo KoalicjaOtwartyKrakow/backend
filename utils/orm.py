@@ -35,12 +35,12 @@ class Language(Base):
     code3 = Column("code3", String(3))
 
 
-class HostStatus(enum.Enum):
-    """Class representing host status enum in database."""
+class Status(enum.Enum):
+    """Class representing status enum in database."""
 
     CREATED = "created"
     VERIFIED = "verified"
-    REJECTED = "rejected"
+    BANNED = "banned"
 
 
 # this will be useful in the future
@@ -84,37 +84,28 @@ class Host(Base):
 class Voivodeship(enum.Enum):
     """Class representing voivodeship enum in database."""
 
-    GREATER_POL = "Greater Poland"
-    KUYAVIA = "Kuyavia-Pomerania"
-    LESSER_POL = "Lesser Poland"
-    LODZ = "Łódź"
-    LOWER_SIL = "Lower Silesia"
-    LUBLIN = "Lublin"
-    LUBUSZ = "Lubusz"
-    MASOVIA = "Masovia"
-    OPOLE = "Opole"
-    PODLASKIE = "Podlaskie"
-    POMERANIA = "Pomerania"
-    SILESIA = "Silesia"
-    SUBCARPATHIA = "Subcarpathia"
-    HOLY_CROSS = "Holy Cross Province"
-    WARMIA = "Warmia-Masuria"
-    WEST_POM = "West Pomerania"
+    DOLNOSLASKIE = "DOLNOŚLĄSKIE"
+    KUJAWSKOPOMORSKIE = "KUJAWSKO-POMORSKIE"
+    LUBELSKIE = "LUBELSKIE"
+    LUBUSKI = "LUBUSKIE"
+    LODZKIE = "ŁÓDZKIE"
+    MALOPOLSKIE = "MAŁOPOLSKIE"
+    MAZOWIECKIE = "MAZOWIECKIE"
+    OPOLSKIE = "OPOLSKIE"
+    PODKARPACKIE = "PODKARPACKIE"
+    PODLASKIE = "PODLASKIE"
+    POMORSKIE = "POMORSKIE"
+    SLASKIE = "ŚLĄSKIE"
+    SWIETOKRZYSKIE = "ŚWIĘTOKRZYSKIE"
+    WARMINSKOMAZURSKIE = "WARMIŃSKO-MAZURSKIE"
+    WIELKOPOLSKIE = "WIELKOPOLSKIE"
+    ZACHODNIOPOMORSKIE = "ZACHODNIOPOMORSKIE"
 
 
-class ApartmentStatus(enum.Enum):
-    """Class representing apartment status enum in database."""
-
-    ADDED = "added"
-    PHONE_VERIFIED = "phone_verified"
-    IN_PERSON_VERIFIED = "in_person_verified"
-
-
-# pylint: disable=too-few-public-methods
-class Apartment(Base):
+class AccommodationUnit(Base):
     """ORM for Apartments."""
 
-    __tablename__ = ...
+    __tablename__ = "accommodation_units"
 
     id = Column("id", Integer, primary_key=True)
     guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
@@ -129,9 +120,7 @@ class Apartment(Base):
     have_pets = Column("have_pets", Boolean)
     accept_pets = Column("accept_pets", Boolean)
     comments = Column("comments", String(255))
-    status = Column(
-        "status", Enum(ApartmentStatus), default=ApartmentStatus.ADDED, nullable=False
-    )
+    status = Column("status", Enum(Status), default=Status.CREATED, nullable=False)
 
     def __repr__(self):
         return f"Apartment: {self.__dict__}"
@@ -164,7 +153,7 @@ class Guest(Base):
     pets_description = Column("pets_description", String(255), nullable=True)
     special_needs = Column("special_needs", Text, nullable=True)
     priority_date = Column("priority_date", TIMESTAMP, server_default=func.now())
-    status = Column("status", Integer, nullable=True)
+    status = Column("status", Enum(Status), nullable=True, default=Status.CREATED)
     finance_status = Column("finance_status", String(255), nullable=True)
     stay_length = Column("stay_length", String(255), nullable=True)
     volunteer_note = Column("volunteer_note", Text, nullable=True)
