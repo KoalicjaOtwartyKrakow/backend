@@ -264,15 +264,15 @@ paths:
         - salamlab_auth:
             - "write:accommodations"
             - "read:accommodations"
-  /accommodation/findByNeeds:
+  /accommodation/filterByGuest:
     get:
       tags:
         - "accommodation"
-      summary: "Finds accommodation by needs"
+      summary: "Finds accommodation based on guest information and their needs"
       description: ""
-      operationId: "find_accommodation_by_needs"
+      operationId: "filter_accommodation_by_guest"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/find_accommodation_by_needs
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/filter_accommodation_by_guest
         protocol: h2
       consumes:
         - "application/json"
@@ -283,8 +283,7 @@ paths:
           name: "body"
           description: "Description of needs"
           required: true
-          schema:
-            $ref: "#/definitions/AccommodationNeeds"
+
       responses:
         "200":
           description: "successful operation"
@@ -850,9 +849,9 @@ definitions:
         type: "string"
       vacanciesTotal:
         type: "integer"
-      havePets:
+      petsPresent:
         type: "boolean"
-      acceptsPets:
+      petsAccepted:
         type: "boolean"
       comments:
         type: "string"
@@ -880,30 +879,14 @@ definitions:
           id:
             type: "string"
             format: "uuid"
+          host:
+            $ref: "#/definitions/Host"
           createdAt:
             type: "string"
             format: "date-time"
           updatedAt:
             type: "string"
             format: "date-time"
-
-  AccommodationNeeds:
-    type: "object"
-    properties:
-      vacancies_needed:
-        type: "integer"
-      adult_male_count:
-        type: "integer"
-      adult_female_count:
-        type: "integer"
-      children_count:
-        type: "integer"
-      children_ages:
-        type: "array"
-        items:
-          type: "integer"
-      have_pets:
-        type: "boolean"
 
   GuestCreate:
     type: "object"
