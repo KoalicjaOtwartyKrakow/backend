@@ -1,3 +1,4 @@
+# pylint: disable=too-few-public-methods
 """Module containing ORM."""
 
 import uuid
@@ -11,6 +12,17 @@ from sqlalchemy.orm import declarative_base
 
 
 Base = declarative_base()
+
+
+class Teammember(Base):
+    """ORM for Teammembers."""
+
+    __tablename__ = "teammembers"
+
+    id = Column("id", Integer, primary_key=True)
+    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
+    full_name = Column("full_name", String(20), nullable=True)
+    phone_number = Column("phone_number", String(20), nullable=True)
 
 
 class Voivodeship(enum.Enum):
