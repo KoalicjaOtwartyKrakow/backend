@@ -3,11 +3,9 @@
 
 import os
 
-import flask
 import functions_framework
 import sqlalchemy
 
-from sqlalchemy import exc
 from sqlalchemy.orm import sessionmaker
 
 from utils import orm
@@ -37,7 +35,7 @@ def add_accommodation(request):
     try:
         apartment = orm.AccommodationUnit(**request_json)
     except TypeError as e:
-        return (f"Received invalid parameter(s) for apartment: {e}", 400)
+        return f"Received invalid parameter(s) for apartment: {e}", 405
 
     # db connection
     db = sqlalchemy.create_engine(
@@ -51,14 +49,9 @@ def add_accommodation(request):
     )
     session = sessionmaker(bind=db)
     session.add(apartment)
+    session.commit()
 
-    # db transaction
-    try:
-        session.commit()
-    except exc.SQLAlchemyError as e:
-        return (f"Transaction error: {e}", 400)
-
-    return flask.Response(status=200)
+    return {}, 201
 
 
 @functions_framework.http

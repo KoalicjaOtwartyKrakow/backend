@@ -148,7 +148,7 @@ class Guest(Base):
     adult_man_count = Column("adult_man_count", Integer)
     adult_women_count = Column("adult_women_count", Integer)
     children_count = Column("children_count", Integer)
-    children_ages = Column("children_ages", ARRAY)
+    children_ages = Column("children_ages", ARRAY(Integer))
     have_pets = Column("have_pets", Boolean, nullable=True)
     pets_description = Column("pets_description", String(255), nullable=True)
     special_needs = Column("special_needs", Text, nullable=True)

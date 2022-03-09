@@ -14,6 +14,10 @@
 2. `pip install -r requirements.txt`
 3. `pre-commit install`
 
+To debug your Google Cloud Function locally, run:
+
+`functions-framework --target <function-name> --debug`
+
 ## API Documentation
 
 ### Accommodation
