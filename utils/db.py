@@ -8,7 +8,6 @@ from .secret import access_secret_version
 DB_USER = access_secret_version("db_user")
 DB_PASS = access_secret_version("db_pass")
 DB_NAME = access_secret_version("db_name")
-DB_HOST = access_secret_version("db_host")
 DB_SOCKET_DIR = access_secret_version("db_socket_dir")
 INSTANCE_CONNECTION_NAME = access_secret_version("instance_connection_name")
 

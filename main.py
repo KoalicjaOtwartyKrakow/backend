@@ -9,11 +9,6 @@ from utils import orm, db
 
 
 @functions_framework.http
-def get_apartment(request):
-    """HTTP Cloud Function for getting apartment."""
-
-
-@functions_framework.http
 def add_accommodation(request):
     """HTTP Cloud Function for posting new accommodation units."""
     # parse request
@@ -32,13 +27,3 @@ def add_accommodation(request):
     session.commit()
 
     return {}, 201
-
-
-@functions_framework.http
-def put_apartment(request):
-    """HTTP Cloud Function for updating apartment."""
-
-
-@functions_framework.http
-def delete_apartment(request):
-    """HTTP Cloud Function for deleting apartment."""
