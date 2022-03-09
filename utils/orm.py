@@ -91,6 +91,7 @@ class Host(Base):
     call_after = Column("call_after", String(20), nullable=True)
     call_before = Column("call_before", String(20), nullable=True)
     comments = Column("comments", Text, nullable=True)
+    languages_spoken = Column("languages_spoken", ARRAY(Language), nullable=True)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
