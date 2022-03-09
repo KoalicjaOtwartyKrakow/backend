@@ -3,6 +3,7 @@
 
 import functions_framework
 
+from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
 from utils import orm, db
@@ -27,3 +28,17 @@ def add_accommodation(request):
     session.commit()
 
     return {}, 201
+
+
+@functions_framework.http
+def get_all_accommodations(request):
+    """HTTP Cloud Function for getting all available accommodation units."""
+    engine = db.get_engine()
+    session = sessionmaker(bind=engine)
+
+    stmt = select(orm.AccommodationUnit)
+    result = session.execute(stmt)
+
+    print(result)
+
+    return {}, 200
