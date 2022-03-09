@@ -52,6 +52,64 @@ paths:
         - salamlab_auth:
             - "write:hosts"
             - "read:hosts"
+    get:
+      tags:
+        - "host"
+      summary: "Get all hosts"
+      description: ""
+      operationId: "get_all_hosts"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_all_hosts
+        protocol: h2
+      produces:
+        - "application/json"
+      responses:
+        "400":
+          description: "Invalid status supplied"
+        "200":
+          description: "Ok. If no host found, empty array will be returned."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Host"
+      security:
+        - salamlab_auth:
+            - "write:hosts"
+            - "read:hosts"
+  /host/findByStatus:
+    get:
+      tags:
+        - "host"
+      summary: "Get hosts with status"
+      description: ""
+      operationId: "get_hosts_by_status"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_hosts_by_status
+        protocol: h2
+      parameters:
+        - in: query
+          name: "status"
+          type: "string"
+          description: "Verification status of the Host"
+          required: true
+          enum:
+            - "created"
+            - "verified"
+            - "rejected"
+
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Ok"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Host"
+      security:
+        - salamlab_auth:
+            - "write:hosts"
+            - "read:hosts"
   /host/{hostId}:
     get:
       tags:
@@ -180,6 +238,28 @@ paths:
           description: "Invalid input"
         "201":
           description: "Created"
+      security:
+        - salamlab_auth:
+            - "write:accommodations"
+            - "read:accommodations"
+    get:
+      tags:
+        - "accommodation"
+      summary: "Get all accommodation units"
+      description: ""
+      operationId: "get_all_accommodations"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_all_accommodations
+        protocol: h2
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Ok"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/AccommodationUnit"
       security:
         - salamlab_auth:
             - "write:accommodations"
@@ -349,6 +429,28 @@ paths:
         - salamlab_auth:
             - "write:guests"
             - "read:guests"
+    get:
+      tags:
+        - "guest"
+      summary: "Get all guests"
+      description: ""
+      operationId: "get_all_guests"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_all_guest
+        protocol: h2
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Ok. If not found, empty array will be returned."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Guest"
+      security:
+        - salamlab_auth:
+            - "write:guests"
+            - "read:guests"
   /guest/{guestId}:
     get:
       tags:
@@ -477,6 +579,28 @@ paths:
           description: "Invalid input"
         "201":
           description: "Created"
+      security:
+        - salamlab_auth:
+            - "write:teammembers"
+            - "read:teammembers"
+    get:
+      tags:
+        - "teammember"
+      summary: "Get all teammembers"
+      description: ""
+      operationId: "get_all_teammembers"
+      x-google-backend:
+        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_all_teammembers
+        protocol: h2
+      produces:
+        - "application/json"
+      responses:
+        "201":
+          description: "Ok. If not found, empty array will be returned."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/TeamMember"
       security:
         - salamlab_auth:
             - "write:teammembers"
