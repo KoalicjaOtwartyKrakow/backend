@@ -1,0 +1,14 @@
+steps:
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  args:
+  - gcloud
+  - functions
+  - deploy
+  - add_accommodation
+  - --region=europe-central2-a
+  - --source=.
+  - --trigger-http
+  - --runtime=python39
+logsBucket: 'gs://plsalamlabbuildlogs'
+options:
+  logging: GCS_ONLY

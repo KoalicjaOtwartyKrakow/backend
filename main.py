@@ -28,14 +28,14 @@ def get_apartment(request):
 
 
 @functions_framework.http
-def post_apartment(request):
-    """HTTP Cloud Function for posting new apartments."""
+def add_accommodation(request):
+    """HTTP Cloud Function for posting new accommodation units."""
     # parse request
     request_json = request.get_json()
 
     # create Apartment object from json
     try:
-        apartment = orm.Apartment(**request_json)
+        apartment = orm.AccommodationUnit(**request_json)
     except TypeError as e:
         return (f"Received invalid parameter(s) for apartment: {e}", 400)
 
