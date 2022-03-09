@@ -25,6 +25,16 @@ class Teammember(Base):
     phone_number = Column("phone_number", String(20), nullable=True)
 
 
+class Language(Base):
+    """ORM for Languages."""
+
+    __tablename__ = "languages"
+
+    name = Column("name", String(20))
+    code2 = Column("code2", String(2), primary_key=True)
+    code3 = Column("code3", String(3))
+
+
 class Voivodeship(enum.Enum):
     """Class representing voivodeship enum in database."""
 
@@ -81,7 +91,7 @@ class Apartment(Base):
         return f"Apartment: {self.__dict__}"
 
 
-class Language(enum.Enum):
+class LanguageEnum(enum.Enum):
     """Class representing language enum in database."""
 
     ENGLISH = "En"
@@ -111,7 +121,7 @@ class Host(Base):
     call_after = Column("call_after", String(20), nullable=True)
     call_before = Column("call_before", String(20), nullable=True)
     comments = Column("comments", Text, nullable=True)
-    languages_spoken = Column("languages_spoken", ARRAY(Language), nullable=True)
+    languages_spoken = Column("languages_spoken", ARRAY(LanguageEnum), nullable=True)
     status = Column("status")
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
