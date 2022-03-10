@@ -1,6 +1,5 @@
 """Module containing functions to retrieve secrets from Google Secrets Manager."""
 
-# pylint: disable=no-name-in-module
 from google.cloud import secretmanager
 
 
