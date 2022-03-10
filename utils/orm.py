@@ -49,11 +49,10 @@ class Status(enum.Enum):
 #     Column('host_id', ForeignKey('hosts.id'), primary_key=True)
 # )
 
-
 host_languages = Table(
     "host_languages",
     Base.metadata,
-    Column("language_code", ForeignKey("languages.id")),
+    Column("language_code", ForeignKey("languages.code2")),
     Column("host_id", ForeignKey("hosts.id")),
     Column("id", Integer, primary_key=True),
 )
@@ -69,10 +68,10 @@ class Host(Base):
     full_name = Column("full_name", String(256))
     email = Column("email", String(100))
     phone_number = Column("phone_number", String(20))
-    call_after = Column("call_after", String(20), nullable=True)
-    call_before = Column("call_before", String(20), nullable=True)
+    call_after = Column("call_after", String(64), nullable=True)
+    call_before = Column("call_before", String(64), nullable=True)
     comments = Column("comments", Text, nullable=True)
-    status = Column("status")
+    status = Column("status", Enum(Status), default=Status.CREATED)
     languages_spoken = relationship("Language", secondary=host_languages)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
@@ -138,7 +137,7 @@ class LanguageEnum(enum.Enum):
 class Guest(Base):
     """ORM for Guests."""
 
-    __tablename__ = ...
+    __tablename__ = "guests"
 
     id = Column("id", Integer, primary_key=True)
     guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
