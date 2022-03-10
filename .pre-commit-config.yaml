@@ -11,6 +11,7 @@ repos:
     rev: 4.0.1
     hooks:
     -   id: flake8
+        exclude: (aws|test|scripts)
         args:
           [
               "--max-line-length=88"
@@ -26,7 +27,7 @@ repos:
         entry: pylint
         language: system
         types: [python]
-        exclude: (aws|test)
+        exclude: (aws|test|scripts)
         args:
           [
             "--disable=W", "--disable=R", "--disable=C", "-rn", # Only display messages
