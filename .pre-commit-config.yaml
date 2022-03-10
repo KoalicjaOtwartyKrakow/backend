@@ -26,7 +26,7 @@ repos:
         entry: pylint
         language: system
         types: [python]
-        exclude: test
+        exclude: (aws|test)
         args:
           [
             "--disable=W", "--disable=R", "--disable=C", "-rn", # Only display messages
