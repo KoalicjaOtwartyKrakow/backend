@@ -974,6 +974,12 @@ definitions:
         type: "boolean"
       petsAccepted:
         type: "boolean"
+      disabledPeopleFriendly:
+        type: "boolean"
+      lgbtFriendly:
+        type: "boolean"
+      parkingPlaceAvailable:
+        type: "boolean"
       ownerComments:
         type: "string"
       easyAmbulanceAccess:
@@ -1047,6 +1053,14 @@ definitions:
         type: "string"
       specialNeeds:
         type: "string"
+      foodAllergies:
+        type: "string"
+      meatFreeDiet:
+        type: "boolean"
+      glutenFreeDiet:
+        type: "boolean"
+      lactoseFreeDiet:
+        type: "boolean"
       financeStatus:
         type: "string"
       howLongToStay:
