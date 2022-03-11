@@ -2,6 +2,7 @@
 
 import os
 import sqlalchemy
+from sqlalchemy.orm import sessionmaker
 
 from .secret import access_secret_version
 
@@ -42,3 +43,13 @@ def get_engine():
     )
 
     return pool
+
+
+def get_db_session() -> sessionmaker:
+    """Usage:
+    ```
+    Session = get_db_session()
+    with Session() as session:
+        # use session here
+    """
+    return sessionmaker(bind=get_engine())
