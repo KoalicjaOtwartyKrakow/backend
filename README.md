@@ -33,7 +33,11 @@ docker run --rm -it -p 5432:5432 test-postgres-kok
 
 Than you can run Google Cloud Function by running:
 ```
-functions-framework --target <function-name> --debug
+$ export IS_LOCAL_DB=True
+$ export db_user=postgres
+$ export db_pass=postgres
+$ export db_name=salamlab-apartments
+$ functions-framework --target <function-name> --debug
 ```
 
 ## API Documentation
