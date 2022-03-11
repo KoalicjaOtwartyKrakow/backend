@@ -22,6 +22,24 @@ tags:
 schemes:
   - "https"
 paths:
+  /hello_http:
+    get:
+      tags:
+        - "hello"
+      summary: "Hello"
+      description: ""
+      operationId: "hello_http"
+      x-google-backend:
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/hello_http
+        allowCors: True
+        protocol: h2
+      produces:
+        - "text/plain"
+      responses:
+        "400":
+          description: "Invalid status supplied"
+        "200":
+          description: "Ok. If no host found, empty array will be returned."
   /host:
     post:
       tags:
@@ -30,7 +48,8 @@ paths:
       description: ""
       operationId: "add_host"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/add_host
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/add_host
+        allowCors: True
         protocol: h2
       consumes:
         - "application/json"
@@ -59,7 +78,8 @@ paths:
       description: ""
       operationId: "get_all_hosts"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_all_hosts
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/get_all_hosts
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -84,7 +104,8 @@ paths:
       description: ""
       operationId: "get_hosts_by_status"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_hosts_by_status
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/get_hosts_by_status
+        allowCors: True
         protocol: h2
       parameters:
         - in: query
@@ -118,7 +139,8 @@ paths:
       description: "Returns a single host"
       operationId: "get_host_by_id"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_host_by_id
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/get_host_by_id
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -147,7 +169,8 @@ paths:
       description: ""
       operationId: "update_host"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/update_host
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/update_host
+        allowCors: True
         protocol: h2
       consumes:
         - "application/json"
@@ -188,7 +211,8 @@ paths:
       description: ""
       operationId: "delete_host"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/delete_host
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/delete_host
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -220,7 +244,8 @@ paths:
       description: ""
       operationId: "add_accommodation"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/add_accommodation
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/add_accommodation
+        allowCors: True
         protocol: h2
       consumes:
         - "application/json"
@@ -249,7 +274,8 @@ paths:
       description: ""
       operationId: "get_all_accommodations"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_all_accommodations
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/get_all_accommodations
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -264,38 +290,6 @@ paths:
         - salamlab_auth:
             - "write:accommodations"
             - "read:accommodations"
-  /accommodation/filterByGuest:
-    get:
-      tags:
-        - "accommodation"
-      summary: "Finds accommodation based on guest information and their needs"
-      description: ""
-      operationId: "filter_accommodation_by_guest"
-      x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/filter_accommodation_by_guest
-        protocol: h2
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "Description of needs"
-          required: true
-
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/AccommodationUnit"
-        "400":
-          description: "Invalid status value"
-      security:
-        - salamlab_auth:
-            - "read:hosts"
   /accommodation/{accommodationId}:
     get:
       tags:
@@ -304,7 +298,8 @@ paths:
       description: "Returns a single accommodation unit"
       operationId: "get_accommodation_by_id"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_accommodation_by_id
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/get_accommodation_by_id
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -333,7 +328,8 @@ paths:
       description: ""
       operationId: "update_accommodation"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/update_accommodation
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/update_accommodation
+        allowCors: True
         protocol: h2
       consumes:
         - "application/json"
@@ -374,7 +370,8 @@ paths:
       description: ""
       operationId: "delete_accommodation"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/delete_accommodation
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/delete_accommodation
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -398,6 +395,88 @@ paths:
         - salamlab_auth:
             - "write:accommodations"
             - "read:accommodations"
+  /accommodation/{accommodationId}/guest:
+    post:
+      tags:
+        - "accommodation"
+      summary: "Add guest to accommodation unit"
+      description: ""
+      operationId: "add_guest_to_accommodation"
+      x-google-backend:
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/add_guest_to_accommodation
+        allowCors: True
+        protocol: h2
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "accommodationId"
+          in: "path"
+          description: "ID of host that needs to be updated"
+          required: true
+          type: "string"
+          format: "uuid"
+        - in: "body"
+          name: "body"
+          description: "Host information that needs to be updated in the database"
+          required: true
+          schema:
+            $ref: "#/definitions/AccommodationUnitUpdate"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AccommodationUnit"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Accommodation Unit not found"
+        "405":
+          description: "Invalid input"
+      security:
+        - salamlab_auth:
+            - "write:accommodations"
+            - "read:accommodations"
+  /accommodation/{accommodationId}/guest/{guestId}:
+    delete:
+      tags:
+        - "accommodation"
+      summary: "Deletes an Accommodation Unit"
+      description: ""
+      operationId: "delete_guest_from_accommodation"
+      x-google-backend:
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/delete_guest_from_accommodation
+        allowCors: True
+        protocol: h2
+      produces:
+        - "application/json"
+      parameters:
+        - name: "api_key"
+          in: "header"
+          required: false
+          type: "string"
+        - name: "accommodationId"
+          in: "path"
+          description: "Accommodation Unit to delete a guest from"
+          required: true
+          type: "string"
+          format: "uuid"
+        - name: "guestId"
+          in: "path"
+          description: "Guest id to delete"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Pet not found"
+      security:
+        - salamlab_auth:
+            - "write:accommodations"
+            - "read:accommodations"
   /guest:
     post:
       tags:
@@ -406,7 +485,8 @@ paths:
       description: ""
       operationId: "add_guest"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/add_guest
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/add_guest
+        allowCors: True
         protocol: h2
       consumes:
         - "application/json"
@@ -435,7 +515,8 @@ paths:
       description: ""
       operationId: "get_all_guests"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_all_guest
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/get_all_guest
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -458,7 +539,8 @@ paths:
       description: "Returns a single guest"
       operationId: "get_guest_by_id"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_guest_by_id
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/get_guest_by_id
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -487,7 +569,8 @@ paths:
       description: ""
       operationId: "update_guest"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/update_guest
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/update_guest
+        allowCors: True
         protocol: h2
       consumes:
         - "application/json"
@@ -528,7 +611,8 @@ paths:
       description: ""
       operationId: "delete_guest"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/delete_guest
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/delete_guest
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -552,6 +636,38 @@ paths:
         - salamlab_auth:
             - "write:guests"
             - "read:guests"
+  /guest/{guestId}/accommodations:
+    get:
+      tags:
+        - "guest"
+      summary: "Finds accommodation matching this guests needs"
+      description: ""
+      operationId: "find_accommodation_for_guest"
+      x-google-backend:
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/find_accommodation_for_guest
+        allowCors: True
+        protocol: h2
+      produces:
+        - "application/json"
+      parameters:
+        - name: "guestId"
+          in: "path"
+          description: "ID of guest to find accommodation for"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/AccommodationUnit"
+        "400":
+          description: "Invalid status value"
+      security:
+        - salamlab_auth:
+            - "read:hosts"
   /teammember:
     post:
       tags:
@@ -560,7 +676,8 @@ paths:
       description: ""
       operationId: "add_teammember"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/add_teammember
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/add_teammember
+        allowCors: True
         protocol: h2
       consumes:
         - "application/json"
@@ -589,7 +706,8 @@ paths:
       description: ""
       operationId: "get_all_teammembers"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_all_teammembers
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/get_all_teammembers
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -612,7 +730,8 @@ paths:
       description: "Returns a single teammember"
       operationId: "get_teammember_by_id"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/get_teammember_by_id
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/get_teammember_by_id
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -641,7 +760,8 @@ paths:
       description: ""
       operationId: "update_teammember"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/update_teammember
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/update_teammember
+        allowCors: True
         protocol: h2
       consumes:
         - "application/json"
@@ -682,7 +802,8 @@ paths:
       description: ""
       operationId: "delete_teammember"
       x-google-backend:
-        address: https://europe-central2-salamlab-apartments.cloudfunctions.net/delete_teammember
+        address: https://europe-central2-salamlab-aparatments.cloudfunctions.net/delete_teammember
+        allowCors: True
         protocol: h2
       produces:
         - "application/json"
@@ -853,8 +974,16 @@ definitions:
         type: "boolean"
       petsAccepted:
         type: "boolean"
-      comments:
+      disabledPeopleFriendly:
+        type: "boolean"
+      lgbtFriendly:
+        type: "boolean"
+      parkingPlaceAvailable:
+        type: "boolean"
+      ownerComments:
         type: "string"
+      easyAmbulanceAccess:
+        type: "boolean"
 
   AccommodationUnitUpdate:
     allOf:
@@ -870,6 +999,8 @@ definitions:
               - "created"
               - "verified"
               - "rejected"
+          staffComments:
+            type: "string"
 
   AccommodationUnit:
     allOf:
@@ -922,26 +1053,45 @@ definitions:
         type: "string"
       specialNeeds:
         type: "string"
+      foodAllergies:
+        type: "string"
+      meatFreeDiet:
+        type: "boolean"
+      glutenFreeDiet:
+        type: "boolean"
+      lactoseFreeDiet:
+        type: "boolean"
       financeStatus:
         type: "string"
       howLongToStay:
         type: "string"
+      desiredDestination:
+        type: "string"
+      priorityStatus:
+        type: "string"
+        enum:
+          - "accommodation_not_needed"
+          - "accommodation_found"
+          - "en_route_ukraine"
+          - "en_route_poland"
+          - "in_krakow"
+          - "in_crisis_point"
+      priorityDate:
+        type: "string"
+        format: "date"
+        description: "Date since when the accommodation will be needed"
 
   GuestUpdate:
     allOf:
       - $ref: "#/definitions/GuestCreate"
       - type: "object"
         properties:
-          status:
+          verificationStatus:
             type: "string"
             enum:
               - "created"
               - "verified"
               - "rejected"
-          priorityDate:
-            type: "string"
-            format: "date-time"
-
   Guest:
     allOf:
       - $ref: "#/definitions/GuestUpdate"

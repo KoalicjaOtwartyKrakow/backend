@@ -14,9 +14,31 @@
 2. `pip install -r requirements.txt`
 3. `pre-commit install`
 
-To debug your Google Cloud Function locally, run:
+## Local debuging
 
-`functions-framework --target <function-name> --debug`
+To debug your Google Cloud Function locally, you need to first create database. Easiest way is to use prepared docker container:
+
+First, install [docker](https://docs.docker.com/get-docker/)
+To build container and recreate DB schema, run:
+```
+$ cd dockerfiles
+$ ./create_debug_container.sh
+```
+
+After this you can run:
+```
+docker run --rm -it -p 5432:5432 test-postgres-kok
+``` 
+(Note: remove `--rm` if you want to keep container after shut down and use `docker start -i <container_id>` in consequetive container starts)
+
+Than you can run Google Cloud Function by running:
+```
+$ export IS_LOCAL_DB=True
+$ export db_user=postgres
+$ export db_pass=postgres
+$ export db_name=salamlab-apartments
+$ functions-framework --target <function-name> --debug
+```
 
 ## API Documentation
 
