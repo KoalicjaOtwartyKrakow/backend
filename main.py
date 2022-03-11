@@ -42,3 +42,18 @@ def get_all_accommodations(request):
     print(result)
 
     return {}, 200
+
+
+@functions_framework.http
+def get_all_guests(request):
+    """HTTP Cloud Function for getting all guests."""
+    engine = db.get_engine()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    stmt = select(orm.Guest)
+    result = session.execute(stmt)
+
+    print(result)
+
+    return {}, 200
