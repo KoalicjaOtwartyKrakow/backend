@@ -66,3 +66,16 @@ def get_all_guests(request):
     print(result)
 
     return {}, 200
+
+
+@functions_framework.http
+def get_all_hosts(request):
+    """HTTP Cloud Function for getting all hosts."""
+    Session = get_db_session()
+    session = Session()
+
+    stmt = select(orm.Host)
+    result = session.execute(stmt)
+
+    print(result)
+    return flask.Response(status=200)
