@@ -142,6 +142,7 @@ class Guest(Base):
     id = Column("id", Integer, primary_key=True)
     guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
     full_name = Column("full_name", String(255))
+    email = Column("email", String(100))
     phone_number = Column("phone_number", String(20))
     people_in_group = Column("people_in_group", Integer, default=1)
     adult_male_count = Column("adult_male_count", Integer)

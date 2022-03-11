@@ -66,3 +66,26 @@ def get_all_guests(request):
     print(result)
 
     return {}, 200
+
+@functions_framework.http
+def add_guest(request):
+    """HTTP Cloud Function for posting new guests."""
+    # parse request
+    request_json = request.get_json()
+
+    # create Guest object from json
+    try:
+        guest = orm.Guest(**request_json)
+    except TypeError as e:
+        return f"Received invalid parameter(s) for guest: {e}", 405
+
+    Session = get_db_session()
+    with Session() as session:
+        session.add(guest)
+        # db transaction
+        try:
+            session.commit()
+        except exc.SQLAlchemyError as e:
+            return (f"Transaction error: {e}", 400)
+
+        return flask.Response(status=201)
