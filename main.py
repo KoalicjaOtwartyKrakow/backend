@@ -21,7 +21,7 @@ def add_accommodation(request):
     try:
         apartment = orm.AccommodationUnit(**request_json)
     except TypeError as e:
-        return f"Received invalid parameter(s) for apartment: {e}", 405
+        return flask.Response(response=f"Received invalid parameter(s) for apartment: {e}", status = 405)
 
     Session = get_db_session()
     with Session() as session:
@@ -30,7 +30,7 @@ def add_accommodation(request):
         try:
             session.commit()
         except exc.SQLAlchemyError as e:
-            return (f"Transaction error: {e}", 400)
+            return flask.Response(response=f"Transaction error: {e}", status = 400)
 
         return flask.Response(status=200)
 
@@ -77,7 +77,7 @@ def add_guest(request):
     try:
         guest = orm.Guest(**request_json)
     except TypeError as e:
-        return f"Received invalid parameter(s) for guest: {e}", 405
+        return flask.Response(response=f"Received invalid parameter(s) for guest: {e}", status = 405)
 
     Session = get_db_session()
     with Session() as session:
@@ -86,6 +86,6 @@ def add_guest(request):
         try:
             session.commit()
         except exc.SQLAlchemyError as e:
-            return (f"Transaction error: {e}", 400)
+            return flask.Response(response=f"Transaction error: {e}", status = 400)
 
         return flask.Response(status=201)
