@@ -319,6 +319,7 @@ def generate_guest():
     assigned_sex = generate_assigned_sex()
     first_name = generate_first_name(assigned_sex)
     last_name = generate_last_name(assigned_sex)
+    email = generate_email_address()
     phone_number = generate_phone_number()
     people_in_group = random.randint(1, 15)
     does_have_men = random.randint(0, 100) < 30
@@ -332,6 +333,7 @@ def generate_guest():
     how_long_to_stay = f'{random.randint(1, 10)} days' if random.randint(0, 100) < 70 else 'month'
     return {
         'full_name': ' '.join([first_name, last_name]),
+        'email': email,
         'phone_number': phone_number,
         'people_in_group': people_in_group,
         'adult_male_count': adult_men_count,

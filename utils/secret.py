@@ -1,10 +1,8 @@
 """Module containing functions to retrieve secrets from Google Secrets Manager."""
-
+import os
 from google.cloud import secretmanager
 
-
-PROJECT_ID = "salamlab-apartments"
-
+PROJECT_ID = os.environ["PROJECT_ID"]
 
 def access_secret_version(secret_id, version_id="latest"):
     """Retrieve secret from Google Secret Manager.
