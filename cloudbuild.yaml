@@ -4,7 +4,7 @@ steps:
       - gcloud
       - functions
       - deploy
-      - add_accommodation
+      - get_all_accommodations
       - --region=europe-central2
       - --source=.
       - --trigger-http

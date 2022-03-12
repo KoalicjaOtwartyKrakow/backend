@@ -9,10 +9,14 @@
 
 ## Before you start
 
-0. Make sure you are developing on dev branch!
 1. Make a virtual environment.
 2. `pip install -r requirements.txt`
 3. `pre-commit install`
+
+Regarding branching:
+- try to make sure you work on issues on seperate branches (e.g. feature/get-guests)
+- always merge to dev
+- merge to main only from dev
 
 ## Local debuging
 
