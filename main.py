@@ -91,3 +91,23 @@ def add_guest(request):
             return flask.Response(response=f"Transaction error: {e}", status = 400)
 
         return flask.Response(status=201)
+
+@functions_framework.http
+def get_guest_by_id(request):
+    """HTTP Cloud Function for getting guest by id."""
+
+    id = request.args.get('guestId')
+    if id is None or not id.isdigit():
+        return flask.Response(response=f"Received invalid guestId: {id}", status = 405)
+
+    Session = get_db_session()
+    with Session() as session:
+        try:
+            guest = session.query(orm.Guest).get(id)
+            if guest is None:
+                return flask.Response(response=f"Guest with id = {id} not found", status = 404)
+
+            return flask.Response(response=guest.toJSON(), status = 200)
+
+        except TypeError as e:
+            return flask.Response(response=f"Received invalid guestId: {e}", status = 405)
