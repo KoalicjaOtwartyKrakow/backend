@@ -2,7 +2,8 @@
 
 import flask
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
+from sqlalchemy.exc import SQLAlchemyError
 
 from utils.db import get_db_session
 from utils.orm import AccommodationUnit
@@ -34,3 +35,28 @@ def handle_get_all_accommodations(request):
     response = [accommodation.to_json() for accommodation in result.scalars()]
 
     return flask.Response(response=response, status=200)
+
+
+def handle_delete_accommodation(request):
+    try:
+        accommodation_id = request.args["accommodationId"]
+    except KeyError:
+        return flask.Response("No accommodation id supplied!", status=400)
+
+    Session = get_db_session()
+
+    try:
+        with Session() as session:
+            stmt = (
+                delete(AccommodationUnit)
+                .where(AccommodationUnit.guid == accommodation_id)
+                .execution_options(synchronize_session="fetch")
+            )
+            result = session.execute(stmt)
+    except SQLAlchemyError:
+        return flask.Response("Invalid accommodation id", status=400)
+
+    if result.rowcount:
+        return "OK"
+    else:
+        return flask.Response("Not found", status=404)

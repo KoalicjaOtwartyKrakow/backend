@@ -24,6 +24,16 @@ steps:
       - gcloud
       - functions
       - deploy
+      - delete_accommodation
+      - --region=europe-central2
+      - --source=.
+      - --trigger-http
+      - --runtime=python39
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args:
+      - gcloud
+      - functions
+      - deploy
       - create_host
       - --region=europe-central2
       - --source=.
