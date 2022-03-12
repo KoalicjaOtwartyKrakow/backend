@@ -8,7 +8,7 @@ from sqlalchemy import exc, select
 from utils.db import get_db_session
 
 from utils import orm
-from functions.create_host import handle_create_host
+from functions import handle_create_host
 
 
 @functions_framework.http
@@ -21,7 +21,9 @@ def add_accommodation(request):
     try:
         apartment = orm.AccommodationUnit(**request_json)
     except TypeError as e:
-        return flask.Response(response=f"Received invalid parameter(s) for apartment: {e}", status = 405)
+        return flask.Response(
+            response=f"Received invalid parameter(s) for apartment: {e}", status=405
+        )
 
     Session = get_db_session()
     with Session() as session:
@@ -65,7 +67,7 @@ def get_all_guests(request):
 
     print(result)
 
-    return {}, 200
+    return flask.Response(status=200)
 
 @functions_framework.http
 def add_guest(request):

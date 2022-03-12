@@ -84,7 +84,7 @@ class HostParser(Parser):
         languages_spoken = list(
             filter(
                 lambda x: x,
-                map(lambda l: languages.get(l), data.get("languagesSpoken")),
+                map(lambda l: languages.get(l), data.get("languagesSpoken", [])),
             )
         )
 
@@ -113,7 +113,9 @@ def parse(data: Dict[str, Any], cls: Type[Parser]) -> ParserResult:
         )
 
     wrong_types = [
-        (f, t) for f, t in cls.all_fields().items() if type(data[f]) is not t
+        (f, t)
+        for f, t in cls.all_fields().items()
+        if f in data and type(data[f]) is not t
     ]
     if wrong_types:
         return ParserResult(

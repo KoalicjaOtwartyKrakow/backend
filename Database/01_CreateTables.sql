@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.languages (
     PRIMARY KEY(code2)
 );
 
-CREATE TYPE public.host_status AS ENUM ('created', 'verified', 'banned');
+CREATE TYPE public.host_status AS ENUM ('CREATED', 'VERIFIED', 'BANNED');
 
 CREATE TABLE IF NOT EXISTS public.hosts (
     id integer  GENERATED ALWAYS AS IDENTITY,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS public.hosts (
     call_after varchar(20),
     call_before varchar(20),
     comments  text,
-    status host_status NOT NULL DEFAULT 'created',
+    status host_status NOT NULL DEFAULT 'CREATED',
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now(),
     PRIMARY KEY(id)
@@ -92,7 +92,7 @@ CREATE TYPE public.voivodeship_enum AS ENUM (
     'ZACHODNIOPOMORSKIE'
 );
 
-CREATE TYPE public.apartment_status AS ENUM ('created', 'verified', 'banned');
+CREATE TYPE public.apartment_status AS ENUM ('CREATED', 'VERIFIED', 'BANNED');
 
 CREATE TABLE IF NOT EXISTS public.accommodation_units (
     id integer GENERATED ALWAYS AS IDENTITY,
@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS public.accommodation_units (
     have_pets boolean,
     accept_pets boolean,
     comments varchar(255),
-    status apartment_status NOT NULL DEFAULT 'created',
+    status apartment_status NOT NULL DEFAULT 'CREATED',
     PRIMARY KEY(id)
 );
 
@@ -119,7 +119,7 @@ CREATE TRIGGER set_accommodation_units_timestamp
     FOR EACH ROW
     EXECUTE PROCEDURE public.trigger_set_timestamp();
 
-CREATE TYPE public.guest_status AS ENUM ('created', 'verified', 'banned');
+CREATE TYPE public.guest_status AS ENUM ('CREATED', 'VERIFIED', 'BANNED');
 
 CREATE TABLE IF NOT EXISTS public.guests  (
     id integer GENERATED ALWAYS AS IDENTITY,
