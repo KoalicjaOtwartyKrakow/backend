@@ -2,7 +2,7 @@
 import os
 from google.cloud import secretmanager
 
-PROJECT_ID = os.environ.get("PROJECT_ID", 'PROJECT_ID environment variable is not set.')
+PROJECT_ID = os.environ["PROJECT_ID"]
 
 def access_secret_version(secret_id, version_id="latest"):
     """Retrieve secret from Google Secret Manager.
