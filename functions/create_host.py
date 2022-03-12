@@ -1,3 +1,5 @@
+import flask
+
 from utils.db import get_db_session
 from utils.payload_parser import parse, HostParser
 
@@ -6,7 +8,7 @@ def handle_create_host(request):
     data = request.get_json(silent=True)
     result = parse(data, HostParser)
     if not result.success:
-        return f"Failed: {','.join(result.errors)}", 405
+        return flask.Response(response=f"Failed: {','.join(result.errors)}", status=405)
 
     # TODO: proper logs
     if result.warnings:
@@ -16,4 +18,4 @@ def handle_create_host(request):
     with Session() as session:
         session.add(result.payload)
         session.commit()
-        return "Success", 201
+        return flask.Response(response="Success", status=201)
