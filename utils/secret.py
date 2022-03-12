@@ -3,7 +3,7 @@
 from google.cloud import secretmanager
 
 
-PROJECT_ID = "salamlab-apartments"
+PROJECT_ID = "396614679188"
 
 
 def access_secret_version(secret_id, version_id="latest"):
