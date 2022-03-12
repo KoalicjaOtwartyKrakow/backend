@@ -43,6 +43,8 @@ class Status(enum.Enum):
     VERIFIED = "verified"
     BANNED = "banned"
 
+    def __str__(self):
+        return self.name
 
 # this will be useful in the future
 # host_teammembers = Table('host_teammembers', Base.metadata,
@@ -169,3 +171,8 @@ class Guest(Base):
     volunteer_note = Column("volunteer_note", Text, nullable=True)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
+
+    def toJSON(self):
+        dict = self.__dict__
+        dict.pop('_sa_instance_state', None)
+        return json.dumps(dict, indent=4, sort_keys=True, default=str)
