@@ -4,7 +4,7 @@ import dateutil.parser
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from .orm import Base, Language, Host
+from .orm import Base, Language, Host, AccommodationUnit
 
 
 class ParseError(Exception):
@@ -99,6 +99,49 @@ class HostParser(Parser):
             call_before=call_before,
             comments=comments,
             languages_spoken=languages_spoken,
+        )
+
+
+class AccommodationParser(Parser):
+    required_fields: Dict[str, Type] = {
+        "hostId": str,
+        "city": str,
+        "zip": str,
+        "voivodeship": str,
+        "addressline": str,
+        "vacanciesTotal": str,
+    }
+    optional_fields: Dict[str, Type] = {
+        "havePets": bool,
+        "acceptsPets": bool,
+        "comments": str,
+    }
+
+    @classmethod
+    def parse(cls, data: Dict[str, Any]) -> AccommodationUnit:
+        # parse required arguments
+        host_id = data["hostId"]
+        city = data["city"]
+        zip = data["zip"]
+        voivodeship = data["voivodeship"]
+        address_line = data["addressline"]
+        vacancies_total = data["vacanciesTotal"]
+
+        # parse optional arguments
+        have_pets = data.get("havePets")
+        accepts_pets = data.get("acceptsPets")
+        comments = data.get("comments")
+
+        return AccommodationUnit(
+            host_id=host_id,
+            city=city,
+            zip=zip,
+            voivodeship=voivodeship,
+            address_line=address_line,
+            vacancies_total=vacancies_total,
+            have_pets=have_pets,
+            accepts_pets=accepts_pets,
+            comments=comments,
         )
 
 
