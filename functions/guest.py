@@ -1,4 +1,4 @@
-"""Module containing function handlers for accommodation requests."""
+"""Module containing function handlers for guest requests."""
 
 import flask
 
@@ -13,7 +13,6 @@ from utils import orm
 
 
 def handle_get_all_guests(request):
-    """HTTP Cloud Function for getting all guests."""
     Session = get_db_session()
     session = Session()
 
@@ -26,11 +25,7 @@ def handle_get_all_guests(request):
 
 
 def handle_add_guest(request):
-    """HTTP Cloud Function for posting new guests."""
-    # parse request
     request_json = request.get_json()
-
-    # create Guest object from json
     try:
         guest = orm.Guest(**request_json)
     except TypeError as e:
@@ -41,7 +36,6 @@ def handle_add_guest(request):
     Session = get_db_session()
     with Session() as session:
         session.add(guest)
-        # db transaction
         try:
             session.commit()
         except exc.SQLAlchemyError as e:
@@ -50,8 +44,6 @@ def handle_add_guest(request):
         return flask.Response(status=201)
 
 def handle_get_guest_by_id(request):
-    """HTTP Cloud Function for getting guest by id."""
-
     id = request.args.get('guestId')
     if id is None or not id.isdigit():
         return flask.Response(response=f"Received invalid guestId: {id}", status = 405)
@@ -62,8 +54,6 @@ def handle_get_guest_by_id(request):
             guest = session.query(orm.Guest).get(id)
             if guest is None:
                 return flask.Response(response=f"Guest with id = {id} not found", status = 404)
-
             return flask.Response(response=guest.toJSON(), status = 200)
-
         except TypeError as e:
             return flask.Response(response=f"Received invalid guestId: {e}", status = 405)
