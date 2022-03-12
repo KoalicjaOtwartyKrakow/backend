@@ -109,7 +109,7 @@ class AccommodationParser(Parser):
         "zip": str,
         "voivodeship": str,
         "addressline": str,
-        "vacanciesTotal": str,
+        "vacanciesTotal": int,
     }
     optional_fields: Dict[str, Type] = {
         "havePets": bool,

@@ -15,7 +15,7 @@ from functions import accommodation
 @functions_framework.http
 def add_accommodation(request):
     """HTTP Cloud Function for posting new accommodation units."""
-    accommodation.handle_add_accommodation(request)
+    return accommodation.handle_add_accommodation(request)
 
 
 @functions_framework.http

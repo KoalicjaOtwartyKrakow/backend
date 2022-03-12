@@ -76,6 +76,8 @@ class Host(Base):
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
+    apartments = relationship("AccommodationUnit")
+
     def __repr__(self):
         return f"Host: {self.__dict__}"
 
@@ -115,11 +117,13 @@ class AccommodationUnit(Base):
     voivodeship = Column("voivodeship", Enum(Voivodeship))
     address_line = Column("address_line", String(512), nullable=False)
     vacancies_total = Column("vacancies_total", Integer, nullable=False)
-    vacancies_free = Column("vacancies_free", Integer, nullable=False)
+    vacancies_free = Column("vacancies_free", Integer)
     have_pets = Column("have_pets", Boolean)
-    accept_pets = Column("accept_pets", Boolean)
+    accepts_pets = Column("accepts_pets", Boolean)
     comments = Column("comments", String(255))
     status = Column("status", Enum(Status), default=Status.CREATED, nullable=False)
+
+    host_id = Column("host_id", ForeignKey("hosts.guid"))
 
     def __repr__(self):
         return f"Apartment: {self.__dict__}"

@@ -29,7 +29,7 @@ CREATE TYPE public.host_status AS ENUM ('CREATED', 'VERIFIED', 'BANNED');
 
 CREATE TABLE IF NOT EXISTS public.hosts (
     id integer  GENERATED ALWAYS AS IDENTITY,
-    guid uuid DEFAULT uuid_generate_v4(),
+    guid uuid UNIQUE DEFAULT uuid_generate_v4(),
     full_name varchar(256) NOT NULL,
     email varchar(100) NOT NULL,
     phone_number varchar(20) NOT NULL,
@@ -104,12 +104,16 @@ CREATE TABLE IF NOT EXISTS public.accommodation_units (
     voivodeship voivodeship_enum  NULL,
     address_line varchar(512) NOT NULL,
     vacancies_total smallint NOT NULL,
-    vacancies_free	smallint NOT NULL,
+    vacancies_free	smallint,
     have_pets boolean,
-    accept_pets boolean,
+    accepts_pets boolean,
     comments varchar(255),
+    host_id uuid NOT NULL,
     status apartment_status NOT NULL DEFAULT 'CREATED',
-    PRIMARY KEY(id)
+    PRIMARY KEY(id),
+    CONSTRAINT fk_host
+        FOREIGN KEY(host_id)
+            REFERENCES public.hosts(guid)
 );
 
 
