@@ -21,10 +21,7 @@ def add_accommodation(request):
 @functions_framework.http
 def get_all_accommodations(request):
     """HTTP Cloud Function for getting all available accommodation units."""
-    Session = get_db_session()
-    with Session() as session:
-        stmt = select(orm.AccommodationUnit)
-        return session.execute(stmt)
+    return accommodation.handle_get_all_accommodations(request)
 
 
 @functions_framework.http

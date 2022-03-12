@@ -3,6 +3,7 @@
 
 import uuid
 import enum
+import json
 
 import sqlalchemy.sql.functions as func
 
@@ -127,6 +128,11 @@ class AccommodationUnit(Base):
 
     def __repr__(self):
         return f"Apartment: {self.__dict__}"
+
+    def to_json(self):
+        obj_dict = self.__dict__
+        obj_dict.pop("__sa_instance_state")
+        return json.dumps(dict, indent=4, sort_keys=True, default=str)
 
 
 class LanguageEnum(enum.Enum):
