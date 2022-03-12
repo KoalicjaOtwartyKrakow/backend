@@ -125,6 +125,7 @@ CREATE TABLE IF NOT EXISTS public.guests  (
     id integer GENERATED ALWAYS AS IDENTITY,
     guid uuid DEFAULT uuid_generate_v4(),
     full_name varchar(255) NOT NULL,
+    email varchar(255) NOT NULL,
     phone_number varchar(20) NULL,
     people_in_group smallint not null DEFAULT 1,
     adult_male_count smallint not null,
