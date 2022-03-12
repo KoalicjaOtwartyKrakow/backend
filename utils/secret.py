@@ -1,9 +1,9 @@
 """Module containing functions to retrieve secrets from Google Secrets Manager."""
-
+import os
 from google.cloud import secretmanager
 
 
-PROJECT_ID = "396614679188"
+PROJECT_ID = os.environ.get("PROJECT_ID", 'PROJECT_ID environment variable is not set.')
 
 
 def access_secret_version(secret_id, version_id="latest"):

@@ -9,3 +9,4 @@ steps:
       - --source=.
       - --trigger-http
       - --runtime=python39
+      - --set-env-vars=PROJECT_ID=396614679188
