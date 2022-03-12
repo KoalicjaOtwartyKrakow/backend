@@ -38,9 +38,9 @@ def get_all_guests(request):
     stmt = select(orm.Guest)
     result = session.execute(stmt)
 
-    print(result)
+    response = [guest.to_json() for guest in result.scalars()]
 
-    return flask.Response(status=200)
+    return flask.Response(response=response, status=200)
 
 
 @functions_framework.http
