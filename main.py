@@ -77,5 +77,6 @@ def get_all_hosts(request):
     stmt = select(orm.Host)
     result = session.execute(stmt)
 
-    print(result)
-    return flask.Response(status=200)
+    response = [host.to_json() for host in result.scalars()]
+
+    return flask.Response(response=response, status=200)
