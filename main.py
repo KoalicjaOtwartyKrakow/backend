@@ -25,11 +25,6 @@ def get_all_accommodations(request):
 
 
 @functions_framework.http
-def delete_apartment(request):
-    """HTTP Cloud Function for deleting apartment."""
-
-
-@functions_framework.http
 def create_host(request):
     return handle_create_host(request)
 
