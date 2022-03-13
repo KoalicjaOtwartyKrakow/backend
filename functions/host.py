@@ -14,3 +14,29 @@ def handle_get_all_hosts(request):
         response = [host.to_json() for host in result.scalars()]
 
     return flask.Response(response=response, status=200)
+
+
+def handle_get_hosts_by_status(request):
+    status_val = request.args.get("status")
+    if status_val is None or status_val not in orm.Status.__members__:
+        return flask.Response(
+            response=f"Received invalid status: {status_val}", status=405
+        )
+
+    stmt = select(orm.Host).where(orm.Host.status == status_val)
+    Session = get_db_session()
+
+    with Session() as session:
+        try:
+            result = session.execute(stmt)
+            if result is None:
+                return flask.Response(
+                    response=f"Host with status = {status_val} not found", status=404
+                )
+
+            return flask.Response(
+                response=[host.to_json() for host in result.scalars()], status=200
+            )
+
+        except TypeError as e:
+            return flask.Response(response=f"Received invalid status: {e}", status=405)
