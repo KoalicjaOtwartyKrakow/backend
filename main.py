@@ -10,6 +10,7 @@ from utils.db import get_db_session
 from utils import orm
 from functions import handle_create_host
 from functions import accommodation
+from functions import host
 
 
 @functions_framework.http
@@ -71,12 +72,4 @@ def add_guest(request):
 @functions_framework.http
 def get_all_hosts(request):
     """HTTP Cloud Function for getting all hosts."""
-    Session = get_db_session()
-    session = Session()
-
-    stmt = select(orm.Host)
-    result = session.execute(stmt)
-
-    response = [host.to_json() for host in result.scalars()]
-
-    return flask.Response(response=response, status=200)
+    return host.handle_get_all_hosts(request)
