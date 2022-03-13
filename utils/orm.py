@@ -172,5 +172,5 @@ class Guest(Base):
 
     def to_json(self):
         dict = self.__dict__
-        dict.pop("_sa_instance_state", None)
+        dict.pop("__sa_instance_state", None)
         return json.dumps(dict, indent=4, sort_keys=True, default=str)
