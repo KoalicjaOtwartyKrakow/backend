@@ -1,5 +1,16 @@
 steps:
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:376.0.0-alpine'
+    args:
+      - gcloud
+      - functions
+      - deploy
+      - get_all_accommodations
+      - --region=europe-central2
+      - --source=.
+      - --trigger-http
+      - --runtime=python39
+      - --set-env-vars=PROJECT_ID=396614679188
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:376.0.0-alpine'
     args:
       - gcloud
       - functions
@@ -9,3 +20,37 @@ steps:
       - --source=.
       - --trigger-http
       - --runtime=python39
+      - --set-env-vars=PROJECT_ID=396614679188
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:376.0.0-alpine'
+    args:
+      - gcloud
+      - functions
+      - deploy
+      - create_host
+      - --region=europe-central2
+      - --source=.
+      - --trigger-http
+      - --runtime=python39
+      - --set-env-vars=PROJECT_ID=396614679188
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:376.0.0-alpine'
+    args:
+      - gcloud
+      - functions
+      - deploy
+      - get_all_guests
+      - --region=europe-central2
+      - --source=.
+      - --trigger-http
+      - --runtime=python39
+      - --set-env-vars=PROJECT_ID=396614679188
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:376.0.0-alpine'
+    args:
+      - gcloud
+      - functions
+      - deploy
+      - add_guest
+      - --region=europe-central2
+      - --source=.
+      - --trigger-http
+      - --runtime=python39
+      - --set-env-vars=PROJECT_ID=396614679188

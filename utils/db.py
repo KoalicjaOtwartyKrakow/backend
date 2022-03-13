@@ -2,8 +2,9 @@
 
 import os
 import sqlalchemy
+from sqlalchemy.orm import sessionmaker
 
-from .secret import access_secret_version
+# from .secret import access_secret_version
 
 
 IS_LOCAL_DB = os.getenv("IS_LOCAL_DB")
@@ -12,7 +13,7 @@ IS_LOCAL_DB = os.getenv("IS_LOCAL_DB")
 def get_secret_var(name):
     if IS_LOCAL_DB:
         return os.getenv(name)
-    return access_secret_version(name)
+    # return access_secret_version(name)
 
 
 DB_USER = get_secret_var("db_user")
@@ -42,3 +43,13 @@ def get_engine():
     )
 
     return pool
+
+
+def get_db_session() -> sessionmaker:
+    """Usage:
+    ```
+    Session = get_db_session()
+    with Session() as session:
+        # use session here
+    """
+    return sessionmaker(bind=get_engine())

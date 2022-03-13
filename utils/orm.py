@@ -3,6 +3,7 @@
 
 import uuid
 import enum
+import json
 
 import sqlalchemy.sql.functions as func
 
@@ -76,6 +77,8 @@ class Host(Base):
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
+    apartments = relationship("AccommodationUnit")
+
     def __repr__(self):
         return f"Host: {self.__dict__}"
 
@@ -115,14 +118,21 @@ class AccommodationUnit(Base):
     voivodeship = Column("voivodeship", Enum(Voivodeship))
     address_line = Column("address_line", String(512), nullable=False)
     vacancies_total = Column("vacancies_total", Integer, nullable=False)
-    vacancies_free = Column("vacancies_free", Integer, nullable=False)
+    vacancies_free = Column("vacancies_free", Integer)
     have_pets = Column("have_pets", Boolean)
-    accept_pets = Column("accept_pets", Boolean)
+    accepts_pets = Column("accepts_pets", Boolean)
     comments = Column("comments", String(255))
     status = Column("status", Enum(Status), default=Status.CREATED, nullable=False)
 
+    host_id = Column("host_id", ForeignKey("hosts.guid"))
+
     def __repr__(self):
         return f"Apartment: {self.__dict__}"
+
+    def to_json(self):
+        obj_dict = self.__dict__
+        obj_dict.pop("__sa_instance_state")
+        return json.dumps(dict, indent=4, sort_keys=True, default=str)
 
 
 class LanguageEnum(enum.Enum):
@@ -142,10 +152,11 @@ class Guest(Base):
     id = Column("id", Integer, primary_key=True)
     guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
     full_name = Column("full_name", String(255))
+    email = Column("email", String(100))
     phone_number = Column("phone_number", String(20))
     people_in_group = Column("people_in_group", Integer, default=1)
-    adult_man_count = Column("adult_man_count", Integer)
-    adult_women_count = Column("adult_women_count", Integer)
+    adult_male_count = Column("adult_male_count", Integer)
+    adult_female_count = Column("adult_female_count", Integer)
     children_count = Column("children_count", Integer)
     children_ages = Column("children_ages", ARRAY(Integer))
     have_pets = Column("have_pets", Boolean, nullable=True)
@@ -154,7 +165,7 @@ class Guest(Base):
     priority_date = Column("priority_date", TIMESTAMP, server_default=func.now())
     status = Column("status", Enum(Status), nullable=True, default=Status.CREATED)
     finance_status = Column("finance_status", String(255), nullable=True)
-    stay_length = Column("stay_length", String(255), nullable=True)
+    how_long_to_stay = Column("how_long_to_stay", String(255), nullable=True)
     volunteer_note = Column("volunteer_note", Text, nullable=True)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
