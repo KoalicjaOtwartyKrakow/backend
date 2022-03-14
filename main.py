@@ -4,12 +4,13 @@
 import flask
 import functions_framework
 
-from sqlalchemy import exc, select
+from sqlalchemy import exc
 from utils.db import get_db_session
 
 from utils import orm
 from functions import handle_create_host
 from functions import accommodation
+from functions import guest
 
 
 @functions_framework.http
@@ -32,15 +33,7 @@ def create_host(request):
 @functions_framework.http
 def get_all_guests(request):
     """HTTP Cloud Function for getting all guests."""
-    Session = get_db_session()
-    session = Session()
-
-    stmt = select(orm.Guest)
-    result = session.execute(stmt)
-
-    print(result)
-
-    return flask.Response(status=200)
+    return guest.handle_get_all_guests(request)
 
 
 @functions_framework.http
