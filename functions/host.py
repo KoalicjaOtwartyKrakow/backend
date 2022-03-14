@@ -27,7 +27,7 @@ def handle_get_host_by_id(request):
             host = session.query(orm.Host).get(id)
             if host is None:
                 return flask.Response(
-                    response=f"Guest with id = {id} not found", status=404
+                    response=f"Host with id = {id} not found", status=404
                 )
             return flask.Response(response=host.to_json(), status=200)
         except TypeError as e:
