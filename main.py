@@ -5,6 +5,7 @@ import functions_framework
 
 from functions import handle_create_host
 from functions import accommodation
+from functions import host
 from functions import guest
 
 
@@ -41,3 +42,8 @@ def add_guest(request):
 def get_guest_by_id(request):
     """HTTP Cloud Function for getting guest by id."""
     return guest.handle_get_guest_by_id(request)
+
+@functions_framework.http
+def get_all_hosts(request):
+    """HTTP Cloud Function for getting all hosts."""
+    return host.handle_get_all_hosts(request)

@@ -1,28 +1,20 @@
 """Module containing function handlers for guest requests."""
 
 import flask
-
-from sqlalchemy import select
-
-from utils.db import get_db_session
-
+import flask
 from sqlalchemy import exc, select
 from utils.db import get_db_session
-
 from utils import orm
 
 
 def handle_get_all_guests(request):
     Session = get_db_session()
-    session = Session()
+    with Session() as session:
+        stmt = select(orm.Guest)
+        result = session.execute(stmt)
+        response = [guest.to_json() for guest in result.scalars()]
 
-    stmt = select(orm.Guest)
-    result = session.execute(stmt)
-
-    print(result)
-
-    return flask.Response(status=200)
-
+    return flask.Response(response=response, status=200)
 
 def handle_add_guest(request):
     request_json = request.get_json()
@@ -41,7 +33,7 @@ def handle_add_guest(request):
         except exc.SQLAlchemyError as e:
             return flask.Response(response=f"Transaction error: {e}", status=400)
 
-        return flask.Response(status=201)
+    return flask.Response(status=201)
 
 def handle_get_guest_by_id(request):
     id = request.args.get('guestId')
@@ -53,7 +45,11 @@ def handle_get_guest_by_id(request):
         try:
             guest = session.query(orm.Guest).get(id)
             if guest is None:
+                
                 return flask.Response(response=f"Guest with id = {id} not found", status = 404)
-            return flask.Response(response=guest.toJSON(), status = 200)
+
+            return flask.Response(response=guest.to_json(), status = 200)
         except TypeError as e:
+
             return flask.Response(response=f"Received invalid guestId: {e}", status = 405)
+

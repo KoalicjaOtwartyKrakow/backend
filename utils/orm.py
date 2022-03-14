@@ -84,6 +84,11 @@ class Host(Base):
     def __repr__(self):
         return f"Host: {self.__dict__}"
 
+    def to_json(self):
+        dict = self.__dict__
+        dict.pop("__sa_instance_state", None)
+        return json.dumps(dict, indent=4, sort_keys=True, default=str)
+
 
 class Voivodeship(enum.Enum):
     """Class representing voivodeship enum in database."""
@@ -172,7 +177,7 @@ class Guest(Base):
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
-    def toJSON(self):
+    def to_json(self):
         dict = self.__dict__
-        dict.pop('_sa_instance_state', None)
+        dict.pop("_sa_instance_state", None)
         return json.dumps(dict, indent=4, sort_keys=True, default=str)
