@@ -144,6 +144,7 @@ class LanguageEnum(enum.Enum):
     RUSSIAN = "Ru"
 
 
+# #TODO: implementation does not match api.yaml "GuestCreate:"
 class Guest(Base):
     """ORM for Guests."""
 

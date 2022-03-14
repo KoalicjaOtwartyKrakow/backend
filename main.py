@@ -4,6 +4,8 @@
 import flask
 import functions_framework
 
+import json
+
 from sqlalchemy import exc, select
 from utils.db import get_db_session
 
@@ -29,18 +31,23 @@ def create_host(request):
     return handle_create_host(request)
 
 
+# #TODO: move to guest.py file
 @functions_framework.http
 def get_all_guests(request):
     """HTTP Cloud Function for getting all guests."""
     Session = get_db_session()
     session = Session()
-
+    # #TODO: It might not read from db
     stmt = select(orm.Guest)
     result = session.execute(stmt)
 
+    for row in result:
+        print(row)
     print(result)
-
-    return flask.Response(status=200)
+    jsonResults = json.dumps([dict(r) for r in result])
+    print(jsonResults)
+    # #TODO: Nothing returned in response
+    return flask.Response(response=f"response: {result}", status=200)
 
 
 @functions_framework.http
@@ -56,7 +63,6 @@ def add_guest(request):
         return flask.Response(
             response=f"Received invalid parameter(s) for guest: {e}", status=405
         )
-
     Session = get_db_session()
     with Session() as session:
         session.add(guest)
