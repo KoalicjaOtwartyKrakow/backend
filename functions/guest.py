@@ -5,6 +5,7 @@ import flask
 from sqlalchemy import exc, select
 from utils.db import get_db_session
 from utils import orm
+from utils.payload_parser import parse, GuestParser
 
 
 def handle_get_all_guests(request):
@@ -17,17 +18,14 @@ def handle_get_all_guests(request):
     return flask.Response(response=response, status=200)
 
 def handle_add_guest(request):
-    request_json = request.get_json()
-    try:
-        guest = orm.Guest(**request_json)
-    except TypeError as e:
-        return flask.Response(
-            response=f"Received invalid parameter(s) for guest: {e}", status=405
-        )
-
+    data = request.get_json()
+    result = parse(data, GuestParser)
+    if not result.success:
+        return flask.Response(response=f"Failed: {','.join(result.errors)}", status=405)
+   
     Session = get_db_session()
     with Session() as session:
-        session.add(guest)
+        session.add(result.payload)
         try:
             session.commit()
         except exc.SQLAlchemyError as e:
@@ -45,11 +43,9 @@ def handle_get_guest_by_id(request):
         try:
             guest = session.query(orm.Guest).get(id)
             if guest is None:
-                
                 return flask.Response(response=f"Guest with id = {id} not found", status = 404)
 
             return flask.Response(response=guest.to_json(), status = 200)
         except TypeError as e:
-
             return flask.Response(response=f"Received invalid guestId: {e}", status = 405)
 

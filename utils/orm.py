@@ -44,7 +44,7 @@ class Status(enum.Enum):
     BANNED = "banned"
 
     def __str__(self):
-        return self.name
+        return self.value
 
 # this will be useful in the future
 # host_teammembers = Table('host_teammembers', Base.metadata,
