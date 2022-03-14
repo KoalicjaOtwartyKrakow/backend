@@ -2,7 +2,7 @@
 
 import flask
 
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, update
 from sqlalchemy.exc import SQLAlchemyError
 
 from utils.db import get_db_session
@@ -60,3 +60,18 @@ def handle_delete_accommodation(request):
         return "OK"
     else:
         return flask.Response("Not found", status=404)
+
+
+def handle_update_accommodation(request):
+    try:
+        accommodation_id = request.args["accommodationId"]
+    except KeyError:
+        return flask.Response("No accommodation id supplied!", status=400)
+
+    Session = get_db_session()
+
+    with Session() as session:
+        stmt = update(AccommodationUnit).where(
+            AccommodationUnit.guid == accommodation_id
+        )
+        session.execute(stmt)
