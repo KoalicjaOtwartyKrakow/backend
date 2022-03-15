@@ -25,13 +25,12 @@ def handle_delete_host(request):
     with Session() as session:
         try:
             stmt = delete(orm.Host).where(orm.Host.id == int(id))
-            effected_rows = session.execute(stmt)
-            session.commit()
-
-            if effected_rows == 0:
+            res = session.execute(stmt)
+            if res.rowcount == 0:
                 return flask.Response(
                     response=f"Host with id = {id} not found", status=404
                 )
+            session.commit()
             return flask.Response(response=f"Host with id = {id} deleted", status=200)
 
         except TypeError as e:
