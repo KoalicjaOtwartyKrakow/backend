@@ -23,7 +23,7 @@ def handle_add_accommodation(request):
     with Session() as session:
         session.add(result.payload)
         session.commit()
-        return flask.Response(response="Success", status=201)
+        return flask.Response(response=[], status=201)
 
 
 def handle_get_all_accommodations(request):
@@ -32,7 +32,12 @@ def handle_get_all_accommodations(request):
         stmt = select(AccommodationUnit)
         result = session.execute(stmt)
 
-    response = [accommodation.to_json() for accommodation in result.scalars()]
+    response = [
+        accommodation.to_json()
+        for accommodation in sorted(
+            result.scalars(), key=lambda x: x.vacancies_free, reverse=True
+        )
+    ]
 
     return flask.Response(response=response, status=200)
 
@@ -57,7 +62,7 @@ def handle_delete_accommodation(request):
         return flask.Response("Invalid accommodation id", status=400)
 
     if result.rowcount:
-        return "OK"
+        return flask.Response([], status=200)
     else:
         return flask.Response("Not found", status=404)
 
@@ -68,10 +73,18 @@ def handle_update_accommodation(request):
     except KeyError:
         return flask.Response("No accommodation id supplied!", status=400)
 
+    data = request.get_json(silent=True)
     Session = get_db_session()
 
-    with Session() as session:
-        stmt = update(AccommodationUnit).where(
-            AccommodationUnit.guid == accommodation_id
-        )
-        session.execute(stmt)
+    try:
+        with Session() as session:
+            stmt = (
+                update(AccommodationUnit)
+                .where(AccommodationUnit.guid == accommodation_id)
+                .values(data)
+            )
+            session.execute(stmt)
+    except SQLAlchemyError:
+        return flask.Response("Could not update object, invalid input", status=405)
+
+    return flask.Response([], status=200)
