@@ -54,3 +54,14 @@ steps:
       - --trigger-http
       - --runtime=python39
       - --set-env-vars=PROJECT_ID=396614679188
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args:
+      - gcloud
+      - functions
+      - deploy
+      - get_guest_by_id
+      - --region=europe-central2
+      - --source=.
+      - --trigger-http
+      - --runtime=python39
+      - --set-env-vars=PROJECT_ID=396614679188
