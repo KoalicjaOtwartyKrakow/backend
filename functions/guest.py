@@ -6,8 +6,8 @@ from sqlalchemy import exc, select
 
 from utils.db import get_db_session
 from utils.orm import Guest
-from utils import orm
 from utils.payload_parser import parse, GuestParser
+
 
 def handle_get_all_guests(request):
     Session = get_db_session()
@@ -24,7 +24,7 @@ def handle_add_guest(request):
     result = parse(data, GuestParser)
     if not result.success:
         return flask.Response(response=f"Failed: {','.join(result.errors)}", status=405)
-   
+
     Session = get_db_session()
     with Session() as session:
         session.add(result.payload)
@@ -38,22 +38,27 @@ def handle_add_guest(request):
 
 def handle_get_guest_by_id(request):
     value = request.path.split("/")
-    id = value[len(value) - 1]
-    
-    #id = request.args.get('guestId')
-    if id is None or not id.isdigit():
-        return flask.Response(response=f"Received invalid guestId: {id}", status = 405)
+    guest_id = value[2]
+
+    if guest_id is None or guest_id.isdigit():
+        return flask.Response(
+            response=f"Received invalid guestId: {guest_id}", status=405
+        )
 
     Session = get_db_session()
     with Session() as session:
         try:
-            guest = session.query(orm.Guest).get(id)
-            if guest is None:
-                return flask.Response(response=f"Guest with id = {id} not found", status = 404)
+            stmt = select(Guest).where(Guest.guid == guest_id)
+            result = session.execute(stmt)
+            response = [guest.to_json() for guest in result.scalars()]
+            if response is None:
+                return flask.Response(
+                    response=f"Guest with id = {guest_id} not found", status=404
+                )
 
-            return flask.Response(response=guest.to_json(), status = 200)
+            return flask.Response(response=response, status=200)
         except TypeError as e:
-            return flask.Response(response=f"Received invalid guestId: {e}", status = 405)
+            return flask.Response(response=f"Received invalid guestId: {e}", status=405)
 
 
 def handle_delete_guest(request):

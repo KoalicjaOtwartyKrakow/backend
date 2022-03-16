@@ -207,11 +207,12 @@ Sample response:
 `POST /guest`
 
 Parameters:
+
 | Parameter          | Description                                                                                     |
 |--------------------|-------------------------------------------------------------------------------------------------|
 | full_name          | **(required)**                                                             
 | email              | **(required)**                                                            
-| phone_number       |                                                                      
+| phone_number       | **(required)**                                                                     
 | people_in_group    | **(required)**                                                  
 | adult_male_count   | **(required)**                                                
 | adult_female_count | **(required)**                                              
@@ -226,6 +227,11 @@ Parameters:
 
 
 Sample request:
+```
+`POST /guest/`
+"Content-Type": "application/json"
+```
+Input data: 
 ```json
 {
     "full_name": "Jan Kowalski",
@@ -253,11 +259,10 @@ Possible responses:
 
 Parameters:
 
-'guestId'
 
 Sample request:
 ```
-`GET /get_guest_by_id?guestId=21`
+`GET /guest/186c5868-9421-43b8-9d13-5e053c14f0c4`
 ```
 
 Sample response:
@@ -294,14 +299,47 @@ Sample response:
 
 Parameters:
 
+| Parameter          | Description                                                                                     |
+|--------------------|-------------------------------------------------------------------------------------------------|
+| full_name          |                                                             
+| email              |                                                            
+| phone_number       |                                                                      
+| people_in_group    |                                                  
+| adult_male_count   |                                               
+| adult_female_count |                                             
+| children_count     |                                        
+| children_ages      |                                                   
+| have_pets          |  
+| pets_description   |  
+| special_needs      |  
+| finance_status     | 
+| how_long_to_stay   |  
+| volunteer_note     |
+
+
 Sample request:
 ```
-
+`POST /guest/186c5868-9421-43b8-9d13-5e053c14f0c4`
+"Content-Type": "application/json"
+```
+Input data: 
+```json
+{
+   "adult_female_count":3,
+   "adult_male_count":0,
+   "children_ages":[
+      10,
+      11
+   ],
+   "children_count":2,
+   "people_in_group":5
+}
 ```
 
 Sample response:
 ```
-
+- 200: guest successfully updated
+- 400: invalid input
 ```
 
 `DELETE /guest/:guestId`
@@ -310,12 +348,13 @@ Parameters:
 
 Sample request:
 ```
-
+DELETE /guest/c2904300-4474-4217-b28a-ec42a47cfdfe
 ```
 
 Sample response:
 ```
-
+- 200: guest successfully deleted
+- 400: invalid input
 ```
 
 ### Teammember
