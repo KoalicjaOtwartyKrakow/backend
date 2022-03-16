@@ -4,16 +4,17 @@ import os
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
-# from .secret import access_secret_version
+from .secret import access_secret_version
 
 
-IS_LOCAL_DB = os.getenv("IS_LOCAL_DB")
+IS_LOCAL_DB = os.getenv("IS_LOCAL_DB", "False").lower() == "true"
 
 
 def get_secret_var(name):
     if IS_LOCAL_DB:
         return os.getenv(name)
-    # return access_secret_version(name)
+
+    return access_secret_version(name)
 
 
 DB_USER = get_secret_var("db_user")
@@ -22,7 +23,7 @@ DB_NAME = get_secret_var("db_name")
 DB_SOCKET_DIR = get_secret_var("db_socket_dir")
 INSTANCE_CONNECTION_NAME = get_secret_var("instance_connection_name")
 QUERY = (
-    {"unix_socket": f"{DB_SOCKET_DIR}/{INSTANCE_CONNECTION_NAME}"}
+    {"unix_sock": f"{DB_SOCKET_DIR}/{INSTANCE_CONNECTION_NAME}/.s.PGSQL.5432"}
     if not IS_LOCAL_DB
     else None
 )
@@ -31,8 +32,7 @@ QUERY = (
 def get_engine():
     """Get database engine."""
     pool = sqlalchemy.create_engine(
-        # Equivalent URL:
-        # mysql+pymysql://<db_user>:<db_pass>@/<db_name>?unix_socket=<socket_path>/<instance_name>
+        # See https://cloud.google.com/sql/docs/postgres/connect-functions#connect_to
         sqlalchemy.engine.url.URL.create(
             drivername="postgresql+pg8000",
             username=DB_USER,  # e.g. "my-database-user"

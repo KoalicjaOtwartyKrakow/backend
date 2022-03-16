@@ -4,7 +4,7 @@ import dateutil.parser
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from .orm import Base, Language, Host, AccommodationUnit
+from .orm import Base, Language, Host, AccommodationUnit, Guest
 
 
 class ParseError(Exception):
@@ -115,6 +115,8 @@ class AccommodationParser(Parser):
         "havePets": bool,
         "acceptsPets": bool,
         "comments": str,
+        "vacanciesFree": int,
+        "status": str,
     }
 
     @classmethod
@@ -131,6 +133,8 @@ class AccommodationParser(Parser):
         have_pets = data.get("havePets")
         accepts_pets = data.get("acceptsPets")
         comments = data.get("comments")
+        vacancies_free = data.get("vacanciesFree")
+        status = data.get("status")
 
         return AccommodationUnit(
             host_id=host_id,
@@ -142,6 +146,67 @@ class AccommodationParser(Parser):
             have_pets=have_pets,
             accepts_pets=accepts_pets,
             comments=comments,
+            vacancies_free=vacancies_free,
+            status=status,
+        )
+
+
+class GuestParser(Parser):
+    required_fields: Dict[str, Type] = {
+        "full_name": str,
+        "email": str,
+        "phone_number": str,
+        "people_in_group": int,
+        "adult_male_count": int,
+        "adult_female_count": int,
+        "children_count": int,
+        "children_ages": list,
+
+    }
+    optional_fields: Dict[str, Type] = {
+        "have_pets": bool,
+        "pets_description": str,
+        "special_needs": str,
+        "volunteer_note": str,
+        "finance_status": str,
+        "how_long_to_stay": int,
+    }
+
+    @classmethod
+    def parse(cls, data: Dict[str, Any]) -> Guest:
+        # parse required arguments
+        full_name = data["full_name"]
+        email = data["email"]
+        phone_number = data["phone_number"]
+        people_in_group = data["people_in_group"]
+        adult_male_count = data["adult_male_count"]
+        adult_female_count = data["adult_female_count"]
+        children_count = data["children_count"]
+        children_ages = data["children_ages"]
+
+        # parse optional arguments
+        have_pets = data.get("have_pets")
+        pets_description = data.get("pets_description")
+        special_needs = data.get("special_needs")        
+        volunteer_note = data.get("volunteer_note")
+        finance_status = data.get("finance_status")
+        how_long_to_stay = data.get("how_long_to_stay")
+
+        return Guest(
+            full_name = full_name,
+            email = email,
+            phone_number = phone_number,
+            people_in_group = people_in_group,
+            adult_male_count = adult_male_count,
+            adult_female_count = adult_female_count,
+            children_count = children_count,
+            children_ages = children_ages,
+            have_pets = have_pets,
+            pets_description = pets_description,
+            special_needs = special_needs,
+            volunteer_note = volunteer_note,
+            finance_status = finance_status,
+            how_long_to_stay = how_long_to_stay,
         )
 
 

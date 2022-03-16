@@ -43,6 +43,8 @@ class Status(enum.Enum):
     VERIFIED = "verified"
     BANNED = "banned"
 
+    def __str__(self):
+        return self.value
 
 # this will be useful in the future
 # host_teammembers = Table('host_teammembers', Base.metadata,
@@ -81,6 +83,11 @@ class Host(Base):
 
     def __repr__(self):
         return f"Host: {self.__dict__}"
+
+    def to_json(self):
+        dict = self.__dict__
+        dict.pop("_sa_instance_state", None)
+        return json.dumps(dict, indent=4, sort_keys=True, default=str)
 
 
 class Voivodeship(enum.Enum):
@@ -131,7 +138,7 @@ class AccommodationUnit(Base):
 
     def to_json(self):
         obj_dict = self.__dict__
-        obj_dict.pop("__sa_instance_state")
+        obj_dict.pop("_sa_instance_state")
         return json.dumps(dict, indent=4, sort_keys=True, default=str)
 
 
@@ -178,3 +185,4 @@ class Guest(Base):
         obj_dict = self.__dict__
         obj_dict.pop("_sa_instance_state")
         return json.dumps(obj_dict, indent=4, sort_keys=True, default=str)
+
