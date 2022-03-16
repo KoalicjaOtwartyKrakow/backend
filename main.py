@@ -48,14 +48,26 @@ def get_all_guests(request):
 def add_guest(request):
     """HTTP Cloud Function for posting new guests."""
     return guest.handle_add_guest(request)
-
+ 
 
 @functions_framework.http
 def get_guest_by_id(request):
-    """HTTP Cloud Function for getting guest by id."""
+    """HTTP Cloud Function for getting selected guests."""
     return guest.handle_get_guest_by_id(request)
 
 
+@functions_framework.http
+def delete_guest(request):
+    """HTTP Cloud Function for deleting selected guests."""
+    return guest.handle_delete_guest(request)
+
+
+@functions_framework.http
+def update_guest(request):
+    """HTTP Cloud Function for updating selected guests."""
+    return guest.handle_update_guest(request)
+
+  
 @functions_framework.http
 def get_all_hosts(request):
     """HTTP Cloud Function for getting all hosts."""
@@ -90,3 +102,4 @@ def get_host_by_id(request):
 def get_hosts_by_status(request):
     """HTTP Cloud Function for getting all hosts with a given status."""
     return host.handle_get_hosts_by_status(request)
+

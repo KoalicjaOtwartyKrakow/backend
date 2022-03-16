@@ -151,6 +151,7 @@ class LanguageEnum(enum.Enum):
     RUSSIAN = "Ru"
 
 
+# #TODO: implementation does not match api.yaml "GuestCreate:"
 class Guest(Base):
     """ORM for Guests."""
 
@@ -177,7 +178,11 @@ class Guest(Base):
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
+    def __repr__(self):
+        return f"Guest: {self.__dict__}"
+
     def to_json(self):
-        dict = self.__dict__
-        dict.pop("_sa_instance_state", None)
-        return json.dumps(dict, indent=4, sort_keys=True, default=str)
+        obj_dict = self.__dict__
+        obj_dict.pop("_sa_instance_state")
+        return json.dumps(obj_dict, indent=4, sort_keys=True, default=str)
+

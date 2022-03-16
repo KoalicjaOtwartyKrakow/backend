@@ -1019,6 +1019,7 @@ definitions:
             type: "string"
             format: "date-time"
 
+// #TODO: Definition does not match with implementation orm.py "class Guest(Base)"
   GuestCreate:
     type: "object"
     required:
