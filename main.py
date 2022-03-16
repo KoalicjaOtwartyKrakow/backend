@@ -39,11 +39,6 @@ def update_accommodation(request):
 
 
 @functions_framework.http
-def create_host(request):
-    return handle_create_host(request)
-
-
-@functions_framework.http
 def get_all_guests(request):
     """HTTP Cloud Function for getting all guests."""
     return guest.handle_get_all_guests(request)
@@ -72,18 +67,19 @@ def delete_host(request):
     """HTTP Cloud Function for deleting a host with a given id."""
     return host.handle_delete_host(request)
 
+
 @functions_framework.http
 def update_host(request):
     """HTTP Cloud Function for updating a host."""
     return host.handle_update_host(request)
 
-  
+
 @functions_framework.http
 def create_host(request):
     """HTTP Cloud Function for posting a new host."""
     return host.handle_create_host(request)
 
-  
+
 @functions_framework.http
 def get_host_by_id(request):
     """HTTP Cloud Function for getting a host with a given id."""
