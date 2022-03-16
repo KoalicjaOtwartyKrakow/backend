@@ -104,8 +104,8 @@ def delete_guest(request):
             )
             result2 = session.commit()
             print(f"result1: {result1} \n result2:{result2}")
-    except exc.SQLAlchemyError:
-        return flask.Response("Invalid accommodation id", status=400)
+    except exc.SQLAlchemyError as e:
+        return flask.Response(f"delete_guest unsuccessful e: {e}", status=400)
 
     return flask.Response(status=200)
 
@@ -131,7 +131,7 @@ def update_guest(request):
             )
             result2 = session.commit()
             print(f"result1: {result1} \n result2:{result2}")
-    except exc.SQLAlchemyError:
-        return flask.Response("Invalid accommodation id", status=400)
+    except exc.SQLAlchemyError as e:
+        return flask.Response(f"update_guest unsuccessful e: {e}", status=400)
 
     return flask.Response(status=200)
