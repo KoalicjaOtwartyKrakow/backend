@@ -115,6 +115,8 @@ class AccommodationParser(Parser):
         "havePets": bool,
         "acceptsPets": bool,
         "comments": str,
+        "vacanciesFree": int,
+        "status": str,
     }
 
     @classmethod
@@ -131,6 +133,8 @@ class AccommodationParser(Parser):
         have_pets = data.get("havePets")
         accepts_pets = data.get("acceptsPets")
         comments = data.get("comments")
+        vacancies_free = data.get("vacanciesFree")
+        status = data.get("status")
 
         return AccommodationUnit(
             host_id=host_id,
@@ -142,6 +146,8 @@ class AccommodationParser(Parser):
             have_pets=have_pets,
             accepts_pets=accepts_pets,
             comments=comments,
+            vacancies_free=vacancies_free,
+            status=status,
         )
 
 

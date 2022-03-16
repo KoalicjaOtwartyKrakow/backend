@@ -23,6 +23,24 @@ def get_all_accommodations(request):
 
 
 @functions_framework.http
+def delete_accommodation(request):
+    """HTTP Cloud Function for deleting an accommodation unit."""
+    return accommodation.handle_delete_accommodation(request)
+
+
+@functions_framework.http
+def get_accommodation_by_id(request):
+    """HTTP Cloud Function for getting an accommodation unit."""
+    return accommodation.handle_get_accommodation_by_id(request)
+
+
+@functions_framework.http
+def update_accommodation(request):
+    """HTTP Cloud function for updating an accommodation unit."""
+    return accommodation.handle_update_accommodation(request)
+
+
+@functions_framework.http
 def create_host(request):
     return handle_create_host(request)
 

@@ -138,7 +138,7 @@ class AccommodationUnit(Base):
 
     def to_json(self):
         obj_dict = self.__dict__
-        obj_dict.pop("__sa_instance_state")
+        obj_dict.pop("_sa_instance_state")
         return json.dumps(dict, indent=4, sort_keys=True, default=str)
 
 
