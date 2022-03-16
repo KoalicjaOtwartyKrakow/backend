@@ -3,7 +3,6 @@
 
 import functions_framework
 
-from functions import handle_create_host
 from functions import accommodation
 from functions import host
 from functions import guest
@@ -48,4 +47,4 @@ def get_all_hosts(request):
 @functions_framework.http
 def create_host(request):
     """HTTP Cloud Function for posting a new host."""
-    return handle_create_host(request)
+    return host.handle_create_host(request)
