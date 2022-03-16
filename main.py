@@ -4,8 +4,6 @@
 import flask
 import functions_framework
 
-import json
-
 from sqlalchemy import exc, select
 from utils.db import get_db_session
 
@@ -37,17 +35,11 @@ def get_all_guests(request):
     """HTTP Cloud Function for getting all guests."""
     Session = get_db_session()
     session = Session()
-    # #TODO: It might not read from db
     stmt = select(orm.Guest)
+    # stmt = select(orm.Guest).where(orm.Guest.id == 4)
     result = session.execute(stmt)
-
-    for row in result:
-        print(row)
-    print(result)
-    jsonResults = json.dumps([dict(r) for r in result])
-    print(jsonResults)
-    # #TODO: Nothing returned in response
-    return flask.Response(response=f"response: {result}", status=200)
+    response = [guest.to_json() for guest in result.scalars()]
+    return flask.Response(response=response, status=200)
 
 
 @functions_framework.http
@@ -73,3 +65,73 @@ def add_guest(request):
             return flask.Response(response=f"Transaction error: {e}", status=400)
 
         return flask.Response(status=201)
+
+
+@functions_framework.http
+def get_guest_by_id(request):
+    print(request.__dict__)
+    print(f"Path: {request.path}")
+    value = request.path.split("/")
+    print(f"Path+split: {value}")
+    guest_id = value[len(value) - 1]
+    print(f"Path+split+value: {guest_id}")
+    Session = get_db_session()
+    session = Session()
+    stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
+    print(stmt)
+    result = session.execute(stmt)
+    response = [guest.to_json() for guest in result.scalars()]
+    return flask.Response(response=response, status=200)
+
+
+# TODO: GET method also allows to remove data
+@functions_framework.http
+def delete_guest(request):
+    print(request.__dict__)
+    print(f"Path: {request.path}")
+    value = request.path.split("/")
+    print(f"Path+split: {value}")
+    guest_id = value[len(value) - 1]
+    print(f"Path+split+value: {guest_id}")
+    print(orm.Guest.guid)
+    Session = get_db_session()
+    try:
+        with Session() as session:
+            result1 = (
+                session.query(orm.Guest)
+                .filter(orm.Guest.guid == guest_id)
+                .delete(synchronize_session=False)
+            )
+            result2 = session.commit()
+            print(f"result1: {result1} \n result2:{result2}")
+    except exc.SQLAlchemyError:
+        return flask.Response("Invalid accommodation id", status=400)
+
+    return flask.Response(status=200)
+
+
+def update_guest(request):
+    print(request.__dict__)
+    print(f"Path: {request.path}")
+    value = request.path.split("/")
+    print(f"Path+split: {value}")
+    guest_id = value[len(value) - 1]
+    print(f"Path+split+value: {guest_id}")
+    print(orm.Guest.guid)
+
+    request_json = request.get_json()
+    print(request_json)
+    Session = get_db_session()
+    try:
+        with Session() as session:
+            result1 = (
+                session.query(orm.Guest)
+                .filter(orm.Guest.guid == guest_id)
+                .update(request_json)
+            )
+            result2 = session.commit()
+            print(f"result1: {result1} \n result2:{result2}")
+    except exc.SQLAlchemyError:
+        return flask.Response("Invalid accommodation id", status=400)
+
+    return flask.Response(status=200)

@@ -170,3 +170,8 @@ class Guest(Base):
     volunteer_note = Column("volunteer_note", Text, nullable=True)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
+
+    def to_json(self):
+        obj_dict = self.__dict__
+        obj_dict.pop("_sa_instance_state")
+        return json.dumps(obj_dict, indent=4, sort_keys=True, default=str)
