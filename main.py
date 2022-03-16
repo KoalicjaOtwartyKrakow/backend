@@ -1,14 +1,8 @@
 # pylint: disable=fixme,invalid-name,no-member,unused-argument
 """Module containing Google Cloud functions for deployment."""
 
-import flask
 import functions_framework
 
-from sqlalchemy import exc
-from utils.db import get_db_session
-
-from utils import orm
-from functions import handle_create_host
 from functions import accommodation
 from functions import host
 from functions import guest
@@ -27,6 +21,24 @@ def get_all_accommodations(request):
 
 
 @functions_framework.http
+def delete_accommodation(request):
+    """HTTP Cloud Function for deleting an accommodation unit."""
+    return accommodation.handle_delete_accommodation(request)
+
+
+@functions_framework.http
+def get_accommodation_by_id(request):
+    """HTTP Cloud Function for getting an accommodation unit."""
+    return accommodation.handle_get_accommodation_by_id(request)
+
+
+@functions_framework.http
+def update_accommodation(request):
+    """HTTP Cloud function for updating an accommodation unit."""
+    return accommodation.handle_update_accommodation(request)
+
+
+@functions_framework.http
 def create_host(request):
     return handle_create_host(request)
 
@@ -40,27 +52,13 @@ def get_all_guests(request):
 @functions_framework.http
 def add_guest(request):
     """HTTP Cloud Function for posting new guests."""
-    # parse request
-    request_json = request.get_json()
+    return guest.handle_add_guest(request)
 
-    # create Guest object from json
-    try:
-        guest = orm.Guest(**request_json)
-    except TypeError as e:
-        return flask.Response(
-            response=f"Received invalid parameter(s) for guest: {e}", status=405
-        )
 
-    Session = get_db_session()
-    with Session() as session:
-        session.add(guest)
-        # db transaction
-        try:
-            session.commit()
-        except exc.SQLAlchemyError as e:
-            return flask.Response(response=f"Transaction error: {e}", status=400)
-
-        return flask.Response(status=201)
+@functions_framework.http
+def get_guest_by_id(request):
+    """HTTP Cloud Function for getting guest by id."""
+    return guest.handle_get_guest_by_id(request)
 
 
 @functions_framework.http
@@ -73,3 +71,21 @@ def get_all_hosts(request):
 def update_host(request):
     """HTTP Cloud Function for updating a host."""
     return host.handle_update_host(request)
+
+  
+@functions_framework.http
+def create_host(request):
+    """HTTP Cloud Function for posting a new host."""
+    return host.handle_create_host(request)
+
+  
+@functions_framework.http
+def get_host_by_id(request):
+    """HTTP Cloud Function for getting a host with a given id."""
+    return host.handle_get_host_by_id(request)
+
+
+@functions_framework.http
+def get_hosts_by_status(request):
+    """HTTP Cloud Function for getting all hosts with a given status."""
+    return host.handle_get_hosts_by_status(request)
