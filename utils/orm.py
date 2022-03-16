@@ -171,6 +171,9 @@ class Guest(Base):
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
+    def __repr__(self):
+        return f"Guest: {self.__dict__}"
+
     def to_json(self):
         obj_dict = self.__dict__
         obj_dict.pop("_sa_instance_state")

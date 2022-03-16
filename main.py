@@ -4,12 +4,13 @@
 import flask
 import functions_framework
 
-from sqlalchemy import exc, select
+from sqlalchemy import exc
 from utils.db import get_db_session
 
 from utils import orm
 from functions import handle_create_host
 from functions import accommodation
+from functions import guest
 
 
 @functions_framework.http
@@ -29,22 +30,17 @@ def create_host(request):
     return handle_create_host(request)
 
 
-# #TODO: move to guest.py file
 @functions_framework.http
 def get_all_guests(request):
     """HTTP Cloud Function for getting all guests."""
-    Session = get_db_session()
-    session = Session()
-    stmt = select(orm.Guest)
-    # stmt = select(orm.Guest).where(orm.Guest.id == 4)
-    result = session.execute(stmt)
-    response = [guest.to_json() for guest in result.scalars()]
-    return flask.Response(response=response, status=200)
+    return guest.handle_get_all_guests(request)
 
 
 @functions_framework.http
 def add_guest(request):
     """HTTP Cloud Function for posting new guests."""
+    # return guest.handle_add_guest(request)
+
     # parse request
     request_json = request.get_json()
 
@@ -64,74 +60,22 @@ def add_guest(request):
         except exc.SQLAlchemyError as e:
             return flask.Response(response=f"Transaction error: {e}", status=400)
 
-        return flask.Response(status=201)
+    return flask.Response(status=201)
 
 
 @functions_framework.http
 def get_guest_by_id(request):
-    print(request.__dict__)
-    print(f"Path: {request.path}")
-    value = request.path.split("/")
-    print(f"Path+split: {value}")
-    guest_id = value[len(value) - 1]
-    print(f"Path+split+value: {guest_id}")
-    Session = get_db_session()
-    session = Session()
-    stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
-    print(stmt)
-    result = session.execute(stmt)
-    response = [guest.to_json() for guest in result.scalars()]
-    return flask.Response(response=response, status=200)
+    """HTTP Cloud Function for getting selected guests."""
+    return guest.handle_get_guest_by_id(request)
 
 
-# TODO: GET method also allows to remove data
 @functions_framework.http
 def delete_guest(request):
-    print(request.__dict__)
-    print(f"Path: {request.path}")
-    value = request.path.split("/")
-    print(f"Path+split: {value}")
-    guest_id = value[len(value) - 1]
-    print(f"Path+split+value: {guest_id}")
-    print(orm.Guest.guid)
-    Session = get_db_session()
-    try:
-        with Session() as session:
-            result1 = (
-                session.query(orm.Guest)
-                .filter(orm.Guest.guid == guest_id)
-                .delete(synchronize_session=False)
-            )
-            result2 = session.commit()
-            print(f"result1: {result1} \n result2:{result2}")
-    except exc.SQLAlchemyError as e:
-        return flask.Response(f"delete_guest unsuccessful e: {e}", status=400)
-
-    return flask.Response(status=200)
+    """HTTP Cloud Function for deleting selected guests."""
+    return guest.handle_delete_guest(request)
 
 
+@functions_framework.http
 def update_guest(request):
-    print(request.__dict__)
-    print(f"Path: {request.path}")
-    value = request.path.split("/")
-    print(f"Path+split: {value}")
-    guest_id = value[len(value) - 1]
-    print(f"Path+split+value: {guest_id}")
-    print(orm.Guest.guid)
-
-    request_json = request.get_json()
-    print(request_json)
-    Session = get_db_session()
-    try:
-        with Session() as session:
-            result1 = (
-                session.query(orm.Guest)
-                .filter(orm.Guest.guid == guest_id)
-                .update(request_json)
-            )
-            result2 = session.commit()
-            print(f"result1: {result1} \n result2:{result2}")
-    except exc.SQLAlchemyError as e:
-        return flask.Response(f"update_guest unsuccessful e: {e}", status=400)
-
-    return flask.Response(status=200)
+    """HTTP Cloud Function for updating selected guests."""
+    return guest.handle_update_guest(request)
