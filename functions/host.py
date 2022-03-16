@@ -18,7 +18,12 @@ def handle_get_all_hosts(request):
 
 
 def handle_update_host(request):
-    id = request.args.get("hostId")
+    try:
+        id = request.args.get("hostId")
+    except ValueError:
+        return flask.Response(response=f"Received invalid hostId: {id}", status=400)
+    if id is None:
+        return flask.Response(response="Received no hostId", status=400)
     data = request.get_json()
     result = parse(data, HostParser)
 
@@ -27,7 +32,7 @@ def handle_update_host(request):
 
     stmt = (
         update(orm.Host)
-        .where(orm.Host.id == int(id))
+        .where(orm.Host.guid == id)
         .values(
             full_name=result.payload.full_name,
             email=result.payload.email,
