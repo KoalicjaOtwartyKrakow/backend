@@ -154,3 +154,16 @@ CREATE TRIGGER set_guests_timestamp
         UPDATE ON public.guests
     FOR EACH ROW
     EXECUTE PROCEDURE public.trigger_set_timestamp();
+
+
+CREATE TABLE IF NOT EXISTS public.guest_accommodation_units (
+   guest_id integer,
+   accommodation_unit_id integer,
+   PRIMARY KEY(guest_id,accommodation_unit_id),
+   CONSTRAINT fk_accommodation_unit
+       FOREIGN KEY(accommodation_unit_id)
+           REFERENCES accommodation_units(id),
+   CONSTRAINT fk_guest
+       FOREIGN KEY(guest_id)
+           REFERENCES guests(id)
+);
