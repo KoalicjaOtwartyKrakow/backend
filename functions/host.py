@@ -4,6 +4,7 @@ import flask
 from sqlalchemy import select, delete
 from utils.db import get_db_session
 from utils import orm
+from sqlalchemy.exc import SQLAlchemyError
 
 
 def handle_get_all_hosts(request):
@@ -17,14 +18,21 @@ def handle_get_all_hosts(request):
 
 
 def handle_delete_host(request):
-    id = request.args.get("hostId")
-    if id is None or not id.isdigit():
-        return flask.Response(response=f"Received invalid hostId: {id}", status=400)
+    try:
+        id = request.args.get("hostId")
+    except KeyError:
+        return flask.Response("No host id supplied!", status=400)
+    if id is None:
+        return flask.Response(response="Received no hostId", status=400)
 
     Session = get_db_session()
     with Session() as session:
         try:
-            stmt = delete(orm.Host).where(orm.Host.id == int(id))
+            stmt = (
+                delete(orm.Host)
+                .where(orm.Host.guid == id)
+                .execution_options(synchronize_session="fetch")
+            )
             res = session.execute(stmt)
             if res.rowcount == 0:
                 return flask.Response(
@@ -33,5 +41,5 @@ def handle_delete_host(request):
             session.commit()
             return flask.Response(response=f"Host with id = {id} deleted", status=200)
 
-        except TypeError as e:
-            return flask.Response(response=f"Received invalid hostId: {e}", status=400)
+        except SQLAlchemyError:
+            return flask.Response(response=f"Received invalid hostId: {id}", status=400)
