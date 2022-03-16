@@ -29,15 +29,12 @@ def handle_add_accommodation(request):
 def handle_get_all_accommodations(request):
     Session = get_db_session()
     with Session() as session:
-        stmt = select(AccommodationUnit)
+        stmt = select(AccommodationUnit).order_by(
+            AccommodationUnit.vacancies_free.desc()
+        )
         result = session.execute(stmt)
 
-    response = [
-        accommodation.to_json()
-        for accommodation in sorted(
-            result.scalars(), key=lambda x: x.vacancies_free, reverse=True
-        )
-    ]
+    response = [accommodation.to_json() for accommodation in result.scalars()]
 
     return flask.Response(response=response, status=200)
 
@@ -67,6 +64,31 @@ def handle_delete_accommodation(request):
         return flask.Response("Not found", status=404)
 
 
+def handle_get_accommodation_by_id(request):
+    try:
+        accommodation_id = request.args["accommodationId"]
+    except KeyError:
+        return flask.Response("No accommodation id supplied!", status=400)
+
+    Session = get_db_session()
+
+    try:
+        with Session() as session:
+            stmt = select(AccommodationUnit).where(
+                AccommodationUnit.guid == accommodation_id
+            )
+            result = session.execute(stmt)
+    except SQLAlchemyError:
+        return flask.Response("Invaild id", status=400)
+
+    response = [accommodation.to_json() for accommodation in result.scalars()]
+
+    if result.rowcount:
+        return flask.Response(response, status=200)
+    else:
+        return flask.Response("Not found", status=404)
+
+
 def handle_update_accommodation(request):
     try:
         accommodation_id = request.args["accommodationId"]
@@ -83,8 +105,11 @@ def handle_update_accommodation(request):
                 .where(AccommodationUnit.guid == accommodation_id)
                 .values(data)
             )
-            session.execute(stmt)
+            result = session.execute(stmt)
     except SQLAlchemyError:
         return flask.Response("Could not update object, invalid input", status=405)
 
-    return flask.Response([], status=200)
+    if result.rowcount:
+        return flask.Response([], status=200)
+    else:
+        return flask.Response("Not found", status=404)
