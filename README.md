@@ -207,28 +207,86 @@ Sample response:
 `POST /guest`
 
 Parameters:
+| Parameter          | Description                                                                                     |
+|--------------------|-------------------------------------------------------------------------------------------------|
+| full_name          | **(required)**                                                             
+| email              | **(required)**                                                            
+| phone_number       |                                                                      
+| people_in_group    | **(required)**                                                  
+| adult_male_count   | **(required)**                                                
+| adult_female_count | **(required)**                                              
+| children_count     | **(required)**                                          
+| children_ages      |                                                   
+| have_pets          |  
+| pets_description   |  
+| special_needs      |  
+| finance_status     | 
+| how_long_to_stay   |  
+| volunteer_note     |
+
 
 Sample request:
+```json
+{
+    "full_name": "Jan Kowalski",
+    "email" : "jan@kowalski.pl",
+    "phone_number": "654-654-654",
+    "people_in_group": 5,
+    "adult_male_count":1,
+    "adult_female_count":2,
+    "children_count":2,
+    "children_ages":[1,5],
+    "have_pets":true,
+    "pets_description":"1 small dog",
+    "special_needs" : "No special needs",
+    "finance_status" : "Some finance status.",
+    "how_long_to_stay" : 1,
+    "volunteer_note" : "Some note."
+}
 ```
 
-```
-
-Sample response:
-```
-
-```
+Possible responses:
+- 201: guest successfully created
+- 405: invalid input
 
 `GET /guest/:guestId`
 
 Parameters:
 
+'guestId'
+
 Sample request:
 ```
-
+`GET /get_guest_by_id?guestId=21`
 ```
 
 Sample response:
-```
+```json
+{
+    "adult_female_count": 2,
+    "adult_male_count": 1,
+    "children_ages": [
+        1,
+        5
+    ],
+    "children_count": 2,
+    "created_at": "2022-03-11 17:08:59.170341",
+    "email": "jan@kowalski.pl",
+    "finance_status": "Some finance status.",
+    "full_name": "Jan Kowalski",
+    "guid": "8d0bb783-7165-41c5-ada7-a0274f48c991",
+    "have_pets": true,
+    "how_long_to_stay": "1",
+    "id": 2,
+    "people_in_group": 5,
+    "pets_description": "1 small dog",
+    "phone_number": "654-654-654",
+    "priority_date": "2022-03-11 17:08:59.170341",
+    "special_needs": "No special needs",
+    "status": "CREATED",
+    "updated_at": null,
+    "volunteer_note": null
+}
 
 ```
 
