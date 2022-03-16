@@ -68,6 +68,11 @@ def get_all_hosts(request):
 
 
 @functions_framework.http
+def delete_host(request):
+    """HTTP Cloud Function for deleting a host with a given id."""
+    return host.handle_delete_host(request)
+
+@functions_framework.http
 def update_host(request):
     """HTTP Cloud Function for updating a host."""
     return host.handle_update_host(request)

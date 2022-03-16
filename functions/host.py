@@ -1,7 +1,8 @@
 """Module containing function handlers for host requests."""
 
 import flask
-from sqlalchemy import select, exc, update
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import select, exc, update, delete
 from utils.db import get_db_session
 from utils import orm
 from utils.payload_parser import parse, HostParser
@@ -112,3 +113,31 @@ def handle_update_host(request):
             return flask.Response(response=f"Transaction error: {e}", status=400)
 
     return flask.Response(response=f"Updated host with id {id}", status=200)
+
+  
+def handle_delete_host(request):
+    try:
+        id = request.args.get("hostId")
+    except KeyError:
+        return flask.Response("No host id supplied!", status=400)
+    if id is None:
+        return flask.Response(response="Received no hostId", status=400)
+
+    Session = get_db_session()
+    with Session() as session:
+        try:
+            stmt = (
+                delete(orm.Host)
+                .where(orm.Host.guid == id)
+                .execution_options(synchronize_session="fetch")
+            )
+            res = session.execute(stmt)
+            if res.rowcount == 0:
+                return flask.Response(
+                    response=f"Host with id = {id} not found", status=404
+                )
+            session.commit()
+            return flask.Response(response=f"Host with id = {id} deleted", status=200)
+
+        except SQLAlchemyError:
+            return flask.Response(response=f"Received invalid hostId: {id}", status=400)
