@@ -4,6 +4,7 @@ import flask
 from sqlalchemy import select
 from utils.db import get_db_session
 from utils import orm
+from utils.payload_parser import parse, HostParser
 
 
 def handle_get_all_hosts(request):
@@ -15,6 +16,22 @@ def handle_get_all_hosts(request):
 
     return flask.Response(response=response, status=200)
 
+
+
+def handle_create_host(request):
+    data = request.get_json(silent=True)
+    result = parse(data, HostParser)
+    if not result.success:
+        return flask.Response(response=f"Failed: {','.join(result.errors)}", status=405)
+
+    if result.warnings:
+        print(result.warnings)
+
+    Session = get_db_session()
+    with Session() as session:
+        session.add(result.payload)
+        session.commit()
+        return flask.Response(response="Success", status=201)
 
 def handle_get_host_by_id(request):
     try:
@@ -64,4 +81,3 @@ def handle_get_hosts_by_status(request):
 
         except TypeError as e:
             return flask.Response(response=f"Received invalid status: {e}", status=405)
-
