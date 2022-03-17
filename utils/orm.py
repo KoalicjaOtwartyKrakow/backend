@@ -4,14 +4,15 @@
 import uuid
 import enum
 import json
+from datetime import datetime, date
 
 import sqlalchemy.sql.functions as func
+from black.brackets import Priority
 
 from sqlalchemy import Column, Integer, String, Enum, Boolean, Text, Table, ForeignKey
 from sqlalchemy.ext.declarative import DeclarativeMeta
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, ARRAY
-from sqlalchemy.orm import declarative_base, relationship
-
+from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP, ARRAY
+from sqlalchemy.orm import declarative_base, relationship, registry
 
 Base = declarative_base()
 
@@ -22,7 +23,7 @@ class Teammember(Base):
     __tablename__ = "teammembers"
 
     id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
+    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4)
     full_name = Column("full_name", String(20), nullable=True)
     phone_number = Column("phone_number", String(20), nullable=True)
 
@@ -37,12 +38,30 @@ class Language(Base):
     code3 = Column("code3", String(3))
 
 
-class Status(enum.Enum):
+# https://stackoverflow.com/a/51976841
+class Status(str, enum.Enum):
     """Class representing status enum in database."""
 
     CREATED = "created"
     VERIFIED = "verified"
     BANNED = "banned"
+
+    def __str__(self):
+        return self.value
+
+
+# https://stackoverflow.com/a/51976841
+class PriorityStatus(str, enum.Enum):
+    """Class representing status enum in database."""
+
+    DOES_NOT_RESPOND = "created"
+    ACCOMMODATION_NOT_NEEDED = "verified"
+    EN_ROUTE_UA = "banned"
+    EN_ROUTE_PL = "en_route_pl"
+    IN_KRK = "in_krk"
+    AT_R3 = "at_r3"
+    ACCOMMODATION_FOUND = "accommodation_found"
+    UPDATED = "updated"
 
     def __str__(self):
         return self.value
@@ -69,7 +88,7 @@ class Host(Base):
     __tablename__ = "hosts"
 
     id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
+    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4)
     full_name = Column("full_name", String(256))
     email = Column("email", String(100))
     phone_number = Column("phone_number", String(20))
@@ -87,7 +106,8 @@ class Host(Base):
         return f"Host: {self.__dict__}"
 
 
-class Voivodeship(enum.Enum):
+# https://stackoverflow.com/a/51976841
+class Voivodeship(str, enum.Enum):
     """Class representing voivodeship enum in database."""
 
     DOLNOSLASKIE = "DOLNOŚLĄSKIE"
@@ -114,7 +134,7 @@ class AccommodationUnit(Base):
     __tablename__ = "accommodation_units"
 
     id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
+    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
     city = Column("city", String(50))
@@ -129,6 +149,9 @@ class AccommodationUnit(Base):
     status = Column("status", Enum(Status), default=Status.CREATED, nullable=False)
 
     host_id = Column("host_id", ForeignKey("hosts.guid"))
+
+    host = relationship("Host")
+    guests = relationship("Guest", back_populates="accommodation")
 
     def __repr__(self):
         return f"Apartment: {self.__dict__}"
@@ -150,10 +173,12 @@ class Guest(Base):
     __tablename__ = "guests"
 
     id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
+    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4)
     full_name = Column("full_name", String(255))
-    email = Column("email", String(100))
+    email = Column("email", String(255))
     phone_number = Column("phone_number", String(20))
+    is_agent = Column("is_agent", Boolean, default=False)
+    document_number = Column("document_number", String(255), nullable=True)
     people_in_group = Column("people_in_group", Integer, default=1)
     adult_male_count = Column("adult_male_count", Integer)
     adult_female_count = Column("adult_female_count", Integer)
@@ -164,34 +189,56 @@ class Guest(Base):
     special_needs = Column("special_needs", Text, nullable=True)
     priority_date = Column("priority_date", TIMESTAMP, server_default=func.now())
     status = Column("status", Enum(Status), nullable=True, default=Status.CREATED)
+    priority_status = Column(
+        "priority_status", Enum(PriorityStatus), nullable=True, default=None
+    )
     finance_status = Column("finance_status", String(255), nullable=True)
     how_long_to_stay = Column("how_long_to_stay", String(255), nullable=True)
+    preferred_location = Column("preferred_location", String(255), nullable=True)
     volunteer_note = Column("volunteer_note", Text, nullable=True)
+    validation_notes = Column("validation_notes", Text, nullable=True)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
+
+    accommodation_unit_id = Column(
+        "accommodation_unit_id", ForeignKey("accommodation_units.guid")
+    )
+    accommodation = relationship("AccommodationUnit", back_populates="guests")
 
     def __repr__(self):
         return f"Guest: {self.__dict__}"
 
 
 # https://stackoverflow.com/a/10664192
-class AlchemyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj.__class__, DeclarativeMeta):
-            # an SQLAlchemy class
-            fields = {}
-            for field in [
-                x for x in dir(obj) if not x.startswith("_") and x != "metadata"
-            ]:
-                data = obj.__getattribute__(field)
-                try:
-                    json.dumps(
-                        data
-                    )  # this will fail on non-encodable values, like other classes
-                    fields[field] = data
-                except TypeError:
-                    fields[field] = None
-            # a json-encodable dict
-            return fields
+def new_alchemy_encoder():
+    _visited_objs = []
 
-        return json.JSONEncoder.default(self, obj)
+    class AlchemyEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj.__class__, DeclarativeMeta):
+                # don't re-visit self
+                if obj in _visited_objs:
+                    return None
+                _visited_objs.append(obj)
+
+                # an SQLAlchemy class
+                fields = {}
+                for field in [
+                    x for x in dir(obj) if not x.startswith("_") and x != "metadata"
+                ]:
+                    fields[field] = obj.__getattribute__(field)
+                # a json-encodable dict
+                return fields
+
+            if isinstance(obj, (datetime, date)):
+                return obj.isoformat()
+
+            if isinstance(obj, uuid.UUID):
+                return obj.hex
+
+            if isinstance(obj, registry):
+                return None
+
+            return json.JSONEncoder.default(self, obj)
+
+    return AlchemyEncoder
