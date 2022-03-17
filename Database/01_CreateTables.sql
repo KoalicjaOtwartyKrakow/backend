@@ -74,20 +74,20 @@ CREATE TABLE IF NOT EXISTS public.host_languages (
 );
 
 CREATE TYPE public.voivodeship_enum AS ENUM (
-    'DOLNOŚLĄSKIE',
-    'KUJAWSKO-POMORSKIE',
+    'DOLNOSLASKIE',
+    'KUJAWSKOPOMORSKIE',
     'LUBELSKIE',
     'LUBUSKIE',
-    'ŁÓDZKIE',
-    'MAŁOPOLSKIE',
+    'LODZKIE',
+    'MALOPOLSKIE',
     'MAZOWIECKIE',
     'OPOLSKIE',
     'PODKARPACKIE',
     'PODLASKIE',
     'POMORSKIE',
-    'ŚLĄSKIE',
-    'ŚWIĘTOKRZYSKIE',
-    'WARMIŃSKO-MAZURSKIE',
+    'SLASKIE',
+    'SWIETOKRZYSKIE',
+    'WARMINSKOMAZURSKIE',
     'WIELKOPOLSKIE',
     'ZACHODNIOPOMORSKIE'
 );
@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS public.accommodation_units (
     have_pets boolean,
     accepts_pets boolean,
     comments varchar(255),
-    host_id uuid NOT NULL,
+    host_id uuid,
     status apartment_status NOT NULL DEFAULT 'CREATED',
     PRIMARY KEY(id),
     CONSTRAINT fk_host
@@ -131,6 +131,8 @@ CREATE TABLE IF NOT EXISTS public.guests  (
     full_name varchar(255) NOT NULL,
     email varchar(255) NOT NULL,
     phone_number varchar(20) NULL,
+    is_agent boolean DEFAULT False, /* is acting on behalf of an actual guest group */
+    document_number varchar(255),
     people_in_group smallint not null DEFAULT 1,
     adult_male_count smallint not null,
     adult_female_count smallint not null,
@@ -143,10 +145,15 @@ CREATE TABLE IF NOT EXISTS public.guests  (
     status guest_status NOT NULL DEFAULT 'CREATED',
     finance_status varchar(255), /*could be enum ,bool , or text*/
     how_long_to_stay  varchar(255),
+    preferred_location varchar(255),
     volunteer_note text,
+    accommodation_unit_id uuid,
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now(),
-    PRIMARY KEY(id)
+    PRIMARY KEY(id),
+    CONSTRAINT fk_accommodation_unit_id,
+        FOREIGN KEY(accommodation_unit_id)
+            REFERENCES public.accommodation_units(guid)
 );
 
 CREATE TRIGGER set_guests_timestamp
@@ -154,16 +161,3 @@ CREATE TRIGGER set_guests_timestamp
         UPDATE ON public.guests
     FOR EACH ROW
     EXECUTE PROCEDURE public.trigger_set_timestamp();
-
-
-CREATE TABLE IF NOT EXISTS public.guest_accommodation_units (
-   guest_id integer,
-   accommodation_unit_id integer,
-   PRIMARY KEY(guest_id,accommodation_unit_id),
-   CONSTRAINT fk_accommodation_unit
-       FOREIGN KEY(accommodation_unit_id)
-           REFERENCES accommodation_units(id),
-   CONSTRAINT fk_guest
-       FOREIGN KEY(guest_id)
-           REFERENCES guests(id)
-);
