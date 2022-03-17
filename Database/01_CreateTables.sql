@@ -125,7 +125,16 @@ CREATE TRIGGER set_accommodation_units_timestamp
 
 CREATE TYPE public.guest_status AS ENUM ('CREATED', 'VERIFIED', 'BANNED');
 
-CREATE TYPE public.guest_priority_status AS ENUM ('DOES_NOT_RESPOND', 'ACCOMMODATION_NOT_NEEDED', 'EN_ROUTE_UA', 'EN_ROUTE_PL', 'IN_KRK', 'AT_R3', 'ACCOMMODATION_FOUND', 'UPDATED');
+CREATE TYPE public.guest_priority_status AS ENUM (
+    'DOES_NOT_RESPOND',
+    'ACCOMMODATION_NOT_NEEDED',
+    'EN_ROUTE_UA',
+    'EN_ROUTE_PL',
+    'IN_KRK',
+    'AT_R3',
+    'ACCOMMODATION_FOUND',
+    'UPDATED'
+);
 
 CREATE TABLE IF NOT EXISTS public.guests  (
     id integer GENERATED ALWAYS AS IDENTITY,
@@ -155,7 +164,7 @@ CREATE TABLE IF NOT EXISTS public.guests  (
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now(),
     PRIMARY KEY(id),
-    CONSTRAINT fk_accommodation_unit_id,
+    CONSTRAINT fk_accommodation_unit_id
         FOREIGN KEY(accommodation_unit_id)
             REFERENCES public.accommodation_units(guid)
 );

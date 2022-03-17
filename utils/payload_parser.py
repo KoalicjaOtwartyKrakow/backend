@@ -4,7 +4,7 @@ import dateutil.parser
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from .orm import Base, Language, Host, AccommodationUnit, Guest
+from .orm import Base, Language, Host, AccommodationUnit, Guest, Status, PriorityStatus
 
 
 class ParseError(Exception):
@@ -161,15 +161,20 @@ class GuestParser(Parser):
         "adult_female_count": int,
         "children_count": int,
         "children_ages": list,
-
     }
     optional_fields: Dict[str, Type] = {
+        "is_agent": bool,
+        "document_number": str,
         "have_pets": bool,
         "pets_description": str,
         "special_needs": str,
-        "volunteer_note": str,
+        "status": Status,
+        "priority_status": PriorityStatus,
         "finance_status": str,
         "how_long_to_stay": int,
+        "preferred_location": str,
+        "volunteer_note": str,
+        "validation_notes": str,
     }
 
     @classmethod
@@ -185,28 +190,40 @@ class GuestParser(Parser):
         children_ages = data["children_ages"]
 
         # parse optional arguments
+        is_agent = data.get("is_agent")
+        document_number = data.get("document_number")
         have_pets = data.get("have_pets")
         pets_description = data.get("pets_description")
-        special_needs = data.get("special_needs")        
-        volunteer_note = data.get("volunteer_note")
+        special_needs = data.get("special_needs")
+        status = data.get("status")
+        priority_status = data.get("priority_status")
         finance_status = data.get("finance_status")
         how_long_to_stay = data.get("how_long_to_stay")
+        preferred_location = data.get("preferred_location")
+        volunteer_note = data.get("volunteer_note")
+        validation_notes = data.get("validation_notes")
 
         return Guest(
-            full_name = full_name,
-            email = email,
-            phone_number = phone_number,
-            people_in_group = people_in_group,
-            adult_male_count = adult_male_count,
-            adult_female_count = adult_female_count,
-            children_count = children_count,
-            children_ages = children_ages,
-            have_pets = have_pets,
-            pets_description = pets_description,
-            special_needs = special_needs,
-            volunteer_note = volunteer_note,
-            finance_status = finance_status,
-            how_long_to_stay = how_long_to_stay,
+            full_name=full_name,
+            email=email,
+            phone_number=phone_number,
+            is_agent=is_agent,
+            document_number=document_number,
+            people_in_group=people_in_group,
+            adult_male_count=adult_male_count,
+            adult_female_count=adult_female_count,
+            children_count=children_count,
+            children_ages=children_ages,
+            have_pets=have_pets,
+            pets_description=pets_description,
+            special_needs=special_needs,
+            status=status,
+            priority_status=priority_status,
+            finance_status=finance_status,
+            how_long_to_stay=how_long_to_stay,
+            preferred_location=preferred_location,
+            volunteer_note=volunteer_note,
+            validation_notes=validation_notes,
         )
 
 

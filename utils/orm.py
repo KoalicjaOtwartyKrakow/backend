@@ -7,6 +7,7 @@ import json
 from datetime import datetime, date
 
 import sqlalchemy.sql.functions as func
+from black.brackets import Priority
 
 from sqlalchemy import Column, Integer, String, Enum, Boolean, Text, Table, ForeignKey
 from sqlalchemy.ext.declarative import DeclarativeMeta
@@ -44,6 +45,23 @@ class Status(str, enum.Enum):
     CREATED = "created"
     VERIFIED = "verified"
     BANNED = "banned"
+
+    def __str__(self):
+        return self.value
+
+
+# https://stackoverflow.com/a/51976841
+class PriorityStatus(str, enum.Enum):
+    """Class representing status enum in database."""
+
+    DOES_NOT_RESPOND = "created"
+    ACCOMMODATION_NOT_NEEDED = "verified"
+    EN_ROUTE_UA = "banned"
+    EN_ROUTE_PL = "en_route_pl"
+    IN_KRK = "in_krk"
+    AT_R3 = "at_r3"
+    ACCOMMODATION_FOUND = "accommodation_found"
+    UPDATED = "updated"
 
     def __str__(self):
         return self.value
@@ -157,8 +175,10 @@ class Guest(Base):
     id = Column("id", Integer, primary_key=True)
     guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4)
     full_name = Column("full_name", String(255))
-    email = Column("email", String(100))
+    email = Column("email", String(255))
     phone_number = Column("phone_number", String(20))
+    is_agent = Column("is_agent", Boolean, default=False)
+    document_number = Column("document_number", String(255), nullable=True)
     people_in_group = Column("people_in_group", Integer, default=1)
     adult_male_count = Column("adult_male_count", Integer)
     adult_female_count = Column("adult_female_count", Integer)
@@ -169,9 +189,14 @@ class Guest(Base):
     special_needs = Column("special_needs", Text, nullable=True)
     priority_date = Column("priority_date", TIMESTAMP, server_default=func.now())
     status = Column("status", Enum(Status), nullable=True, default=Status.CREATED)
+    priority_status = Column(
+        "priority_status", Enum(PriorityStatus), nullable=True, default=None
+    )
     finance_status = Column("finance_status", String(255), nullable=True)
     how_long_to_stay = Column("how_long_to_stay", String(255), nullable=True)
+    preferred_location = Column("preferred_location", String(255), nullable=True)
     volunteer_note = Column("volunteer_note", Text, nullable=True)
+    validation_notes = Column("validation_notes", Text, nullable=True)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
