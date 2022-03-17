@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS public.accommodation_units (
     have_pets boolean,
     accepts_pets boolean,
     comments varchar(255),
-    host_id uuid,
+    host_id uuid NOT NULL,
     status apartment_status NOT NULL DEFAULT 'CREATED',
     PRIMARY KEY(id),
     CONSTRAINT fk_host
