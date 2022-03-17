@@ -1,4 +1,5 @@
 """Module containing function handlers for accommodation requests."""
+import json
 
 import flask
 
@@ -6,7 +7,7 @@ from sqlalchemy import select, delete, update
 from sqlalchemy.exc import SQLAlchemyError
 
 from utils.db import get_db_session
-from utils.orm import AccommodationUnit
+from utils.orm import AccommodationUnit, AlchemyEncoder
 from utils.payload_parser import parse, AccommodationParser
 
 
@@ -34,9 +35,9 @@ def handle_get_all_accommodations(request):
         )
         result = session.execute(stmt)
 
-    response = [accommodation.to_json() for accommodation in result.scalars()]
+        response = json.dumps(list(result.scalars()), cls=AlchemyEncoder)
 
-    return flask.Response(response=response, status=200)
+    return flask.Response(response=response, status=200, mimetype="application/json")
 
 
 def handle_delete_accommodation(request):
@@ -77,16 +78,19 @@ def handle_get_accommodation_by_id(request):
             stmt = select(AccommodationUnit).where(
                 AccommodationUnit.guid == accommodation_id
             )
+
             result = session.execute(stmt)
+
+            maybe_result = list(result.scalars())
     except SQLAlchemyError:
-        return flask.Response("Invaild id", status=400)
+        return flask.Response("Invaild id format, uuid expected", status=400)
 
-    response = [accommodation.to_json() for accommodation in result.scalars()]
-
-    if result.rowcount:
-        return flask.Response(response, status=200)
-    else:
+    if not maybe_result:
         return flask.Response("Not found", status=404)
+
+    response = json.dumps(maybe_result[0], cls=AlchemyEncoder)
+
+    return flask.Response(response=response, status=200, mimetype="application/json")
 
 
 def handle_update_accommodation(request):
