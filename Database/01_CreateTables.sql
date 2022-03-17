@@ -125,6 +125,8 @@ CREATE TRIGGER set_accommodation_units_timestamp
 
 CREATE TYPE public.guest_status AS ENUM ('CREATED', 'VERIFIED', 'BANNED');
 
+CREATE TYPE public.guest_priority_status AS ENUM ('does_not_respond', 'accommodation_not_needed', 'en_route_ua', 'en_route_pl', 'in_krk', 'at_r3', 'accommodation_found', 'updated');
+
 CREATE TABLE IF NOT EXISTS public.guests  (
     id integer GENERATED ALWAYS AS IDENTITY,
     guid uuid DEFAULT uuid_generate_v4(),
@@ -143,11 +145,13 @@ CREATE TABLE IF NOT EXISTS public.guests  (
     special_needs text,
     priority_date  timestamp DEFAULT now(),
     status guest_status NOT NULL DEFAULT 'CREATED',
+    priority_status guest_priority_status DEFAULT NULL,
     finance_status varchar(255), /*could be enum ,bool , or text*/
     how_long_to_stay  varchar(255),
     preferred_location varchar(255),
     volunteer_note text,
     accommodation_unit_id uuid,
+    validation_notes text,
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now(),
     PRIMARY KEY(id),
