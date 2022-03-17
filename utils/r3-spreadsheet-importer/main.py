@@ -74,6 +74,8 @@ def map_how_long(s, vn):
             return "3m"
         case ">3 m.":
             return "1y"
+        case "3-12m":
+            return "1y"
         case "długoterminowo":
             return "1y"
         case "3-12 miesięcy | 3-12 місяців":
@@ -210,9 +212,9 @@ def import_data(dry_run):
                 'volunteer_note': volunteer_note,
                 'created_at': created_at,
                 'validation_notes': validation_notes,
+                'priority_status': status,
                 '__old_guest_id': old_guest_id,
                 '__old_accommodation_id': old_accommodation_id,
-                '__status': status,
                 '__volunteer_assigned': volunteer_assigned,
             }
             if full_name != ' ' and full_name != '':
@@ -326,9 +328,9 @@ def import_data(dry_run):
                 'created_at': created_at,
                 'validation_notes': validation_notes,
                 'volunteer_note': volunteer_note,
+                'priority_status': None,
                 '__old_guest_id': None,
                 '__old_accommodation_id': None,
-                '__status': None,
                 '__volunteer_assigned': None,
             }
             if full_name != ' ' and full_name != '':
@@ -344,27 +346,55 @@ def import_data(dry_run):
         full_name_dict[x['full_name']] = x
 
     duplicate_ludzi = {}
-    for x in ludzi:
+    for i, x in enumerate(ludzi):
         key = x['full_name']
         r = full_name_dict.get(key, None)
         if r:
-            duplicate_ludzi[key] = (x, r)
+            x['document_number'] = r['document_number']
+            x['is_agent'] = r['is_agent']
+            x['adult_male_count'] = r['adult_male_count']
+            x['adult_female_count'] = r['adult_female_count']
+            finance_status = "\n".join([x['finance_status'], r['finance_status']])
+            x['finance_status'] = finance_status
+            r['finance_status'] = finance_status
+            x['preferred_location'] = r['preferred_location']
+            x['priority_status'] = r['priority_status']
+            for vn in r['validation_notes']:
+                x['validation_notes'].append(vn)
+            r['validation_notes'] = x['validation_notes']
+            x['created_at'] = r['created_at']
+            notes = "\n".join([x['volunteer_note'], r['volunteer_note']])
+            x['volunteer_note'] = notes
+            r['volunteer_note'] = notes
+            special_needs = "\n".join([x['special_needs'], r['special_needs']])
+            x['special_needs'] = special_needs
+            r['special_needs'] = special_needs
+            merge_issues = {i: (x[i], r[i]) for i, j in x.items() if x[i] != r[i]}
+            merge_issues_arr = []
+            for k in merge_issues.keys():
+                if not k.startswith("__"):
+                    v = merge_issues[k]
+                    row = f'{k} - {v[0]} vs. {v[1]}'
+                    merge_issues_arr.append(row)
+            merge_issues_str = "\n".join(merge_issues_arr)
+            x['validation_notes'].append(f'Could not merge following data:\n{merge_issues_str}')
+            ludzi[i] = x
+            full_name_dict.pop(key, None)
 
     report.info(f'Found {len(duplicate_ludzi.keys())} duplicate Ludzi')
 
-    for k, v in duplicate_ludzi.items():
-        l, r = v
-        for key in l.keys():
-            print(key, ": \t", l[key], "\t", r[key])
-        data = l
-        # this is only available in registration form
-        data['document_number'] = r['document_number']
-        data['is_agent'] = r['is_agent']
-        data['adult_male_count'] = r['adult_male_count']
-        data['adult_female_count'] = r['adult_female_count']
-        data['finance_status'] = "\n".join([l['finance_status'], r['finance_status']])
-        print(data)
-        break
+    # first process "Ludzi"
+    import json
+    with open("dupa.json", "w", encoding='utf-8') as f:
+        f.write(json.dumps(ludzi))
+    with open("recepcja.json", "w", encoding='utf-8') as f:
+        f.write(json.dumps(full_name_dict))
+    for l in ludzi:
+        pass
+
+    # then process Reception, that are not in "Ludzi"
+    for l in recepcja:
+        pass
 
 
 if __name__ == '__main__':
