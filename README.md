@@ -209,39 +209,35 @@ Sample response:
 Parameters:
 | Parameter          | Description                                                                                     |
 |--------------------|-------------------------------------------------------------------------------------------------|
-| full_name          | **(required)**                                                             
+| fullName           | **(required)**                                                             
 | email              | **(required)**                                                            
-| phone_number       |                                                                      
-| people_in_group    | **(required)**                                                  
-| adult_male_count   | **(required)**                                                
-| adult_female_count | **(required)**                                              
-| children_count     | **(required)**                                          
-| children_ages      |                                                   
-| have_pets          |  
-| pets_description   |  
-| special_needs      |  
-| finance_status     | 
-| how_long_to_stay   |  
-| volunteer_note     |
+| phoneNumber        | **(required)**                                                                     
+| peopleInGroup      |                                              
+| adultMaleCount     |                                               
+| adultFemaleCount   |                                          
+| children           |                                                   
+| havePets           |  
+| petsDescription    |  
+| specialNeeds       |  
+| priorityDate       | 
+| priorityStatus     |  
+| financeStatus      |
+| howLongToStay      |
 
 
 Sample request:
 ```json
 {
-    "full_name": "Jan Kowalski",
-    "email" : "jan@kowalski.pl",
-    "phone_number": "654-654-654",
-    "people_in_group": 5,
-    "adult_male_count":1,
-    "adult_female_count":2,
-    "children_count":2,
-    "children_ages":[1,5],
-    "have_pets":true,
-    "pets_description":"1 small dog",
-    "special_needs" : "No special needs",
-    "finance_status" : "Some finance status.",
-    "how_long_to_stay" : 1,
-    "volunteer_note" : "Some note."
+   "adultFemaleCount":1,
+   "adultMaleCount":1,
+   "children":[
+      10,
+      11
+   ],
+   "email":"jon.doe@google.com",
+   "fullName":"Jon Doe",
+   "peopleInGroup":4,
+   "phoneNumber":"123-456-789"
 }
 ```
 
