@@ -48,7 +48,7 @@ def handle_get_guest_by_id(request):
 
     try:
         with Session() as session:
-            stmt = select(orm.Host).where(orm.Guest.guid == guest_id)
+            stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
             maybe_result = list(result.scalars())
 
