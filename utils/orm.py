@@ -144,6 +144,10 @@ class AccommodationUnit(Base):
     vacancies_free = Column("vacancies_free", Integer)
     have_pets = Column("have_pets", Boolean)
     accepts_pets = Column("accepts_pets", Boolean)
+    disabled_people_friendly = Column("disabled_people_friendly", Boolean)
+    lgbt_friendly = Column("lgbt_friendly", Boolean)
+    parking_place_available = Column("parking_place_available", Boolean)
+    easy_ambulance_access = Column("easy_ambulance_access", Boolean)
     comments = Column("comments", String(255))
     status = Column("status", Enum(Status), default=Status.CREATED, nullable=False)
 

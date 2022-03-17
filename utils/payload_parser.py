@@ -4,7 +4,7 @@ import dateutil.parser
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from .orm import Base, Language, Host, AccommodationUnit, Guest, Status, PriorityStatus
+from .orm import Base, Language, Host, AccommodationUnit, Guest
 
 
 class ParseError(Exception):
@@ -108,13 +108,17 @@ class AccommodationParser(Parser):
         "city": str,
         "zip": str,
         "voivodeship": str,
-        "addressline": str,
+        "addressLine": str,
         "vacanciesTotal": int,
     }
     optional_fields: Dict[str, Type] = {
-        "havePets": bool,
-        "acceptsPets": bool,
-        "comments": str,
+        "petsPresent": bool,
+        "petsAccepted": bool,
+        "disabledPeopleFriendly": bool,
+        "lgbtFriendly": bool,
+        "parkingPlaceAvailable": bool,
+        "easyAmbulanceAccess": bool,
+        "ownerComments": str,
         "vacanciesFree": int,
         "status": str,
     }
@@ -122,18 +126,22 @@ class AccommodationParser(Parser):
     @classmethod
     def parse(cls, data: Dict[str, Any]) -> AccommodationUnit:
         # parse required arguments
-        host_id = data["hostId"]
+        host_id = data["host_id"]
         city = data["city"]
         zip = data["zip"]
         voivodeship = data["voivodeship"]
-        address_line = data["addressline"]
-        vacancies_total = data["vacanciesTotal"]
+        address_line = data["address_line"]
+        vacancies_total = data["vacancies_total"]
 
         # parse optional arguments
-        have_pets = data.get("havePets")
-        accepts_pets = data.get("acceptsPets")
-        comments = data.get("comments")
-        vacancies_free = data.get("vacanciesFree")
+        petsPresent = data.get("have_pets")
+        petsAccepted = data.get("accepts_pets")
+        disabledPeopleFriendly = data.get("disabledPeopleFriendly")
+        lgbtFriendly = data.get("lgbtFriendly")
+        parkingPlaceAvailable = data.get("parkingPlaceAvailable")
+        easyAmbulanceAccess = data.get("easyAmbulanceAccess")
+        ownerComments = data.get("comments")
+        vacancies_free = data.get("vacancies_free")
         status = data.get("status")
 
         return AccommodationUnit(
@@ -143,9 +151,13 @@ class AccommodationParser(Parser):
             voivodeship=voivodeship,
             address_line=address_line,
             vacancies_total=vacancies_total,
-            have_pets=have_pets,
-            accepts_pets=accepts_pets,
-            comments=comments,
+            have_pets=petsPresent,
+            accepts_pets=petsAccepted,
+            disabledPeopleFriendly=disabledPeopleFriendly,
+            lgbtFriendly=lgbtFriendly,
+            parkingPlaceAvailable=parkingPlaceAvailable,
+            easyAmbulanceAccess=easyAmbulanceAccess,
+            ownerComments=ownerComments,
             vacancies_free=vacancies_free,
             status=status,
         )
