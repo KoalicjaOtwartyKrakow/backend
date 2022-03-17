@@ -1,10 +1,12 @@
 """Module containing function handlers for host requests."""
+import json
 
 import flask
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, exc, update, delete
 from utils.db import get_db_session
 from utils import orm
+from utils.orm import AlchemyEncoder
 from utils.payload_parser import parse, HostParser
 
 
@@ -13,9 +15,10 @@ def handle_get_all_hosts(request):
     with Session() as session:
         stmt = select(orm.Host)
         result = session.execute(stmt)
-        response = [host.to_json() for host in result.scalars()]
 
-    return flask.Response(response=response, status=200)
+        response = json.dumps(list(result.scalars()), cls=AlchemyEncoder)
+
+    return flask.Response(response=response, status=200, mimetype="application/json")
 
 
 def handle_create_host(request):
@@ -36,25 +39,26 @@ def handle_create_host(request):
 
 def handle_get_host_by_id(request):
     try:
-        id = request.args.get("hostId")
-    except ValueError:
-        return flask.Response(response=f"Received invalid hostId: {id}", status=400)
-    if id is None:
-        return flask.Response(response="Received no hostId", status=400)
+        host_id = request.args["hostId"]
+    except KeyError:
+        return flask.Response("No host id supplied!", status=400)
 
     Session = get_db_session()
-    with Session() as session:
-        try:
-            stmt = select(orm.Host).where(orm.Host.guid == id)
-            res = session.execute(stmt)
-            response = [host.to_json() for host in res.scalars()]
-            if len(response) == 0:
-                return flask.Response(
-                    response=f"Host with id = {id} not found", status=404
-                )
-            return flask.Response(response=response, status=200)
-        except TypeError as e:
-            return flask.Response(response=f"Received invalid hostId: {e}", status=400)
+
+    try:
+        with Session() as session:
+            stmt = select(orm.Host).where(orm.Host.guid == host_id)
+            result = session.execute(stmt)
+            maybe_result = list(result.scalars())
+
+            if not maybe_result:
+                return flask.Response("Not found", status=404)
+
+            response = json.dumps(maybe_result[0], cls=AlchemyEncoder)
+    except SQLAlchemyError:
+        return flask.Response("Invaild id format, uuid expected", status=400)
+
+    return flask.Response(response=response, status=200, mimetype="application/json")
 
 
 def handle_get_hosts_by_status(request):
@@ -72,16 +76,12 @@ def handle_get_hosts_by_status(request):
     with Session() as session:
         try:
             result = session.execute(stmt)
-            response = [host.to_json() for host in result.scalars()]
-            if len(response) == 0:
-                return flask.Response(
-                    response=f"Host with status = {status_val} not found", status=404
-                )
 
-            return flask.Response(response=response, status=200)
-
+            response = json.dumps(list(result.scalars()), cls=AlchemyEncoder)
         except TypeError as e:
             return flask.Response(response=f"Received invalid status: {e}", status=405)
+
+    return flask.Response(response=response, status=200, mimetype="application/json")
 
 
 def handle_update_host(request):

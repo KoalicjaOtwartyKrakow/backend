@@ -1,22 +1,24 @@
 """Module containing function handlers for guest requests."""
+import json
 
 import flask
 
 from sqlalchemy import exc, select
+from sqlalchemy.exc import SQLAlchemyError
 
 from utils.db import get_db_session
-from utils.orm import Guest
+from utils.orm import Guest, AlchemyEncoder
 from utils import orm
 from utils.payload_parser import parse, GuestParser
+
 
 def handle_get_all_guests(request):
     Session = get_db_session()
     with Session() as session:
         stmt = select(Guest)
-        # stmt = select(orm.Guest).where(orm.Guest.id == 4)
         result = session.execute(stmt)
-        response = [guest.to_json() for guest in result.scalars()]
-    return flask.Response(response=response, status=200)
+        response = json.dumps(list(result.scalars()), cls=AlchemyEncoder)
+    return flask.Response(response=response, status=200, mimetype="application/json")
 
 
 def handle_add_guest(request):
@@ -24,7 +26,7 @@ def handle_add_guest(request):
     result = parse(data, GuestParser)
     if not result.success:
         return flask.Response(response=f"Failed: {','.join(result.errors)}", status=405)
-   
+
     Session = get_db_session()
     with Session() as session:
         session.add(result.payload)
@@ -37,23 +39,27 @@ def handle_add_guest(request):
 
 
 def handle_get_guest_by_id(request):
-    value = request.path.split("/")
-    id = value[len(value) - 1]
-    
-    #id = request.args.get('guestId')
-    if id is None or not id.isdigit():
-        return flask.Response(response=f"Received invalid guestId: {id}", status = 405)
+    try:
+        guest_id = request.args["guestId"]
+    except KeyError:
+        return flask.Response("No guest id supplied!", status=400)
 
     Session = get_db_session()
-    with Session() as session:
-        try:
-            guest = session.query(orm.Guest).get(id)
-            if guest is None:
-                return flask.Response(response=f"Guest with id = {id} not found", status = 404)
 
-            return flask.Response(response=guest.to_json(), status = 200)
-        except TypeError as e:
-            return flask.Response(response=f"Received invalid guestId: {e}", status = 405)
+    try:
+        with Session() as session:
+            stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
+            result = session.execute(stmt)
+            maybe_result = list(result.scalars())
+
+            if not maybe_result:
+                return flask.Response("Not found", status=404)
+
+            response = json.dumps(maybe_result[0], cls=AlchemyEncoder)
+    except SQLAlchemyError:
+        return flask.Response("Invaild id format, uuid expected", status=400)
+
+    return flask.Response(response=response, status=200, mimetype="application/json")
 
 
 def handle_delete_guest(request):
