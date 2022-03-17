@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, exc, update, delete
 from utils.db import get_db_session
 from utils import orm
-from utils.orm import AlchemyEncoder
+from utils.orm import new_alchemy_encoder
 from utils.payload_parser import parse, HostParser
 
 
@@ -16,7 +16,9 @@ def handle_get_all_hosts(request):
         stmt = select(orm.Host)
         result = session.execute(stmt)
 
-        response = json.dumps(list(result.scalars()), cls=AlchemyEncoder)
+        response = json.dumps(
+            list(result.scalars()), cls=new_alchemy_encoder(), check_circular=False
+        )
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
@@ -54,7 +56,9 @@ def handle_get_host_by_id(request):
             if not maybe_result:
                 return flask.Response("Not found", status=404)
 
-            response = json.dumps(maybe_result[0], cls=AlchemyEncoder)
+            response = json.dumps(
+                maybe_result[0], cls=new_alchemy_encoder(), check_circular=False
+            )
     except SQLAlchemyError:
         return flask.Response("Invaild id format, uuid expected", status=400)
 
@@ -77,7 +81,9 @@ def handle_get_hosts_by_status(request):
         try:
             result = session.execute(stmt)
 
-            response = json.dumps(list(result.scalars()), cls=AlchemyEncoder)
+            response = json.dumps(
+                list(result.scalars()), cls=new_alchemy_encoder(), check_circular=False
+            )
         except TypeError as e:
             return flask.Response(response=f"Received invalid status: {e}", status=405)
 

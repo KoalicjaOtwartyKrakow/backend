@@ -12,7 +12,7 @@ $$ LANGUAGE plpgsql;
 /* those who work with spreadsheet  */
 CREATE TABLE IF NOT EXISTS public.teammembers (
     id integer GENERATED ALWAYS AS IDENTITY,
-    guid uuid DEFAULT uuid_generate_v4(),
+    guid uuid UNIQUE DEFAULT uuid_generate_v4(),
     full_name varchar(20),
     phone_number varchar(20) ,
     PRIMARY KEY(id)
@@ -96,7 +96,7 @@ CREATE TYPE public.apartment_status AS ENUM ('CREATED', 'VERIFIED', 'BANNED');
 
 CREATE TABLE IF NOT EXISTS public.accommodation_units (
     id integer GENERATED ALWAYS AS IDENTITY,
-    guid uuid DEFAULT uuid_generate_v4(),
+    guid uuid UNIQUE DEFAULT uuid_generate_v4(),
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now(),
     city varchar(50), /* this should ideally be NOT NULL, but spreadsheet has very unstructured data */
@@ -129,7 +129,7 @@ CREATE TYPE public.guest_priority_status AS ENUM ('DOES_NOT_RESPOND', 'ACCOMMODA
 
 CREATE TABLE IF NOT EXISTS public.guests  (
     id integer GENERATED ALWAYS AS IDENTITY,
-    guid uuid DEFAULT uuid_generate_v4(),
+    guid uuid UNIQUE DEFAULT uuid_generate_v4(),
     full_name varchar(255) NOT NULL,
     email varchar(255) NOT NULL,
     phone_number varchar(20) NULL,
