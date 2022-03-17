@@ -174,6 +174,7 @@ class Guest(Base):
         return f"Guest: {self.__dict__}"
 
 
+# https://stackoverflow.com/a/10664192
 class AlchemyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj.__class__, DeclarativeMeta):
