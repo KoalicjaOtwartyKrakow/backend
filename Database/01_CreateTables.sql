@@ -125,7 +125,7 @@ CREATE TRIGGER set_accommodation_units_timestamp
 
 CREATE TYPE public.guest_status AS ENUM ('CREATED', 'VERIFIED', 'BANNED');
 
-CREATE TYPE public.guest_priority_status AS ENUM ('does_not_respond', 'accommodation_not_needed', 'en_route_ua', 'en_route_pl', 'in_krk', 'at_r3', 'accommodation_found', 'updated');
+CREATE TYPE public.guest_priority_status AS ENUM ('DOES_NOT_RESPOND', 'ACCOMMODATION_NOT_NEEDED', 'EN_ROUTE_UA', 'EN_ROUTE_PL', 'IN_KRK', 'AT_R3', 'ACCOMMODATION_FOUND', 'UPDATED');
 
 CREATE TABLE IF NOT EXISTS public.guests  (
     id integer GENERATED ALWAYS AS IDENTITY,
