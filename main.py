@@ -87,9 +87,9 @@ def update_host(request):
 
 
 @functions_framework.http
-def create_host(request):
+def add_host(request):
     """HTTP Cloud Function for posting a new host."""
-    return host.handle_create_host(request)
+    return host.handle_add_host(request)
 
 
 @functions_framework.http

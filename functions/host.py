@@ -23,7 +23,7 @@ def handle_get_all_hosts(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_create_host(request):
+def handle_add_host(request):
     data = request.get_json(silent=True)
     result = parse(data, HostParser)
     if not result.success:
