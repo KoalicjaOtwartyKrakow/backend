@@ -7,7 +7,6 @@ import json
 from datetime import datetime, date
 
 import sqlalchemy.sql.functions as func
-from black.brackets import Priority
 
 from sqlalchemy import Column, Integer, String, Enum, Boolean, Text, Table, ForeignKey
 from sqlalchemy.ext.declarative import DeclarativeMeta
