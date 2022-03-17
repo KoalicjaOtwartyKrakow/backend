@@ -6,14 +6,13 @@ from sqlalchemy import exc, select
 
 from utils.db import get_db_session
 from utils.orm import Guest
-from utils.payload_parser import parse, GuestParser
+from utils.payload_parser import parse, GuestParser, is_valid_uuid
 
 
 def handle_get_all_guests(request):
     Session = get_db_session()
     with Session() as session:
         stmt = select(Guest)
-        # stmt = select(orm.Guest).where(orm.Guest.id == 4)
         result = session.execute(stmt)
         response = [guest.to_json() for guest in result.scalars()]
     return flask.Response(response=response, status=200)
@@ -40,7 +39,7 @@ def handle_get_guest_by_id(request):
     value = request.path.split("/")
     guest_id = value[2]
 
-    if guest_id is None or guest_id.isdigit():
+    if not is_valid_uuid(guest_id):
         return flask.Response(
             response=f"Received invalid guestId: {guest_id}", status=405
         )
@@ -62,13 +61,14 @@ def handle_get_guest_by_id(request):
 
 
 def handle_delete_guest(request):
-    print(request.__dict__)
-    print(f"Path: {request.path}")
     value = request.path.split("/")
-    print(f"Path+split: {value}")
-    guest_id = value[len(value) - 1]
-    print(f"Path+split+value: {guest_id}")
-    print(Guest.guid)
+    guest_id = value[2]
+
+    if not is_valid_uuid(guest_id):
+        return flask.Response(
+            response=f"Received invalid guestId: {guest_id}", status=405
+        )
+
     Session = get_db_session()
     try:
         with Session() as session:
@@ -86,13 +86,13 @@ def handle_delete_guest(request):
 
 
 def handle_update_guest(request):
-    print(request.__dict__)
-    print(f"Path: {request.path}")
     value = request.path.split("/")
-    print(f"Path+split: {value}")
-    guest_id = value[len(value) - 1]
-    print(f"Path+split+value: {guest_id}")
-    print(Guest.guid)
+    guest_id = value[2]
+
+    if not is_valid_uuid(guest_id):
+        return flask.Response(
+            response=f"Received invalid guestId: {guest_id}", status=405
+        )
 
     request_json = request.get_json()
     print(request_json)
