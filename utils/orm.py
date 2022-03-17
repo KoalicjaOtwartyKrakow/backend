@@ -208,6 +208,12 @@ class Guest(Base):
         return f"Guest: {self.__dict__}"
 
 
+# https://stackoverflow.com/a/19053800/526604
+def to_camel_case(s):
+    components = s.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])
+
+
 # https://stackoverflow.com/a/10664192
 def new_alchemy_encoder():
     _visited_objs = []
@@ -225,7 +231,8 @@ def new_alchemy_encoder():
                 for field in [
                     x for x in dir(obj) if not x.startswith("_") and x != "metadata"
                 ]:
-                    fields[field] = obj.__getattribute__(field)
+                    camel_field = to_camel_case(field)
+                    fields[camel_field] = obj.__getattribute__(field)
                 # a json-encodable dict
                 return fields
 
