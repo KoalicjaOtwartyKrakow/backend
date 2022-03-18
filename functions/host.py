@@ -179,7 +179,7 @@ def handle_delete_host(request):
                     response=f"Host with id = {id} not found", status=404
                 )
             session.commit()
-            return flask.Response(response=f"Host with id = {id} deleted", status=200)
+            return flask.Response(response=f"Host with id = {id} deleted", status=204)
 
         except ProgrammingError as e:
             if "invalid input syntax for type uuid" in str(e):
