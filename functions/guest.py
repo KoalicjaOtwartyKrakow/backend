@@ -11,8 +11,10 @@ from utils.orm import Guest, new_alchemy_encoder
 from utils import orm, mapper
 from utils.payload_parser import parse, GuestParserCreate
 
-# Global pool, see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
+# Global pool, see
+# https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
 global_pool = get_engine()
+
 
 def handle_get_all_guests(request):
     Session = get_db_session(global_pool)
@@ -31,15 +33,19 @@ def handle_add_guest(request):
     if not result.success:
         return flask.Response(response=f"Failed: {','.join(result.errors)}", status=405)
 
+    guest = result.payload
+
     Session = get_db_session(global_pool)
     with Session() as session:
-        session.add(result.payload)
+        session.add(guest)
         try:
             session.commit()
         except exc.SQLAlchemyError as e:
             return flask.Response(response=f"Transaction error: {e}", status=400)
+        session.refresh(guest)
+        response = get_guest_json(guest)
 
-    return flask.Response(status=201)
+    return flask.Response(response=response, status=201, mimetype="application/json")
 
 
 def handle_get_guest_by_id(request):
@@ -59,9 +65,7 @@ def handle_get_guest_by_id(request):
             if not maybe_result:
                 return flask.Response("Not found", status=404)
 
-            response = json.dumps(
-                maybe_result[0], cls=new_alchemy_encoder(Guest), check_circular=False
-            )
+            response = get_guest_json(maybe_result[0])
     except SQLAlchemyError:
         return flask.Response("Invaild id format, uuid expected", status=400)
 
@@ -107,7 +111,24 @@ def handle_update_guest(request):
             )
             result2 = session.commit()
             print(f"result1: {result1} \n result2:{result2}")
+
+            stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
+            result = session.execute(stmt)
+            maybe_result = list(result.scalars())
+
+            if not maybe_result:
+                return flask.Response("Not found", status=404)
+
+            response = get_guest_json(maybe_result[0])
     except exc.SQLAlchemyError as e:
         return flask.Response(f"update_guest unsuccessful e: {e}", status=400)
 
-    return flask.Response(status=200)
+    return flask.Response(response=response, status=200, mimetype="application/json")
+
+
+def get_guest_json(obj):
+    return json.dumps(
+        obj,
+        cls=new_alchemy_encoder(Guest),
+        check_circular=False,
+    )

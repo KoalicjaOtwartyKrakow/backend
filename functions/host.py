@@ -9,8 +9,10 @@ from utils import orm
 from utils.orm import new_alchemy_encoder, Host
 from utils.payload_parser import parse, HostParser
 
-# Global pool, see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
+# Global pool,
+# see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
 global_pool = get_engine()
+
 
 def handle_get_all_hosts(request):
     Session = get_db_session(global_pool)
@@ -35,16 +37,21 @@ def handle_add_host(request):
     if result.warnings:
         print(result.warnings)
 
+    host = result.payload
+
     Session = get_db_session(global_pool)
     stmt1 = select(orm.Language).where(
         orm.Language.code2.in_(result.payload.languages_spoken)
     )
     with Session() as session:
         langs = list(session.execute(stmt1).scalars())
-        result.payload.languages_spoken = langs
-        session.add(result.payload)
+        host.languages_spoken = langs
+        session.add(host)
         session.commit()
-        return flask.Response(response="Success", status=201)
+        session.refresh(host)
+        response = get_host_json(host)
+
+    return flask.Response(response=response, status=201, mimetype="application/json")
 
 
 def handle_get_host_by_id(request):
@@ -64,9 +71,7 @@ def handle_get_host_by_id(request):
             if not maybe_result:
                 return flask.Response("Not found", status=404)
 
-            response = json.dumps(
-                maybe_result[0], cls=new_alchemy_encoder(Host), check_circular=False
-            )
+            response = get_host_json(maybe_result[0])
     except SQLAlchemyError:
         return flask.Response("Invaild id format, uuid expected", status=400)
 
@@ -89,11 +94,7 @@ def handle_get_hosts_by_status(request):
         try:
             result = session.execute(stmt)
 
-            response = json.dumps(
-                list(result.scalars()),
-                cls=new_alchemy_encoder(Host),
-                check_circular=False,
-            )
+            response = get_host_json(list(result.scalars()))
         except TypeError as e:
             return flask.Response(response=f"Received invalid status: {e}", status=405)
 
@@ -139,11 +140,13 @@ def handle_update_host(request):
                 res.status = result.payload.status
             session.add(res)
             session.commit()
+            session.refresh(res)
+            response = get_host_json(res)
 
         except exc.SQLAlchemyError as e:
             return flask.Response(response=f"Transaction error: {e}", status=400)
 
-    return flask.Response(response=f"Updated host with id {id}", status=200)
+    return flask.Response(response=response, status=200, mimetype="application/json")
 
 
 def handle_delete_host(request):
@@ -172,3 +175,11 @@ def handle_delete_host(request):
 
         except SQLAlchemyError:
             return flask.Response(response=f"Received invalid hostId: {id}", status=400)
+
+
+def get_host_json(obj):
+    return json.dumps(
+        obj,
+        cls=new_alchemy_encoder(Host),
+        check_circular=False,
+    )

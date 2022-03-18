@@ -11,8 +11,10 @@ from utils.orm import AccommodationUnit, new_alchemy_encoder
 from utils.payload_parser import parse, AccommodationParser
 from utils import mapper
 
-# Global pool, see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
+# Global pool, see
+# https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
 global_pool = get_engine()
+
 
 def handle_add_accommodation(request):
     data = request.get_json(silent=True)
@@ -23,11 +25,16 @@ def handle_add_accommodation(request):
     if result.warnings:
         print(result.warnings)
 
+    accommodation = result.payload
+
     Session = get_db_session(global_pool)
     with Session() as session:
-        session.add(result.payload)
+        session.add(accommodation)
         session.commit()
-        return flask.Response(response=[], status=201)
+        session.refresh(accommodation)
+        response = get_accommodation_json(accommodation)
+
+    return flask.Response(response=response, status=201, mimetype="application/json")
 
 
 def handle_get_all_accommodations(request):
@@ -37,12 +44,7 @@ def handle_get_all_accommodations(request):
             AccommodationUnit.vacancies_free.desc()
         )
         result = session.execute(stmt)
-
-        response = json.dumps(
-            list(result.scalars()),
-            cls=new_alchemy_encoder(AccommodationUnit),
-            check_circular=False,
-        )
+        response = get_accommodation_json(list(result.scalars()))
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
@@ -91,11 +93,7 @@ def handle_get_accommodation_by_id(request):
             if not maybe_result:
                 return flask.Response("Not found", status=404)
 
-            response = json.dumps(
-                maybe_result[0],
-                cls=new_alchemy_encoder(AccommodationUnit),
-                check_circular=False,
-            )
+            response = get_accommodation_json(maybe_result[0])
     except SQLAlchemyError:
         return flask.Response("Invaild id format, uuid expected", status=400)
 
@@ -120,8 +118,26 @@ def handle_update_accommodation(request):
                 .update(mapped_data)
             )
             session.commit()
-            print(result)
+
+            stmt = select(AccommodationUnit).where(
+                AccommodationUnit.guid == accommodation_id
+            )
+            result = session.execute(stmt)
+            maybe_result = list(result.scalars())
+
+            if not maybe_result:
+                return flask.Response("Not found", status=404)
+
+            response = get_accommodation_json(maybe_result[0])
     except SQLAlchemyError:
         return flask.Response("Could not update object, invalid input", status=405)
 
-    return flask.Response([], status=200)
+    return flask.Response(response=response, status=200, mimetype="application/json")
+
+
+def get_accommodation_json(obj):
+    return json.dumps(
+        obj,
+        cls=new_alchemy_encoder(AccommodationUnit),
+        check_circular=False,
+    )
