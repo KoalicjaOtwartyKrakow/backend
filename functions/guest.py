@@ -98,7 +98,7 @@ def handle_delete_guest(request):
             )
         raise e
 
-    return flask.Response(status=200)
+    return flask.Response(response=f"Guest with id = {guest_id} deleted", status=204)
 
 
 def handle_update_guest(request):

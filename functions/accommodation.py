@@ -73,7 +73,9 @@ def handle_delete_accommodation(request):
         raise e
 
     if result.rowcount:
-        return flask.Response([], status=200)
+        return flask.Response(
+            response=f"Accommodation with id = {accommodation_id} deleted", status=204
+        )
     else:
         return flask.Response("Not found", status=404)
 
