@@ -4,15 +4,17 @@ import json
 import flask
 
 from sqlalchemy import select, delete
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import NoResultFound, ProgrammingError
 
 from utils.db import get_engine, get_db_session
 from utils.orm import AccommodationUnit, new_alchemy_encoder
 from utils.payload_parser import parse, AccommodationParser
 from utils import mapper
 
-# Global pool, see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
+# Global pool, see
+# https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
 global_pool = get_engine()
+
 
 def handle_add_accommodation(request):
     data = request.get_json(silent=True)
@@ -23,11 +25,16 @@ def handle_add_accommodation(request):
     if result.warnings:
         print(result.warnings)
 
+    accommodation = result.payload
+
     Session = get_db_session(global_pool)
     with Session() as session:
-        session.add(result.payload)
+        session.add(accommodation)
         session.commit()
-        return flask.Response(response=[], status=201)
+        session.refresh(accommodation)
+        response = get_accommodation_json(accommodation)
+
+    return flask.Response(response=response, status=201, mimetype="application/json")
 
 
 def handle_get_all_accommodations(request):
@@ -37,12 +44,7 @@ def handle_get_all_accommodations(request):
             AccommodationUnit.vacancies_free.desc()
         )
         result = session.execute(stmt)
-
-        response = json.dumps(
-            list(result.scalars()),
-            cls=new_alchemy_encoder(AccommodationUnit),
-            check_circular=False,
-        )
+        response = get_accommodation_json(list(result.scalars()))
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
@@ -63,8 +65,12 @@ def handle_delete_accommodation(request):
                 .execution_options(synchronize_session="fetch")
             )
             result = session.execute(stmt)
-    except SQLAlchemyError:
-        return flask.Response("Invalid accommodation id", status=400)
+    except ProgrammingError as e:
+        if "invalid input syntax for type uuid" in str(e):
+            return flask.Response(
+                f"Invaild id format, uuid expected, got {accommodation_id}", status=400
+            )
+        raise e
 
     if result.rowcount:
         return flask.Response([], status=200)
@@ -86,18 +92,19 @@ def handle_get_accommodation_by_id(request):
                 AccommodationUnit.guid == accommodation_id
             )
             result = session.execute(stmt)
-            maybe_result = list(result.scalars())
 
-            if not maybe_result:
+            try:
+                accommodation = result.one()
+            except NoResultFound:
                 return flask.Response("Not found", status=404)
 
-            response = json.dumps(
-                maybe_result[0],
-                cls=new_alchemy_encoder(AccommodationUnit),
-                check_circular=False,
+            response = get_accommodation_json(accommodation)
+    except ProgrammingError as e:
+        if "invalid input syntax for type uuid" in str(e):
+            return flask.Response(
+                f"Invaild id format, uuid expected, got {accommodation_id}", status=400
             )
-    except SQLAlchemyError:
-        return flask.Response("Invaild id format, uuid expected", status=400)
+        raise e
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
@@ -120,8 +127,31 @@ def handle_update_accommodation(request):
                 .update(mapped_data)
             )
             session.commit()
-            print(result)
-    except SQLAlchemyError:
-        return flask.Response("Could not update object, invalid input", status=405)
 
-    return flask.Response([], status=200)
+            stmt = select(AccommodationUnit).where(
+                AccommodationUnit.guid == accommodation_id
+            )
+            result = session.execute(stmt)
+
+            try:
+                accommodation = result.one()
+            except NoResultFound:
+                return flask.Response("Not found", status=404)
+
+            response = get_accommodation_json(accommodation)
+    except ProgrammingError as e:
+        if "invalid input syntax for type uuid" in str(e):
+            return flask.Response(
+                f"Invaild id format, uuid expected, got {accommodation_id}", status=400
+            )
+        raise e
+
+    return flask.Response(response=response, status=200, mimetype="application/json")
+
+
+def get_accommodation_json(obj):
+    return json.dumps(
+        obj,
+        cls=new_alchemy_encoder(AccommodationUnit),
+        check_circular=False,
+    )

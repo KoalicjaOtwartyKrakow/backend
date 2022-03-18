@@ -41,7 +41,7 @@ def get_engine():
             query=QUERY,
         ),
         pool_size=1,
-        max_overflow=0
+        max_overflow=0,
     )
     print(f"Connecting to query={QUERY}, name={DB_NAME}")
 
@@ -52,7 +52,7 @@ def get_db_session(pool) -> sessionmaker:
     """Usage:
     ```
     pool = get_engine() # this is global variable
-    
+
     Session = get_db_session(pool)
     with Session() as session:
         # use session here
