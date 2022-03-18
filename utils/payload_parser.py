@@ -102,13 +102,18 @@ class AccommodationParser(Parser):
         "city": str,
         "zip": str,
         "voivodeship": str,
-        "addressline": str,
+        "addressLine": str,
         "vacanciesTotal": int,
     }
     optional_fields: Dict[str, Type] = {
-        "havePets": bool,
-        "acceptsPets": bool,
-        "comments": str,
+        "petsPresent": bool,
+        "petsAccepted": bool,
+        "disabledPeopleFriendly": bool,
+        "lgbtFriendly": bool,
+        "parkingPlaceAvailable": bool,
+        "easyAmbulanceAccess": bool,
+        "ownerComments": str,
+        "staffComments": str,
         "vacanciesFree": int,
         "status": str,
     }
@@ -120,13 +125,18 @@ class AccommodationParser(Parser):
         city = data["city"]
         zip = data["zip"]
         voivodeship = data["voivodeship"]
-        address_line = data["addressline"]
+        address_line = data["addressLine"]
         vacancies_total = data["vacanciesTotal"]
 
         # parse optional arguments
-        have_pets = data.get("havePets")
-        accepts_pets = data.get("acceptsPets")
-        comments = data.get("comments")
+        have_pets = data.get("petsPresent")
+        accepts_pets = data.get("petsAccepted")
+        disabled_people_friendly = data.get("disabledPeopleFriendly")
+        lgbt_friendly = data.get("lgbtFriendly")
+        parking_place_available = data.get("parkingPlaceAvailable")
+        easy_ambulance_access = data.get("easyAmbulanceAccess")
+        owner_comments = data.get("ownerComments")
+        staff_comments = data.get("staffComments")
         vacancies_free = data.get("vacanciesFree")
         status = data.get("status")
 
@@ -139,7 +149,12 @@ class AccommodationParser(Parser):
             vacancies_total=vacancies_total,
             have_pets=have_pets,
             accepts_pets=accepts_pets,
-            comments=comments,
+            disabled_people_friendly=disabled_people_friendly,
+            lgbt_friendly=lgbt_friendly,
+            parking_place_available=parking_place_available,
+            easy_ambulance_access=easy_ambulance_access,
+            owner_comments=owner_comments,
+            staff_comments=staff_comments,
             vacancies_free=vacancies_free,
             status=status,
         )

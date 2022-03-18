@@ -3,12 +3,13 @@ import json
 
 import flask
 
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, delete
 from sqlalchemy.exc import SQLAlchemyError
 
 from utils.db import get_db_session
 from utils.orm import AccommodationUnit, new_alchemy_encoder
 from utils.payload_parser import parse, AccommodationParser
+from utils import mapper
 
 
 def handle_add_accommodation(request):
@@ -105,21 +106,20 @@ def handle_update_accommodation(request):
     except KeyError:
         return flask.Response("No accommodation id supplied!", status=400)
 
-    data = request.get_json(silent=True)
+    request_json = request.get_json(silent=True)
+    mapped_data = mapper.map_accommodation_from_front_to_db(request_json)
     Session = get_db_session()
 
     try:
         with Session() as session:
-            stmt = (
-                update(AccommodationUnit)
-                .where(AccommodationUnit.guid == accommodation_id)
-                .values(data)
+            result = (
+                session.query(AccommodationUnit)
+                .filter(AccommodationUnit.guid == accommodation_id)
+                .update(mapped_data)
             )
-            result = session.execute(stmt)
+            session.commit()
+            print(result)
     except SQLAlchemyError:
         return flask.Response("Could not update object, invalid input", status=405)
 
-    if result.rowcount:
-        return flask.Response([], status=200)
-    else:
-        return flask.Response("Not found", status=404)
+    return flask.Response([], status=200)
