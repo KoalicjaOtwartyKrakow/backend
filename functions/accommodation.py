@@ -4,7 +4,7 @@ import json
 import flask
 
 from sqlalchemy import select, delete
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import NoResultFound, ProgrammingError
 
 from utils.db import get_engine, get_db_session
 from utils.orm import AccommodationUnit, new_alchemy_encoder
@@ -65,8 +65,12 @@ def handle_delete_accommodation(request):
                 .execution_options(synchronize_session="fetch")
             )
             result = session.execute(stmt)
-    except SQLAlchemyError:
-        return flask.Response("Invalid accommodation id", status=400)
+    except ProgrammingError as e:
+        if "invalid input syntax for type uuid" in str(e):
+            return flask.Response(
+                f"Invaild id format, uuid expected, got {accommodation_id}", status=400
+            )
+        raise e
 
     if result.rowcount:
         return flask.Response([], status=200)
@@ -88,14 +92,19 @@ def handle_get_accommodation_by_id(request):
                 AccommodationUnit.guid == accommodation_id
             )
             result = session.execute(stmt)
-            maybe_result = result.scalar()
 
-            if not maybe_result:
+            try:
+                accommodation = result.one()
+            except NoResultFound:
                 return flask.Response("Not found", status=404)
 
-            response = get_accommodation_json(maybe_result)
-    except SQLAlchemyError:
-        return flask.Response("Invaild id format, uuid expected", status=400)
+            response = get_accommodation_json(accommodation)
+    except ProgrammingError as e:
+        if "invalid input syntax for type uuid" in str(e):
+            return flask.Response(
+                f"Invaild id format, uuid expected, got {accommodation_id}", status=400
+            )
+        raise e
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
@@ -123,14 +132,19 @@ def handle_update_accommodation(request):
                 AccommodationUnit.guid == accommodation_id
             )
             result = session.execute(stmt)
-            maybe_result = result.scalar()
 
-            if not maybe_result:
+            try:
+                accommodation = result.one()
+            except NoResultFound:
                 return flask.Response("Not found", status=404)
 
-            response = get_accommodation_json(maybe_result)
-    except SQLAlchemyError:
-        return flask.Response("Could not update object, invalid input", status=405)
+            response = get_accommodation_json(accommodation)
+    except ProgrammingError as e:
+        if "invalid input syntax for type uuid" in str(e):
+            return flask.Response(
+                f"Invaild id format, uuid expected, got {accommodation_id}", status=400
+            )
+        raise e
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 

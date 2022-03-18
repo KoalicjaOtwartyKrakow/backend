@@ -4,7 +4,6 @@ import json
 import flask
 
 from sqlalchemy import exc, select
-from sqlalchemy.exc import SQLAlchemyError
 
 from utils.db import get_engine, get_db_session
 from utils.orm import Guest, new_alchemy_encoder
@@ -60,14 +59,19 @@ def handle_get_guest_by_id(request):
         with Session() as session:
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
-            maybe_result = result.scalar()
 
-            if not maybe_result:
+            try:
+                guest = result.one()
+            except exc.NoResultFound:
                 return flask.Response("Not found", status=404)
 
-            response = get_guest_json(maybe_result)
-    except SQLAlchemyError:
-        return flask.Response("Invaild id format, uuid expected", status=400)
+            response = get_guest_json(guest)
+    except exc.ProgrammingError as e:
+        if "invalid input syntax for type uuid" in str(e):
+            return flask.Response(
+                f"Invaild id format, uuid expected, got {guest_id}", status=400
+            )
+        raise e
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
@@ -88,8 +92,12 @@ def handle_delete_guest(request):
             )
             result2 = session.commit()
             print(f"result1: {result1} \n result2:{result2}")
-    except exc.SQLAlchemyError as e:
-        return flask.Response(f"delete_guest unsuccessful e: {e}", status=400)
+    except exc.ProgrammingError as e:
+        if "invalid input syntax for type uuid" in str(e):
+            return flask.Response(
+                f"Invaild id format, uuid expected, got {guest_id}", status=400
+            )
+        raise e
 
     return flask.Response(status=200)
 
@@ -114,14 +122,19 @@ def handle_update_guest(request):
 
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
-            maybe_result = result.scalar()
 
-            if not maybe_result:
+            try:
+                guest = result.one()
+            except exc.NoResultFound:
                 return flask.Response("Not found", status=404)
 
-            response = get_guest_json(maybe_result)
-    except exc.SQLAlchemyError as e:
-        return flask.Response(f"update_guest unsuccessful e: {e}", status=400)
+            response = get_guest_json(guest)
+    except exc.ProgrammingError as e:
+        if "invalid input syntax for type uuid" in str(e):
+            return flask.Response(
+                f"Invaild id format, uuid expected, got {guest_id}", status=400
+            )
+        raise e
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 

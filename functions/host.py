@@ -2,7 +2,7 @@
 import json
 
 import flask
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import select, exc, delete
 from utils.db import get_engine, get_db_session
 from utils import orm
@@ -66,14 +66,19 @@ def handle_get_host_by_id(request):
         with Session() as session:
             stmt = select(orm.Host).where(orm.Host.guid == host_id)
             result = session.execute(stmt)
-            maybe_result = result.scalar()
 
-            if not maybe_result:
+            try:
+                host = result.one()
+            except exc.NoResultFound:
                 return flask.Response("Not found", status=404)
 
-            response = get_host_json(maybe_result)
-    except SQLAlchemyError:
-        return flask.Response("Invaild id format, uuid expected", status=400)
+            response = get_host_json(host)
+    except ProgrammingError as e:
+        if "invalid input syntax for type uuid" in str(e):
+            return flask.Response(
+                f"Invaild id format, uuid expected, got {host_id}", status=400
+            )
+        raise e
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
@@ -142,9 +147,12 @@ def handle_update_host(request):
             session.commit()
             session.refresh(res)
             response = get_host_json(res)
-
-        except exc.SQLAlchemyError as e:
-            return flask.Response(response=f"Transaction error: {e}", status=400)
+        except ProgrammingError as e:
+            if "invalid input syntax for type uuid" in str(e):
+                return flask.Response(
+                    f"Invaild id format, uuid expected, got {id}", status=400
+                )
+            raise e
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
@@ -173,8 +181,12 @@ def handle_delete_host(request):
             session.commit()
             return flask.Response(response=f"Host with id = {id} deleted", status=200)
 
-        except SQLAlchemyError:
-            return flask.Response(response=f"Received invalid hostId: {id}", status=400)
+        except ProgrammingError as e:
+            if "invalid input syntax for type uuid" in str(e):
+                return flask.Response(
+                    f"Invaild id format, uuid expected, got {id}", status=400
+                )
+            raise e
 
 
 def get_host_json(obj):
