@@ -53,7 +53,7 @@ class Status(str, enum.Enum):
 class PriorityStatus(str, enum.Enum):
     """Class representing status enum in database."""
 
-    DOES_NOT_RESPOND = "created"
+    DOES_NOT_RESPOND = "does_not_respond"
     ACCOMMODATION_NOT_NEEDED = "verified"
     EN_ROUTE_UA = "banned"
     EN_ROUTE_PL = "en_route_pl"
