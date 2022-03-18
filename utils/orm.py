@@ -147,7 +147,7 @@ class AccommodationUnit(Base):
     comments = Column("comments", String(255))
     status = Column("status", Enum(Status), default=Status.CREATED, nullable=False)
 
-    host_id = Column("host_id", ForeignKey("hosts.guid"))
+    host_id = Column("host_id", ForeignKey("hosts.guid"), uselist=False)
 
     host = relationship("Host")
     guests = relationship("Guest", back_populates="accommodation")
@@ -200,7 +200,7 @@ class Guest(Base):
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
     accommodation_unit_id = Column(
-        "accommodation_unit_id", ForeignKey("accommodation_units.guid")
+        "accommodation_unit_id", ForeignKey("accommodation_units.guid"), uselist=False
     )
     accommodation = relationship("AccommodationUnit", back_populates="guests")
 
