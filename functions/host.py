@@ -15,10 +15,11 @@ def handle_get_all_hosts(request):
     with Session() as session:
         stmt = select(orm.Host)
         result = session.execute(stmt)
-
+        print(result.scalars())
         response = json.dumps(
             list(result.scalars()), cls=new_alchemy_encoder(), check_circular=False
         )
+        print(response)
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
