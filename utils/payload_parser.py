@@ -161,7 +161,7 @@ class GuestParserCreate(Parser):
         "peopleInGroup": int,
         "adultMaleCount": int,
         "adultFemaleCount": int,
-        "children": list,
+        "childrenAges": list,
         "havePets": bool,
         "petsDescription": str,
         "specialNeeds": str,
@@ -190,7 +190,7 @@ class GuestParserCreate(Parser):
         adult_male_count = data.get("adultMaleCount")
         adult_female_count = data.get("adultFemaleCount")
         # children_count = data.get("*****") # TODO: children_count is missing in API?
-        children_ages = data.get("children")
+        children_ages = data.get("childrenAges")
         have_pets = data.get("havePets")
         pets_description = data.get("petsDescription")
         special_needs = data.get("specialNeeds")
