@@ -39,7 +39,7 @@ def get_engine():
             password=DB_PASS,  # e.g. "my-database-password"
             database=DB_NAME,  # e.g. "my-database-name"
             query=QUERY,
-        )
+        ), echo=True
     )
     print(f'Connecting to query={QUERY}, name={DB_NAME}')
 
