@@ -147,7 +147,7 @@ class AccommodationUnit(Base):
     comments = Column("comments", String(255))
     status = Column("status", Enum(Status), default=Status.CREATED, nullable=False)
 
-    host_id = Column("host_id", ForeignKey("hosts.guid"), uselist=False)
+    host_id = Column("host_id", ForeignKey("hosts.guid"))
 
     host = relationship("Host")
     guests = relationship("Guest", back_populates="accommodation")
@@ -200,7 +200,7 @@ class Guest(Base):
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
     accommodation_unit_id = Column(
-        "accommodation_unit_id", ForeignKey("accommodation_units.guid"), uselist=False
+        "accommodation_unit_id", ForeignKey("accommodation_units.guid")
     )
     accommodation = relationship("AccommodationUnit", back_populates="guests")
 
@@ -210,8 +210,8 @@ class Guest(Base):
 
 # https://stackoverflow.com/a/19053800/526604
 def to_camel_case(s):
-    components = s.split('_')
-    return components[0] + ''.join(x.title() for x in components[1:])
+    components = s.split("_")
+    return components[0] + "".join(x.title() for x in components[1:])
 
 
 # https://stackoverflow.com/a/10664192
