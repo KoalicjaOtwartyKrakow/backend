@@ -4,7 +4,7 @@ import os
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
-from .secret import access_secret_version
+from .secret import access_secret_version_or_none
 
 
 IS_LOCAL_DB = os.getenv("IS_LOCAL_DB", "False").lower() == "true"
@@ -14,7 +14,7 @@ def get_secret_var(name):
     if IS_LOCAL_DB:
         return os.getenv(name)
 
-    return access_secret_version(name)
+    return access_secret_version_or_none(name)
 
 
 DB_USER = get_secret_var("db_user")
