@@ -22,7 +22,7 @@ def map_guest_from_front_to_db(input):
 
 accommodation_front_to_db = {
     "hostId": "host_id",
-    "email": "city",
+    "city": "city",
     "zip": "zip",
     "voivodeship": "voivodeship",
     "addressLine": "address_line",

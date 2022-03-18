@@ -107,7 +107,7 @@ def handle_update_accommodation(request):
         return flask.Response("No accommodation id supplied!", status=400)
 
     request_json = request.get_json(silent=True)
-    mapped_data = mapper.map_guest_from_front_to_db(request_json)
+    mapped_data = mapper.map_accommodation_from_front_to_db(request_json)
     Session = get_db_session()
 
     try:
@@ -118,10 +118,8 @@ def handle_update_accommodation(request):
                 .update(mapped_data)
             )
             session.commit()
+            print(result)
     except SQLAlchemyError:
         return flask.Response("Could not update object, invalid input", status=405)
 
-    if result.rowcount:
-        return flask.Response([], status=200)
-    else:
-        return flask.Response("Not found", status=404)
+    return flask.Response([], status=200)
