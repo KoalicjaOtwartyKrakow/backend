@@ -5,7 +5,7 @@ guest_front_to_db = {
     "peopleInGroup": "people_in_group",
     "adultMaleCount": "adult_male_count",
     "adultFemaleCount": "adult_female_count",
-    "children": "children_ages",
+    "childrenAges": "children_ages",
     "havePets": "have_pets",
     "petsDescription": "pets_description",
     "specialNeeds": "special_needs",
