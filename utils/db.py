@@ -39,18 +39,22 @@ def get_engine():
             password=DB_PASS,  # e.g. "my-database-password"
             database=DB_NAME,  # e.g. "my-database-name"
             query=QUERY,
-        )
+        ),
+        pool_size=1,
+        max_overflow=0
     )
     print(f"Connecting to query={QUERY}, name={DB_NAME}")
 
     return pool
 
 
-def get_db_session() -> sessionmaker:
+def get_db_session(pool) -> sessionmaker:
     """Usage:
     ```
-    Session = get_db_session()
+    pool = get_engine() # this is global variable
+    
+    Session = get_db_session(pool)
     with Session() as session:
         # use session here
     """
-    return sessionmaker(bind=get_engine())
+    return sessionmaker(bind=pool)

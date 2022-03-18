@@ -6,11 +6,13 @@ import flask
 from sqlalchemy import select, delete
 from sqlalchemy.exc import SQLAlchemyError
 
-from utils.db import get_db_session
+from utils.db import get_engine, get_db_session
 from utils.orm import AccommodationUnit, new_alchemy_encoder
 from utils.payload_parser import parse, AccommodationParser
 from utils import mapper
 
+# Global pool, see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
+global_pool = get_engine()
 
 def handle_add_accommodation(request):
     data = request.get_json(silent=True)
@@ -21,7 +23,7 @@ def handle_add_accommodation(request):
     if result.warnings:
         print(result.warnings)
 
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
     with Session() as session:
         session.add(result.payload)
         session.commit()
@@ -29,7 +31,7 @@ def handle_add_accommodation(request):
 
 
 def handle_get_all_accommodations(request):
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
     with Session() as session:
         stmt = select(AccommodationUnit).order_by(
             AccommodationUnit.vacancies_free.desc()
@@ -51,7 +53,7 @@ def handle_delete_accommodation(request):
     except KeyError:
         return flask.Response("No accommodation id supplied!", status=400)
 
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
 
     try:
         with Session() as session:
@@ -76,7 +78,7 @@ def handle_get_accommodation_by_id(request):
     except KeyError:
         return flask.Response("No accommodation id supplied!", status=400)
 
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
 
     try:
         with Session() as session:
@@ -108,7 +110,7 @@ def handle_update_accommodation(request):
 
     request_json = request.get_json(silent=True)
     mapped_data = mapper.map_accommodation_from_front_to_db(request_json)
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
 
     try:
         with Session() as session:

@@ -6,14 +6,16 @@ import flask
 from sqlalchemy import exc, select
 from sqlalchemy.exc import SQLAlchemyError
 
-from utils.db import get_db_session
+from utils.db import get_engine, get_db_session
 from utils.orm import Guest, new_alchemy_encoder
 from utils import orm, mapper
 from utils.payload_parser import parse, GuestParserCreate
 
+# Global pool, see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
+global_pool = get_engine()
 
 def handle_get_all_guests(request):
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
     with Session() as session:
         stmt = select(Guest)
         result = session.execute(stmt)
@@ -29,7 +31,7 @@ def handle_add_guest(request):
     if not result.success:
         return flask.Response(response=f"Failed: {','.join(result.errors)}", status=405)
 
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
     with Session() as session:
         session.add(result.payload)
         try:
@@ -46,7 +48,7 @@ def handle_get_guest_by_id(request):
     except KeyError:
         return flask.Response("No guest id supplied!", status=400)
 
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
 
     try:
         with Session() as session:
@@ -72,7 +74,7 @@ def handle_delete_guest(request):
     except KeyError:
         return flask.Response("No guest id supplied!", status=400)
 
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
     try:
         with Session() as session:
             result1 = (
@@ -97,7 +99,7 @@ def handle_update_guest(request):
     request_json = request.get_json()
     mapped_data = mapper.map_guest_from_front_to_db(request_json)
 
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
     try:
         with Session() as session:
             result1 = (

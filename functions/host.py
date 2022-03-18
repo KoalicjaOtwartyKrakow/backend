@@ -4,14 +4,16 @@ import json
 import flask
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, exc, delete
-from utils.db import get_db_session
+from utils.db import get_engine, get_db_session
 from utils import orm
 from utils.orm import new_alchemy_encoder, Host
 from utils.payload_parser import parse, HostParser
 
+# Global pool, see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
+global_pool = get_engine()
 
 def handle_get_all_hosts(request):
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
     with Session() as session:
         stmt = select(orm.Host)
         result = session.execute(stmt)
@@ -33,7 +35,7 @@ def handle_add_host(request):
     if result.warnings:
         print(result.warnings)
 
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
     stmt1 = select(orm.Language).where(
         orm.Language.code2.in_(result.payload.languages_spoken)
     )
@@ -51,7 +53,7 @@ def handle_get_host_by_id(request):
     except KeyError:
         return flask.Response("No host id supplied!", status=400)
 
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
 
     try:
         with Session() as session:
@@ -81,7 +83,7 @@ def handle_get_hosts_by_status(request):
         )
 
     stmt = select(orm.Host).where(orm.Host.status == status_val)
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
 
     with Session() as session:
         try:
@@ -116,7 +118,7 @@ def handle_update_host(request):
         orm.Language.code2.in_(result.payload.languages_spoken)
     )
 
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
     with Session() as session:
         try:
             res = session.execute(stmt1).scalar()
@@ -152,7 +154,7 @@ def handle_delete_host(request):
     if id is None:
         return flask.Response(response="Received no hostId", status=400)
 
-    Session = get_db_session()
+    Session = get_db_session(global_pool)
     with Session() as session:
         try:
             stmt = (
