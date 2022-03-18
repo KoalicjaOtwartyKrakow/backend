@@ -6,6 +6,7 @@ import functions_framework
 from functions import accommodation
 from functions import host
 from functions import guest
+from functions import teammember
 
 
 @functions_framework.http
@@ -102,3 +103,33 @@ def get_host_by_id(request):
 def get_hosts_by_status(request):
     """HTTP Cloud Function for getting all hosts with a given status."""
     return host.handle_get_hosts_by_status(request)
+
+
+@functions_framework.http
+def get_all_teammembers(request):
+    """HTTP Cloud Function for getting all teammembers."""
+    return teammember.handle_get_all_teammembers(request)
+
+
+@functions_framework.http
+def delete_teammember(request):
+    """HTTP Cloud Function for deleting a teammember with a given id."""
+    return teammember.handle_delete_teammember(request)
+
+
+@functions_framework.http
+def update_teammember(request):
+    """HTTP Cloud Function for updating a teammember."""
+    return teammember.handle_update_teammember(request)
+
+
+@functions_framework.http
+def get_teammember_by_id(request):
+    """HTTP Cloud Function for getting a teammember with a given id."""
+    return teammember.handle_get_teammember_by_id(request)
+
+
+@functions_framework.http
+def add_teammember(request):
+    """HTTP Cloud Function for posting a new teammember."""
+    return teammember.handle_add_teammember(request)
