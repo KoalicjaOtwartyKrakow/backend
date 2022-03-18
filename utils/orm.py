@@ -214,38 +214,61 @@ def to_camel_case(s):
     return components[0] + "".join(x.title() for x in components[1:])
 
 
+do_not_expand_list = {
+    "AccommodationUnit": ["guests"],
+    "Guest": ["accommodationUnit"],
+    "Host": ["apartments"],
+}
+
+
 # https://stackoverflow.com/a/10664192
-def new_alchemy_encoder():
+def new_alchemy_encoder(root_class):
     _visited_objs = []
+    root_class_name = root_class.__class__.__name__
 
     class AlchemyEncoder(json.JSONEncoder):
         def default(self, obj):
-            if isinstance(obj.__class__, DeclarativeMeta):
-                # don't re-visit self
-                if obj in _visited_objs:
+            try:
+                if isinstance(obj.__class__, DeclarativeMeta):
+                    # don't re-visit self
+                    if obj.__class__.__name__ != "Language" and obj in _visited_objs:
+                        return None
+                    _visited_objs.append(obj)
+
+                    # an SQLAlchemy class
+                    fields = {}
+
+                    def is_circular_ref_field(name):
+                        class_name = obj.__class__.__name__
+                        if root_class_name != class_name:
+                            return name in do_not_expand_list.get(class_name, [])
+                        return False
+
+                    for field in [
+                        x
+                        for x in dir(obj)
+                        if not x.startswith("_")
+                        and x != "metadata"
+                        and x != "registry"
+                        and not is_circular_ref_field(x)
+                    ]:
+                        camel_field = to_camel_case(field)
+                        fields[camel_field] = obj.__getattribute__(field)
+                    # a json-encodable dict
+                    return fields
+
+                if isinstance(obj, (datetime, date)):
+                    return obj.isoformat()
+
+                if isinstance(obj, uuid.UUID):
+                    return obj.hex
+
+                if isinstance(obj, registry):
                     return None
-                _visited_objs.append(obj)
-
-                # an SQLAlchemy class
-                fields = {}
-                for field in [
-                    x
-                    for x in dir(obj)
-                    if not x.startswith("_") and x != "metadata" and x != "registry"
-                ]:
-                    camel_field = to_camel_case(field)
-                    fields[camel_field] = obj.__getattribute__(field)
-                # a json-encodable dict
-                return fields
-
-            if isinstance(obj, (datetime, date)):
-                return obj.isoformat()
-
-            if isinstance(obj, uuid.UUID):
-                return obj.hex
-
-            if isinstance(obj, registry):
-                return None
+            except Exception:
+                print("Exception!!")
+                print(obj)
+                raise
 
             return json.JSONEncoder.default(self, obj)
 

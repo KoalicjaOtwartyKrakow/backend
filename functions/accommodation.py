@@ -36,7 +36,9 @@ def handle_get_all_accommodations(request):
         result = session.execute(stmt)
 
         response = json.dumps(
-            list(result.scalars()), cls=new_alchemy_encoder(), check_circular=False
+            list(result.scalars()),
+            cls=new_alchemy_encoder(AccommodationUnit),
+            check_circular=False,
         )
 
     return flask.Response(response=response, status=200, mimetype="application/json")
@@ -91,7 +93,9 @@ def handle_get_accommodation_by_id(request):
         return flask.Response("Not found", status=404)
 
     response = json.dumps(
-        maybe_result[0], cls=new_alchemy_encoder(), check_circular=False
+        maybe_result[0],
+        cls=new_alchemy_encoder(AccommodationUnit),
+        check_circular=False,
     )
 
     return flask.Response(response=response, status=200, mimetype="application/json")

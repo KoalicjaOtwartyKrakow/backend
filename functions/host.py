@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, exc, update, delete
 from utils.db import get_db_session
 from utils import orm
-from utils.orm import new_alchemy_encoder
+from utils.orm import new_alchemy_encoder, Host
 from utils.payload_parser import parse, HostParser
 
 
@@ -17,7 +17,7 @@ def handle_get_all_hosts(request):
         result = session.execute(stmt)
         print(result.scalars())
         response = json.dumps(
-            list(result.scalars()), cls=new_alchemy_encoder(), check_circular=False
+            list(result.scalars()), cls=new_alchemy_encoder(Host), check_circular=False
         )
         print(response)
 
@@ -58,7 +58,7 @@ def handle_get_host_by_id(request):
                 return flask.Response("Not found", status=404)
 
             response = json.dumps(
-                maybe_result[0], cls=new_alchemy_encoder(), check_circular=False
+                maybe_result[0], cls=new_alchemy_encoder(Host), check_circular=False
             )
     except SQLAlchemyError:
         return flask.Response("Invaild id format, uuid expected", status=400)
@@ -83,7 +83,9 @@ def handle_get_hosts_by_status(request):
             result = session.execute(stmt)
 
             response = json.dumps(
-                list(result.scalars()), cls=new_alchemy_encoder(), check_circular=False
+                list(result.scalars()),
+                cls=new_alchemy_encoder(Host),
+                check_circular=False,
             )
         except TypeError as e:
             return flask.Response(response=f"Received invalid status: {e}", status=405)
