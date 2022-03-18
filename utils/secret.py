@@ -2,24 +2,29 @@
 import os
 from google.cloud import secretmanager
 
-PROJECT_ID = os.environ.get("PROJECT_ID", "<LOCAL>")
 
-
-def access_secret_version(secret_id, version_id="latest"):
-    """Retrieve secret from Google Secret Manager.
+def access_secret_version_or_none(secret_id, version_id="latest"):
+    """
+    Retrieve secret from Google Secret Manager. Or none, if running locally, aka
+    detected by whether PROJECT_ID is set.
 
     Args:
         secret_id (string): Name of secret.
         version_id (str, optional): Version of secret. Defaults to "latest".
 
     Returns:
-        Secret variable.
+        Secret variable or None when running locally
     """
+    project_id = os.environ.get("PROJECT_ID")
+
+    if not project_id:
+        return None
+
     # Create the Secret Manager client.
     client = secretmanager.SecretManagerServiceClient()
 
     # Build the resource name of the secret version.
-    name = f"projects/{PROJECT_ID}/secrets/{secret_id}/versions/{version_id}"
+    name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
 
     # Access the secret version.
     response = client.access_secret_version(name=name)
