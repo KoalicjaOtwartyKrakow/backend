@@ -179,10 +179,10 @@ class Guest(Base):
     is_agent = Column("is_agent", Boolean, default=False)
     document_number = Column("document_number", String(255), nullable=True)
     people_in_group = Column("people_in_group", Integer, default=1)
-    adult_male_count = Column("adult_male_count", Integer)
-    adult_female_count = Column("adult_female_count", Integer)
-    children_count = Column("children_count", Integer)
-    children_ages = Column("children_ages", ARRAY(Integer))
+    adult_male_count = Column("adult_male_count", Integer, default=0)
+    adult_female_count = Column("adult_female_count", Integer, default=0)
+    children_count = Column("children_count", Integer, default=0)
+    children_ages = Column("children_ages", ARRAY(Integer), nullable=True)
     have_pets = Column("have_pets", Boolean, nullable=True)
     pets_description = Column("pets_description", String(255), nullable=True)
     special_needs = Column("special_needs", Text, nullable=True)
@@ -229,7 +229,9 @@ def new_alchemy_encoder():
                 # an SQLAlchemy class
                 fields = {}
                 for field in [
-                    x for x in dir(obj) if not x.startswith("_") and x != "metadata"
+                    x
+                    for x in dir(obj)
+                    if not x.startswith("_") and x != "metadata" and x != "registry"
                 ]:
                     camel_field = to_camel_case(field)
                     fields[camel_field] = obj.__getattribute__(field)

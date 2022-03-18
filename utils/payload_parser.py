@@ -4,7 +4,7 @@ import dateutil.parser
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from .orm import Base, Language, Host, AccommodationUnit, Guest, Status, PriorityStatus
+from .orm import Base, Language, Host, AccommodationUnit, Guest
 
 
 class ParseError(Exception):
@@ -151,79 +151,81 @@ class AccommodationParser(Parser):
         )
 
 
-class GuestParser(Parser):
+class GuestParserCreate(Parser):
     required_fields: Dict[str, Type] = {
-        "full_name": str,
+        "fullName": str,
         "email": str,
-        "phone_number": str,
-        "people_in_group": int,
-        "adult_male_count": int,
-        "adult_female_count": int,
-        "children_count": int,
-        "children_ages": list,
+        "phoneNumber": str,
     }
     optional_fields: Dict[str, Type] = {
-        "is_agent": bool,
-        "document_number": str,
-        "have_pets": bool,
-        "pets_description": str,
-        "special_needs": str,
-        "status": str,
-        "priority_status": str,
-        "finance_status": str,
-        "how_long_to_stay": int,
-        "preferred_location": str,
-        "volunteer_note": str,
-        "validation_notes": str,
+        "peopleInGroup": int,
+        "adultMaleCount": int,
+        "adultFemaleCount": int,
+        "childrenAges": list,
+        "havePets": bool,
+        "petsDescription": str,
+        "specialNeeds": str,
+        # "foodAllergies": str, # TODO: not in db
+        # "meatFreeDiet": bool, # TODO: not in db
+        # "glutenFreeDiet": bool, # TODO: not in db
+        # "lactoseFreeDiet": bool, # TODO: not in db
+        "financeStatus": str,
+        "howLongToStay": str,
+        "desiredDestination": str,
+        "priorityStatus": str,
+        "priorityDate": str,
     }
 
     @classmethod
     def parse(cls, data: Dict[str, Any]) -> Guest:
         # parse required arguments
-        full_name = data["full_name"]
+        full_name = data["fullName"]
         email = data["email"]
-        phone_number = data["phone_number"]
-        people_in_group = data["people_in_group"]
-        adult_male_count = data["adult_male_count"]
-        adult_female_count = data["adult_female_count"]
-        children_count = data["children_count"]
-        children_ages = data["children_ages"]
+        phone_number = data["phoneNumber"]
 
         # parse optional arguments
-        is_agent = data.get("is_agent")
-        document_number = data.get("document_number")
-        have_pets = data.get("have_pets")
-        pets_description = data.get("pets_description")
-        special_needs = data.get("special_needs")
-        status = data.get("status")
-        priority_status = data.get("priority_status")
-        finance_status = data.get("finance_status")
-        how_long_to_stay = data.get("how_long_to_stay")
-        preferred_location = data.get("preferred_location")
-        volunteer_note = data.get("volunteer_note")
-        validation_notes = data.get("validation_notes")
+        # is_agent = data.get("*****") # TODO: is_agent is missing in API?
+        # document_number = data.get("*****") # TODO: document_number is missing in API?
+        people_in_group = data.get("peopleInGroup")
+        adult_male_count = data.get("adultMaleCount")
+        adult_female_count = data.get("adultFemaleCount")
+        # children_count = data.get("*****") # TODO: children_count is missing in API?
+        children_ages = data.get("childrenAges")
+        have_pets = data.get("havePets")
+        pets_description = data.get("petsDescription")
+        special_needs = data.get("specialNeeds")
+        priority_date = data.get("priorityDate")
+        # status = data.get("*****") # TODO: what is this?
+        priority_status = data.get("priorityStatus")
+        finance_status = data.get("financeStatus")
+        how_long_to_stay = data.get("howLongToStay")
+        # volunteer_note = data.get("******") # TODO: volunteer_note is missing in API?
+        # validation_notes = data.get("******") # TODO: volunteer_note missing in API?
+        # created_at = data.get("******") # Should not be settable for user
+        # updated_at = data.get("******") # Should not be settable for user
+        # id = data.get("******") # Should not be settable for user
+        # guid = data.get("******") # Should not be settable for user
 
         return Guest(
             full_name=full_name,
             email=email,
             phone_number=phone_number,
-            is_agent=is_agent,
-            document_number=document_number,
             people_in_group=people_in_group,
             adult_male_count=adult_male_count,
             adult_female_count=adult_female_count,
-            children_count=children_count,
+            # children_count=children_count, # TODO: children_count is missing in API?
             children_ages=children_ages,
             have_pets=have_pets,
             pets_description=pets_description,
             special_needs=special_needs,
-            status=status,
+            priority_date=priority_date,
+            # status=status, # TODO: what is this?
             priority_status=priority_status,
             finance_status=finance_status,
             how_long_to_stay=how_long_to_stay,
-            preferred_location=preferred_location,
-            volunteer_note=volunteer_note,
-            validation_notes=validation_notes,
+            # volunteer_note=volunteer_note, # TODO: volunteer_note is missing in API?
+            # created_at=created_at,
+            # updated_at=updated_at,
         )
 
 
