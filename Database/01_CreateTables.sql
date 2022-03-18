@@ -50,27 +50,27 @@ CREATE TRIGGER set_host_timestamp
 
 CREATE TABLE IF NOT EXISTS public.host_teammembers (
     teammember_id integer,
-    host_id integer,
+    host_id uuid,
     PRIMARY KEY(host_id,teammember_id),
     CONSTRAINT fk_teammember
         FOREIGN KEY(teammember_id)
             REFERENCES teammembers(id),
     CONSTRAINT fk_host
         FOREIGN KEY(host_id)
-            REFERENCES hosts(id)
+            REFERENCES hosts(guid)
 );
 
 CREATE TABLE IF NOT EXISTS public.host_languages (
     id integer GENERATED ALWAYS AS IDENTITY,
     language_code varchar(2),
-    host_id integer,
+    host_id uuid,
     PRIMARY KEY(id),
     CONSTRAINT fk_language
         FOREIGN KEY(language_code)
         REFERENCES languages(code2),
     CONSTRAINT fk_hosts
         FOREIGN KEY(host_id)
-            REFERENCES hosts(id)
+            REFERENCES hosts(guid)
 );
 
 CREATE TYPE public.voivodeship_enum AS ENUM (

@@ -76,7 +76,7 @@ host_languages = Table(
     "host_languages",
     Base.metadata,
     Column("language_code", ForeignKey("languages.code2")),
-    Column("host_id", ForeignKey("hosts.id")),
+    Column("host_id", ForeignKey("hosts.guid")),
     Column("id", Integer, primary_key=True),
 )
 
