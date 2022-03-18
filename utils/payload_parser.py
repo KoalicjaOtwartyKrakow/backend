@@ -104,22 +104,22 @@ class HostParser(Parser):
 
 class AccommodationParser(Parser):
     required_fields: Dict[str, Type] = {
-        "hostId": str,
+        "host_id": str,
         "city": str,
         "zip": str,
         "voivodeship": str,
-        "addressLine": str,
-        "vacanciesTotal": int,
+        "address_line": str,
+        "vacancies_total": int,
     }
     optional_fields: Dict[str, Type] = {
-        "petsPresent": bool,
-        "petsAccepted": bool,
-        "disabledPeopleFriendly": bool,
-        "lgbtFriendly": bool,
-        "parkingPlaceAvailable": bool,
-        "easyAmbulanceAccess": bool,
-        "ownerComments": str,
-        "vacanciesFree": int,
+        "have_pets": bool,
+        "accepts_pets": bool,
+        # "disabledPeopleFriendly": bool,
+        # "lgbtFriendly": bool,
+        # "parkingPlaceAvailable": bool,
+        # "easyAmbulanceAccess": bool,
+        "comments": str,
+        "vacancies_free": int,
         "status": str,
     }
 
@@ -136,11 +136,14 @@ class AccommodationParser(Parser):
         # parse optional arguments
         petsPresent = data.get("have_pets")
         petsAccepted = data.get("accepts_pets")
-        disabledPeopleFriendly = data.get("disabledPeopleFriendly")
-        lgbtFriendly = data.get("lgbtFriendly")
-        parkingPlaceAvailable = data.get("parkingPlaceAvailable")
-        easyAmbulanceAccess = data.get("easyAmbulanceAccess")
-        ownerComments = data.get("comments")
+        # disabledPeopleFriendly = data.get("disabledPeopleFriendly")
+        # lgbtFriendly = data.get("lgbtFriendly")
+        # parkingPlaceAvailable = data.get("parkingPlaceAvailable")
+        # easyAmbulanceAccess = data.get("easyAmbulanceAccess")
+
+        # TODO: uncomment when these are added to db
+        comments = data.get("comments")
+        # TODO: change name to ownerComments?
         vacancies_free = data.get("vacancies_free")
         status = data.get("status")
 
@@ -153,11 +156,11 @@ class AccommodationParser(Parser):
             vacancies_total=vacancies_total,
             have_pets=petsPresent,
             accepts_pets=petsAccepted,
-            disabledPeopleFriendly=disabledPeopleFriendly,
-            lgbtFriendly=lgbtFriendly,
-            parkingPlaceAvailable=parkingPlaceAvailable,
-            easyAmbulanceAccess=easyAmbulanceAccess,
-            ownerComments=ownerComments,
+            # disabledPeopleFriendly=disabledPeopleFriendly,
+            # lgbtFriendly=lgbtFriendly,
+            # parkingPlaceAvailable=parkingPlaceAvailable,
+            # easyAmbulanceAccess=easyAmbulanceAccess,
+            comments=comments,
             vacancies_free=vacancies_free,
             status=status,
         )
