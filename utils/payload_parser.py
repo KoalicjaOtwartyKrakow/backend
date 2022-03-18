@@ -4,7 +4,7 @@ import dateutil.parser
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from .orm import Base, Language, Host, AccommodationUnit, Guest
+from .orm import Base, Host, AccommodationUnit, Guest
 
 
 class ParseError(Exception):
@@ -16,14 +16,6 @@ class ParseError(Exception):
 
     def __repr__(self):
         return f"Parse error: {','.join(self.errors)}"
-
-
-# TODO: discuss how to solve languages
-languages = {
-    "en": Language(name="English", code2="en", code3="eng"),
-    "pl": Language(name="Polski", code2="pl", code3="pol"),
-    "uk": Language(name="українська", code2="uk", code3="ukr"),
-}
 
 
 @dataclass
@@ -84,7 +76,9 @@ class HostParser(Parser):
         languages_spoken = list(
             filter(
                 lambda x: x,
-                map(lambda l: languages.get(l), data.get("languagesSpoken", [])),
+                map(
+                    lambda l: l["code2"] if l else None, data.get("languagesSpoken", [])
+                ),
             )
         )
 

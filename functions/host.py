@@ -3,7 +3,7 @@ import json
 
 import flask
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import select, exc, update, delete
+from sqlalchemy import select, exc, delete
 from utils.db import get_db_session
 from utils import orm
 from utils.orm import new_alchemy_encoder, Host
@@ -106,32 +106,31 @@ def handle_update_host(request):
     if not result.success:
         return flask.Response(response=f"Failed: {','.join(result.errors)}", status=405)
 
-    stmt = (
-        update(orm.Host)
-        .where(orm.Host.guid == id)
-        .values(
-            full_name=result.payload.full_name,
-            email=result.payload.email,
-            phone_number=result.payload.phone_number,
-            call_after=result.payload.call_after,
-            call_before=result.payload.call_before,
-            comments=result.payload.comments,
-            # languages_spoken=result.payload.languages_spoken,
-            # status=result.payload.status,
-        )
+    stmt1 = select(orm.Host).where(orm.Host.guid == id)
+    stmt2 = select(orm.Language).where(
+        orm.Language.code2.in_(result.payload.languages_spoken)
     )
-    # TODO: Uncomment these ^ fields here when HostParser is fixed
-    # parser doesn't parse languages_spoken correctly, and doesn't parse status at all.
 
     Session = get_db_session()
     with Session() as session:
         try:
-            res = session.execute(stmt)
-            if res.rowcount == 0:
+            res = session.execute(stmt1).scalar()
+            if not res:
                 return flask.Response(
                     response=f"Host with id = {id} not found", status=404
                 )
+            langs = list(session.execute(stmt2).scalars())
 
+            res.full_name = result.payload.full_name
+            res.email = result.payload.email
+            res.phone_number = result.payload.phone_number
+            res.call_after = result.payload.call_after
+            res.call_before = result.payload.call_before
+            res.comments = result.payload.comments
+            res.languages_spoken = langs
+            if result.payload.status:
+                res.status = result.payload.status
+            session.add(res)
             session.commit()
 
         except exc.SQLAlchemyError as e:
