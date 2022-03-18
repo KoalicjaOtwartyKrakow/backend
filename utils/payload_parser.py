@@ -98,47 +98,46 @@ class HostParser(Parser):
 
 class AccommodationParser(Parser):
     required_fields: Dict[str, Type] = {
-        "host_id": str,
+        "hostId": str,
         "city": str,
         "zip": str,
         "voivodeship": str,
-        "address_line": str,
-        "vacancies_total": int,
+        "addressLine": str,
+        "vacanciesTotal": int,
     }
     optional_fields: Dict[str, Type] = {
-        "have_pets": bool,
-        "accepts_pets": bool,
-        # "disabledPeopleFriendly": bool,
-        # "lgbtFriendly": bool,
-        # "parkingPlaceAvailable": bool,
-        # "easyAmbulanceAccess": bool,
-        "comments": str,
-        "vacancies_free": int,
+        "petsPresent": bool,
+        "petsAccepted": bool,
+        "disabledPeopleFriendly": bool,
+        "lgbtFriendly": bool,
+        "parkingPlaceAvailable": bool,
+        "easyAmbulanceAccess": bool,
+        "ownerComments": str,
+        "staffComments": str,
+        "vacanciesFree": int,
         "status": str,
     }
 
     @classmethod
     def parse(cls, data: Dict[str, Any]) -> AccommodationUnit:
         # parse required arguments
-        host_id = data["host_id"]
+        host_id = data["hostId"]
         city = data["city"]
         zip = data["zip"]
         voivodeship = data["voivodeship"]
-        address_line = data["address_line"]
-        vacancies_total = data["vacancies_total"]
+        address_line = data["addressLine"]
+        vacancies_total = data["vacanciesTotal"]
 
         # parse optional arguments
-        petsPresent = data.get("have_pets")
-        petsAccepted = data.get("accepts_pets")
-        # disabledPeopleFriendly = data.get("disabledPeopleFriendly")
-        # lgbtFriendly = data.get("lgbtFriendly")
-        # parkingPlaceAvailable = data.get("parkingPlaceAvailable")
-        # easyAmbulanceAccess = data.get("easyAmbulanceAccess")
-
-        # TODO: uncomment when these are added to db
-        comments = data.get("comments")
-        # TODO: change name to ownerComments?
-        vacancies_free = data.get("vacancies_free")
+        have_pets = data.get("petsPresent")
+        accepts_pets = data.get("petsAccepted")
+        disabled_people_friendly = data.get("disabledPeopleFriendly")
+        lgbt_friendly = data.get("lgbtFriendly")
+        parking_place_available = data.get("parkingPlaceAvailable")
+        easy_ambulance_access = data.get("easyAmbulanceAccess")
+        owner_comments = data.get("ownerComments")
+        staff_comments = data.get("staffComments")
+        vacancies_free = data.get("vacanciesFree")
         status = data.get("status")
 
         return AccommodationUnit(
@@ -148,13 +147,14 @@ class AccommodationParser(Parser):
             voivodeship=voivodeship,
             address_line=address_line,
             vacancies_total=vacancies_total,
-            have_pets=petsPresent,
-            accepts_pets=petsAccepted,
-            # disabledPeopleFriendly=disabledPeopleFriendly,
-            # lgbtFriendly=lgbtFriendly,
-            # parkingPlaceAvailable=parkingPlaceAvailable,
-            # easyAmbulanceAccess=easyAmbulanceAccess,
-            comments=comments,
+            have_pets=have_pets,
+            accepts_pets=accepts_pets,
+            disabled_people_friendly=disabled_people_friendly,
+            lgbt_friendly=lgbt_friendly,
+            parking_place_available=parking_place_available,
+            easy_ambulance_access=easy_ambulance_access,
+            owner_comments=owner_comments,
+            staff_comments=staff_comments,
             vacancies_free=vacancies_free,
             status=status,
         )
