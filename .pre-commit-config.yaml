@@ -20,6 +20,7 @@ repos:
     rev: 1.7.3
     hooks:
     -   id: bandit
+        exclude: (utils/data-generator)
 -   repo: local
     hooks:
     -   id: pylint
@@ -27,7 +28,7 @@ repos:
         entry: pylint
         language: system
         types: [python]
-        exclude: (aws|test|scripts)
+        exclude: (aws|test|scripts|utils/data-generator)
         args:
           [
             "--disable=W", "--disable=R", "--disable=C", "-rn", # Only display messages
