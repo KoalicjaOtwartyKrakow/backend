@@ -4,7 +4,7 @@ import dateutil.parser
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from .orm import Base, Language, Host, AccommodationUnit, Guest
+from .orm import Base, Language, Host, AccommodationUnit, Guest, Teammember
 
 
 class ParseError(Exception):
@@ -227,6 +227,19 @@ class GuestParserCreate(Parser):
             # created_at=created_at,
             # updated_at=updated_at,
         )
+
+
+class TeammemberParser(Parser):
+    required_fields: Dict[str, Type] = {"fullName": str, "phoneNumber": str}
+    optional_fields: Dict[str, Type] = {}
+
+    @classmethod
+    def parse(cls, data: Dict[str, Any]) -> AccommodationUnit:
+        # parse required arguments
+        full_name = data["fullName"]
+        phone_number = data["phoneNumber"]
+
+        return Teammember(full_name=full_name, phone_number=phone_number)
 
 
 def parse(data: Dict[str, Any], cls: Type[Parser]) -> ParserResult:
