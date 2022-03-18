@@ -1,6 +1,5 @@
 """Module containing function handlers for accommodation requests."""
 import json
-from backend.utils.db import get_engine
 
 import flask
 
