@@ -34,7 +34,12 @@ def handle_add_host(request):
         print(result.warnings)
 
     Session = get_db_session()
+    stmt1 = select(orm.Language).where(
+        orm.Language.code2.in_(result.payload.languages_spoken)
+    )
     with Session() as session:
+        langs = list(session.execute(stmt1).scalars())
+        result.payload.languages_spoken = langs
         session.add(result.payload)
         session.commit()
         return flask.Response(response="Success", status=201)
