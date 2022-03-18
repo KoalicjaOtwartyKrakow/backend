@@ -82,21 +82,19 @@ def handle_get_accommodation_by_id(request):
             stmt = select(AccommodationUnit).where(
                 AccommodationUnit.guid == accommodation_id
             )
-
             result = session.execute(stmt)
-
             maybe_result = list(result.scalars())
+
+            if not maybe_result:
+                return flask.Response("Not found", status=404)
+
+            response = json.dumps(
+                maybe_result[0],
+                cls=new_alchemy_encoder(AccommodationUnit),
+                check_circular=False,
+            )
     except SQLAlchemyError:
         return flask.Response("Invaild id format, uuid expected", status=400)
-
-    if not maybe_result:
-        return flask.Response("Not found", status=404)
-
-    response = json.dumps(
-        maybe_result[0],
-        cls=new_alchemy_encoder(AccommodationUnit),
-        check_circular=False,
-    )
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
