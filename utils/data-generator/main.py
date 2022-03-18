@@ -34,36 +34,28 @@ def to_sql(table, values):
 @click.option('--count', default=1, help='Number of.')
 @click.option('--teryt-path', help='Path to TERYT')
 @click.option('--sql/', is_flag=True)
-@click.option('--guests', is_flag=True)
-@click.option('--hosts', is_flag=True)
-@click.option('--accomodations', is_flag=True)
-@click.option('--teammember', is_flag=True)
-@click.option('--languages', is_flag=True)
 @click.option('--db', is_flag=True)
-def generate(count, teryt_path, sql, guests, hosts, accomodations, teammember, languages, db):
+def generate(count, teryt_path, sql, db):
     datasets = get_datasets(teryt_path)
     seed_generators(datasets)
-    all_guests = [generate_guest() for x in range(0, count)] if guests else []
-    all_hosts = [generate_host() for x in range(0, count)] if hosts else []
-    all_accomodations = [generate_accomodation_unit() for x in range(0, count)] if accomodations else []
-    all_teammembers = [generate_teammember() for x in range(0, count)] if teammember else []
+
+    all_hosts = [generate_host() for x in range(0, count)]
+    all_host_languages = [generate_languages(all_hosts) for x in range(0, count*3)]
+    all_accomodations = [generate_accomodation_unit(all_hosts) for x in range(0, count)]
+    all_guests = [generate_guest() for x in range(0, count)]
+    all_teammembers = [generate_teammember() for x in range(0, count)]
 
     if sql:
-        to_sql('public.guests', all_guests) if guests else None
-        to_sql('public.hosts', all_hosts) if hosts else None
-        to_sql('public.accommodation_units', all_accomodations) if accomodations else None
-        to_sql('public.teammembers', all_teammembers) if teammember else None
+        to_sql('public.hosts', all_hosts)
+        print()
+        to_sql('public.host_languages', all_host_languages)
+        print()
+        to_sql('public.accommodation_units', all_accomodations)
+        print()
+        to_sql('public.guests', all_guests)
+        print()
+        to_sql('public.teammembers', all_teammembers)
 
-    if db:
-        import psycopg2
-        import os
-        host = os.getenv('PSQL_HOST')
-        database = os.getenv('PSQL_DATABASE')
-        user = os.getenv('PSQL_USERNAME')
-        password = os.getenv('PSQL_PASSWORD')
-        port = os.getenv('PSQL_PORT')
-
-        c = psycopg2.connect(f'dbname={database} user={user} password={password} host={host} port={port}')
 
 
 if __name__ == '__main__':

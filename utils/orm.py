@@ -76,7 +76,7 @@ host_languages = Table(
     "host_languages",
     Base.metadata,
     Column("language_code", ForeignKey("languages.code2")),
-    Column("host_id", ForeignKey("hosts.id")),
+    Column("host_id", ForeignKey("hosts.guid")),
     Column("id", Integer, primary_key=True),
 )
 
@@ -112,7 +112,7 @@ class Voivodeship(str, enum.Enum):
     DOLNOSLASKIE = "DOLNOŚLĄSKIE"
     KUJAWSKOPOMORSKIE = "KUJAWSKO-POMORSKIE"
     LUBELSKIE = "LUBELSKIE"
-    LUBUSKI = "LUBUSKIE"
+    LUBUSKIE = "LUBUSKIE"
     LODZKIE = "ŁÓDZKIE"
     MALOPOLSKIE = "MAŁOPOLSKIE"
     MAZOWIECKIE = "MAZOWIECKIE"
@@ -183,10 +183,10 @@ class Guest(Base):
     is_agent = Column("is_agent", Boolean, default=False)
     document_number = Column("document_number", String(255), nullable=True)
     people_in_group = Column("people_in_group", Integer, default=1)
-    adult_male_count = Column("adult_male_count", Integer)
-    adult_female_count = Column("adult_female_count", Integer)
-    children_count = Column("children_count", Integer)
-    children_ages = Column("children_ages", ARRAY(Integer))
+    adult_male_count = Column("adult_male_count", Integer, default=0)
+    adult_female_count = Column("adult_female_count", Integer, default=0)
+    children_count = Column("children_count", Integer, default=0)
+    children_ages = Column("children_ages", ARRAY(Integer), nullable=True)
     have_pets = Column("have_pets", Boolean, nullable=True)
     pets_description = Column("pets_description", String(255), nullable=True)
     special_needs = Column("special_needs", Text, nullable=True)
@@ -214,40 +214,65 @@ class Guest(Base):
 
 # https://stackoverflow.com/a/19053800/526604
 def to_camel_case(s):
-    components = s.split('_')
-    return components[0] + ''.join(x.title() for x in components[1:])
+    components = s.split("_")
+    return components[0] + "".join(x.title() for x in components[1:])
+
+
+do_not_expand_list = {
+    "AccommodationUnit": ["guests"],
+    "Guest": ["accommodationUnit"],
+    "Host": ["apartments"],
+}
 
 
 # https://stackoverflow.com/a/10664192
-def new_alchemy_encoder():
+def new_alchemy_encoder(root_class):
     _visited_objs = []
+    root_class_name = root_class.__class__.__name__
 
     class AlchemyEncoder(json.JSONEncoder):
         def default(self, obj):
-            if isinstance(obj.__class__, DeclarativeMeta):
-                # don't re-visit self
-                if obj in _visited_objs:
+            try:
+                if isinstance(obj.__class__, DeclarativeMeta):
+                    # don't re-visit self
+                    if obj.__class__.__name__ != "Language" and obj in _visited_objs:
+                        return None
+                    _visited_objs.append(obj)
+
+                    # an SQLAlchemy class
+                    fields = {}
+
+                    def is_circular_ref_field(name):
+                        class_name = obj.__class__.__name__
+                        if root_class_name != class_name:
+                            return name in do_not_expand_list.get(class_name, [])
+                        return False
+
+                    for field in [
+                        x
+                        for x in dir(obj)
+                        if not x.startswith("_")
+                        and x != "metadata"
+                        and x != "registry"
+                        and not is_circular_ref_field(x)
+                    ]:
+                        camel_field = to_camel_case(field)
+                        fields[camel_field] = obj.__getattribute__(field)
+                    # a json-encodable dict
+                    return fields
+
+                if isinstance(obj, (datetime, date)):
+                    return obj.isoformat()
+
+                if isinstance(obj, uuid.UUID):
+                    return obj.hex
+
+                if isinstance(obj, registry):
                     return None
-                _visited_objs.append(obj)
-
-                # an SQLAlchemy class
-                fields = {}
-                for field in [
-                    x for x in dir(obj) if not x.startswith("_") and x != "metadata"
-                ]:
-                    camel_field = to_camel_case(field)
-                    fields[camel_field] = obj.__getattribute__(field)
-                # a json-encodable dict
-                return fields
-
-            if isinstance(obj, (datetime, date)):
-                return obj.isoformat()
-
-            if isinstance(obj, uuid.UUID):
-                return obj.hex
-
-            if isinstance(obj, registry):
-                return None
+            except Exception:
+                print("Exception!!")
+                print(obj)
+                raise
 
             return json.JSONEncoder.default(self, obj)
 

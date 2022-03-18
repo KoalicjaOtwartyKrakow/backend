@@ -2,7 +2,7 @@
 import os
 from google.cloud import secretmanager
 
-PROJECT_ID = os.environ["PROJECT_ID"]
+PROJECT_ID = os.environ.get("PROJECT_ID", "<LOCAL>")
 
 
 def access_secret_version(secret_id, version_id="latest"):

@@ -1,6 +1,7 @@
 import random
 import csv
 import string
+import uuid
 
 from datasets import male_first_names_id, male_middle_names_id, female_first_names_id, female_middle_names_id, \
     female_last_names_id, male_last_names_id
@@ -243,7 +244,8 @@ def generate_host():
         'email': email_address,
         'call_after': call_time[0],
         'call_before': call_time[1],
-        'comments': ''
+        'comments': '',
+        'guid': str(uuid.uuid4())
     }
 
 
@@ -251,9 +253,13 @@ languages = ['En', 'Uk', 'Pl', 'Ru']
 languages_weights = [8, 2, 10, 2]
 
 
-def generate_languages():
-    l = random.sample(languages, counts=languages_weights, k=random.randint(1, len(languages)))
-    return list(set(l))
+def generate_languages(all_hosts):
+    sample = random.sample(languages, counts=languages_weights, k=1)
+    host = random.choice(all_hosts)
+    return {
+        'language_code': sample[0],
+        'host_id': host['guid']
+    }
 
 
 def generate_teammember():
@@ -266,8 +272,26 @@ def generate_teammember():
         'phone_number': phone_number
     }
 
+WOJEWODZTWA_MAP = {
+    'DOLNOŚLĄSKIE': 'DOLNOSLASKIE',
+    'KUJAWSKO-POMORSKIE': 'KUJAWSKOPOMORSKIE',
+    'LUBELSKIE': 'LUBELSKIE',
+    'LUBUSKIE': 'LUBUSKIE',
+    'ŁÓDZKIE': 'LODZKIE',
+    'MAŁOPOLSKIE': 'MALOPOLSKIE',
+    'MAZOWIECKIE': 'MAZOWIECKIE',
+    'OPOLSKIE': 'OPOLSKIE',
+    'PODKARPACKIE': 'PODKARPACKIE',
+    'PODLASKIE': 'PODLASKIE',
+    'POMORSKIE': 'POMORSKIE',
+    'ŚLĄSKIE': 'SLASKIE',
+    'ŚWIĘTOKRZYSTKIE': 'SWIETOKRZYSKIE',
+    'WARMIŃSKO-MAZURSKIE': 'WARMINSKOMAZURSKIE',
+    'WIELKOPOLSKIE': 'WIELKOPOLSKIE',
+    'ZACHODNIOPOMORSKIE': 'ZACHODNIOPOMORSKIE'
+}
 
-def generate_accomodation_unit():
+def generate_accomodation_unit(all_hosts):
     ulic = random.choices(ulice, weights=ulice_weights, k=1)[0]
     woj = ulic['woj']
     pow = ulic['pow']
@@ -296,12 +320,14 @@ def generate_accomodation_unit():
 
     zip = f'{woj}-{pow}{rodz}'
     city = simc['name']
-    voivodeship = wojewodztwa[woj]
+    voivodeship = WOJEWODZTWA_MAP.get(wojewodztwa[woj])
     big_apt = random.randint(0, 100) < 20
     vacancies_total = random.randint(10, 40) if big_apt else random.randint(1, 10)
     vacancies_free = random.randint(0, int(vacancies_total/2)) if random.randint(0, 100) < 40 else vacancies_total
     have_pets = random.randint(0, 100) < 30
     accept_pets = random.randint(0, 100) < 20
+    host = random.choice(all_hosts)
+    host_id = host['guid']
     return {
         'address_line': f'{address_line} {building_no}',
         'city': city,
@@ -310,11 +336,20 @@ def generate_accomodation_unit():
         'vacancies_total': vacancies_total,
         'vacancies_free': vacancies_free,
         'have_pets': have_pets,
-        'accept_pets': accept_pets,
-        'comments': ''
+        'accepts_pets': accept_pets,
+        'comments': '',
+        'host_id': host_id
     }
 
-
+STAYS = ['1d', '2d', '1w', '1m', '1y']
+PRIORITY_STATUS = [    'DOES_NOT_RESPOND',
+                       'ACCOMMODATION_NOT_NEEDED',
+                       'EN_ROUTE_UA',
+                       'EN_ROUTE_PL',
+                       'IN_KRK',
+                       'AT_R3',
+                       'ACCOMMODATION_FOUND',
+                       'UPDATED']
 def generate_guest():
     assigned_sex = generate_assigned_sex()
     first_name = generate_first_name(assigned_sex)
@@ -330,7 +365,9 @@ def generate_guest():
     have_pets = random.randint(0, 100) < 40
     pets_description = random.choice(['dog', 'cat', 'parrot', 'rat', 'rabbit']) if have_pets else ''
     special_needs = ''
-    how_long_to_stay = f'{random.randint(1, 10)} days' if random.randint(0, 100) < 70 else 'month'
+    how_long_to_stay = random.choice(STAYS)
+    priority_status = random.choice(PRIORITY_STATUS)
+    validation_notes = "validation failed" if random.randint(1, 100) < 20 else ""
     return {
         'full_name': ' '.join([first_name, last_name]),
         'email': email,
@@ -343,5 +380,7 @@ def generate_guest():
         'have_pets': have_pets,
         'pets_description': pets_description,
         'special_needs': special_needs,
-        'how_long_to_stay': how_long_to_stay
+        'how_long_to_stay': how_long_to_stay,
+        'priority_status': priority_status,
+        'validation_notes': validation_notes
     }

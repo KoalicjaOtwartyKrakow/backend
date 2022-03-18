@@ -1,7 +1,7 @@
 #!/bin/bash
 
 pkill -f 'bin/functions-framework --target'
-
+export PROJECT_ID=blah
 export IS_LOCAL_DB=True
 export db_user=postgres
 export db_pass=postgres

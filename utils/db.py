@@ -41,6 +41,7 @@ def get_engine():
             query=QUERY,
         )
     )
+    print(f"Connecting to query={QUERY}, name={DB_NAME}")
 
     return pool
 
