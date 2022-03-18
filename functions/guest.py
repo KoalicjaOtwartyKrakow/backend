@@ -60,12 +60,12 @@ def handle_get_guest_by_id(request):
         with Session() as session:
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
-            maybe_result = list(result.scalars())
+            maybe_result = result.scalar()
 
             if not maybe_result:
                 return flask.Response("Not found", status=404)
 
-            response = get_guest_json(maybe_result[0])
+            response = get_guest_json(maybe_result)
     except SQLAlchemyError:
         return flask.Response("Invaild id format, uuid expected", status=400)
 
@@ -114,12 +114,12 @@ def handle_update_guest(request):
 
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
-            maybe_result = list(result.scalars())
+            maybe_result = result.scalar()
 
             if not maybe_result:
                 return flask.Response("Not found", status=404)
 
-            response = get_guest_json(maybe_result[0])
+            response = get_guest_json(maybe_result)
     except exc.SQLAlchemyError as e:
         return flask.Response(f"update_guest unsuccessful e: {e}", status=400)
 

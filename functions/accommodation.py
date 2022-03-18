@@ -88,12 +88,12 @@ def handle_get_accommodation_by_id(request):
                 AccommodationUnit.guid == accommodation_id
             )
             result = session.execute(stmt)
-            maybe_result = list(result.scalars())
+            maybe_result = result.scalar()
 
             if not maybe_result:
                 return flask.Response("Not found", status=404)
 
-            response = get_accommodation_json(maybe_result[0])
+            response = get_accommodation_json(maybe_result)
     except SQLAlchemyError:
         return flask.Response("Invaild id format, uuid expected", status=400)
 
@@ -123,12 +123,12 @@ def handle_update_accommodation(request):
                 AccommodationUnit.guid == accommodation_id
             )
             result = session.execute(stmt)
-            maybe_result = list(result.scalars())
+            maybe_result = result.scalar()
 
             if not maybe_result:
                 return flask.Response("Not found", status=404)
 
-            response = get_accommodation_json(maybe_result[0])
+            response = get_accommodation_json(maybe_result)
     except SQLAlchemyError:
         return flask.Response("Could not update object, invalid input", status=405)
 

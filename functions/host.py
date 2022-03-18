@@ -66,12 +66,12 @@ def handle_get_host_by_id(request):
         with Session() as session:
             stmt = select(orm.Host).where(orm.Host.guid == host_id)
             result = session.execute(stmt)
-            maybe_result = list(result.scalars())
+            maybe_result = result.scalar()
 
             if not maybe_result:
                 return flask.Response("Not found", status=404)
 
-            response = get_host_json(maybe_result[0])
+            response = get_host_json(maybe_result)
     except SQLAlchemyError:
         return flask.Response("Invaild id format, uuid expected", status=400)
 
