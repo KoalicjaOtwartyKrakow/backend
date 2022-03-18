@@ -60,9 +60,8 @@ def handle_get_guest_by_id(request):
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
 
-            try:
-                guest = result.one()
-            except exc.NoResultFound:
+            guest = result.scalar()
+            if guest is None:
                 return flask.Response("Not found", status=404)
 
             response = get_guest_json(guest)
@@ -123,9 +122,8 @@ def handle_update_guest(request):
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
 
-            try:
-                guest = result.one()
-            except exc.NoResultFound:
+            guest = result.scalar()
+            if guest is None:
                 return flask.Response("Not found", status=404)
 
             response = get_guest_json(guest)

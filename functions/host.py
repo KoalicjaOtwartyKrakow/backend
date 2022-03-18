@@ -3,7 +3,7 @@ import json
 
 import flask
 from sqlalchemy.exc import ProgrammingError
-from sqlalchemy import select, exc, delete
+from sqlalchemy import select, delete
 from utils.db import get_engine, get_db_session
 from utils import orm
 from utils.orm import new_alchemy_encoder, Host
@@ -67,9 +67,8 @@ def handle_get_host_by_id(request):
             stmt = select(orm.Host).where(orm.Host.guid == host_id)
             result = session.execute(stmt)
 
-            try:
-                host = result.one()
-            except exc.NoResultFound:
+            host = result.scalar()
+            if host is None:
                 return flask.Response("Not found", status=404)
 
             response = get_host_json(host)

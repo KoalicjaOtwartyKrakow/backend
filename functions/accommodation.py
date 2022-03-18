@@ -4,7 +4,7 @@ import json
 import flask
 
 from sqlalchemy import select, delete
-from sqlalchemy.exc import NoResultFound, ProgrammingError
+from sqlalchemy.exc import ProgrammingError
 
 from utils.db import get_engine, get_db_session
 from utils.orm import AccommodationUnit, new_alchemy_encoder
@@ -93,9 +93,8 @@ def handle_get_accommodation_by_id(request):
             )
             result = session.execute(stmt)
 
-            try:
-                accommodation = result.one()
-            except NoResultFound:
+            accommodation = result.scalar()
+            if accommodation is None:
                 return flask.Response("Not found", status=404)
 
             response = get_accommodation_json(accommodation)
@@ -133,9 +132,8 @@ def handle_update_accommodation(request):
             )
             result = session.execute(stmt)
 
-            try:
-                accommodation = result.one()
-            except NoResultFound:
+            accommodation = result.scalar()
+            if accommodation is None:
                 return flask.Response("Not found", status=404)
 
             response = get_accommodation_json(accommodation)
