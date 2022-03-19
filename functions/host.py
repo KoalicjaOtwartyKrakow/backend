@@ -15,17 +15,34 @@ global_pool = get_engine()
 
 
 def handle_get_all_hosts(request):
-    Session = get_db_session(global_pool)
-    with Session() as session:
-        stmt = select(orm.Host)
-        result = session.execute(stmt)
-        print(result.scalars())
-        response = json.dumps(
-            list(result.scalars()), cls=new_alchemy_encoder(Host), check_circular=False
-        )
-        print(response)
+    status_parameter = request.args.get("status", None)
+    if status_parameter:
+        try:
+            status_parameter = orm.Status(status_parameter)
+        except ValueError:
+            print(
+                f"Could not understand status={status_parameter}. Filtering disabled."
+            )
+            response = json.dumps([])
+            return flask.Response(
+                response=response, status=200, mimetype="application/json"
+            )
 
-    return flask.Response(response=response, status=200, mimetype="application/json")
+    stmt = select(orm.Host)
+    if status_parameter:
+        print(f"Filtering by status={status_parameter}")
+        stmt = stmt.where(orm.Host.status == status_parameter)
+
+    session = get_db_session(global_pool)
+    with session() as s:
+        try:
+            result = s.execute(stmt)
+            response = get_host_json(list(result.scalars()))
+            return flask.Response(
+                response=response, status=200, mimetype="application/json"
+            )
+        except TypeError as e:
+            return flask.Response(response=f"Received invalid status: {e}", status=405)
 
 
 def handle_add_host(request):
@@ -78,29 +95,6 @@ def handle_get_host_by_id(request):
                 f"Invaild id format, uuid expected, got {host_id}", status=400
             )
         raise e
-
-    return flask.Response(response=response, status=200, mimetype="application/json")
-
-
-def handle_get_hosts_by_status(request):
-    status_val = request.args.get("status")
-    try:
-        status_val = orm.Status(status_val)
-    except ValueError:
-        return flask.Response(
-            response=f"Received invalid status: {status_val}", status=400
-        )
-
-    stmt = select(orm.Host).where(orm.Host.status == status_val)
-    Session = get_db_session(global_pool)
-
-    with Session() as session:
-        try:
-            result = session.execute(stmt)
-
-            response = get_host_json(list(result.scalars()))
-        except TypeError as e:
-            return flask.Response(response=f"Received invalid status: {e}", status=405)
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
