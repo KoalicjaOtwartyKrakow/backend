@@ -42,3 +42,19 @@ accommodation_front_to_db = {
 
 def map_accommodation_from_front_to_db(input):
     return dict((accommodation_front_to_db[name], val) for name, val in input.items())
+
+
+host_front_to_db = {
+    "fullName": "full_name",
+    "email": "email",
+    "phoneNumber": "phone_number",
+    "callAfter": "call_after",
+    "callBefore": "call_before",
+    "comments": "comments",
+    "status": "status",
+    "languagesSpoken": "languages_spoken",
+}
+
+
+def map_host_from_front_to_db(input):
+    return dict((host_front_to_db[name], val) for name, val in input.items())
