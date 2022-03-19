@@ -43,7 +43,7 @@ class Status(str, enum.Enum):
 
     CREATED = "created"
     VERIFIED = "verified"
-    BANNED = "banned"
+    REJECTED = "rejected"
 
     def __str__(self):
         return self.value
