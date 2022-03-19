@@ -3,9 +3,9 @@ import json
 
 import flask
 from sqlalchemy.exc import ProgrammingError
-from sqlalchemy import select, delete
+from sqlalchemy import select, update, delete
 from utils.db import get_engine, get_db_session
-from utils import orm
+from utils import orm, mapper
 from utils.orm import new_alchemy_encoder, Host
 from utils.payload_parser import parse, HostParser
 
@@ -112,37 +112,35 @@ def handle_update_host(request):
         return flask.Response(response=f"Received invalid hostId: {id}", status=400)
     if id is None:
         return flask.Response(response="Received no hostId", status=400)
+
     data = request.get_json()
-    result = parse(data, HostParser)
+    result = mapper.map_host_from_front_to_db(data)
 
-    if not result.success:
-        return flask.Response(response=f"Failed: {','.join(result.errors)}", status=405)
+    languages_spoken = None
+    if "languages_spoken" in result:
+        languages_spoken = [lang["code2"] for lang in result["languages_spoken"]]
+        del result["languages_spoken"]
 
-    stmt1 = select(orm.Host).where(orm.Host.guid == id)
-    stmt2 = select(orm.Language).where(
-        orm.Language.code2.in_(result.payload.languages_spoken)
-    )
+    stmt1 = update(orm.Host).where(orm.Host.guid == id).values(**result)
+    stmt2 = select(orm.Language).where(orm.Language.code2.in_(languages_spoken or []))
 
     Session = get_db_session(global_pool)
     with Session() as session:
         try:
-            res = session.execute(stmt1).scalar()
-            if not res:
+            res = session.execute(stmt1)
+            print(res)
+            if res.rowcount == 0:
                 return flask.Response(
                     response=f"Host with id = {id} not found", status=404
                 )
-            langs = list(session.execute(stmt2).scalars())
 
-            res.full_name = result.payload.full_name
-            res.email = result.payload.email
-            res.phone_number = result.payload.phone_number
-            res.call_after = result.payload.call_after
-            res.call_before = result.payload.call_before
-            res.comments = result.payload.comments
-            res.languages_spoken = langs
-            if result.payload.status:
-                res.status = result.payload.status
-            session.add(res)
+            stmt = select(orm.Host).where(orm.Host.guid == id)
+            res = session.execute(stmt).scalar()
+            if languages_spoken:
+                langs = list(session.execute(stmt2).scalars())
+                res.languages_spoken = langs
+                session.add(res)
+
             session.commit()
             session.refresh(res)
             response = get_host_json(res)
