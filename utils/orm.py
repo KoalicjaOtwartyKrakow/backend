@@ -92,6 +92,7 @@ class Host(Base):
     call_after = Column("call_after", String(64), nullable=True)
     call_before = Column("call_before", String(64), nullable=True)
     comments = Column("comments", Text, nullable=True)
+    system_comments = Column("system_comments", Text, nullable=True)
     status = Column("status", Enum(Status), default=Status.CREATED)
     languages_spoken = relationship("Language", secondary=host_languages)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
@@ -145,8 +146,9 @@ class AccommodationUnit(Base):
     lgbt_friendly = Column("lgbt_friendly", Boolean)
     parking_place_available = Column("parking_place_available", Boolean)
     easy_ambulance_access = Column("easy_ambulance_access", Boolean)
-    owner_comments = Column("owner_comments", String(255))
-    staff_comments = Column("staff_comments", String(255))
+    owner_comments = Column("owner_comments", Text, nullable=True)
+    staff_comments = Column("staff_comments", Text, nullable=True)
+    system_comments = Column("system_comments", Text, nullable=True)
     status = Column("status", Enum(Status), default=Status.CREATED, nullable=False)
 
     host_id = Column("host_id", ForeignKey("hosts.guid"))
@@ -197,6 +199,7 @@ class Guest(Base):
     preferred_location = Column("preferred_location", String(255), nullable=True)
     volunteer_note = Column("volunteer_note", Text, nullable=True)
     validation_notes = Column("validation_notes", Text, nullable=True)
+    system_comments = Column("system_comments", Text, nullable=True)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 

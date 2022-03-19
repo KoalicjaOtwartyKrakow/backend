@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS public.hosts (
     call_after varchar(20),
     call_before varchar(20),
     comments  text,
+    system_comments text,
     status host_status NOT NULL DEFAULT 'CREATED',
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now()
@@ -105,8 +106,9 @@ CREATE TABLE IF NOT EXISTS public.accommodation_units (
     lgbt_friendly boolean,
     parking_place_available boolean,
     easy_ambulance_access boolean,
-    owner_comments varchar(255),
-    staff_comments varchar(255),
+    owner_comments text,
+    staff_comments text,
+    system_comments text,
     host_id uuid NOT NULL,
     status apartment_status NOT NULL DEFAULT 'CREATED',
     CONSTRAINT fk_host
@@ -147,7 +149,7 @@ CREATE TABLE IF NOT EXISTS public.guests  (
     children_count smallint not null,
     children_ages smallint array null,
     have_pets boolean,
-    pets_description varchar(255),
+    pets_description text,
     special_needs text,
     priority_date  timestamp DEFAULT now(),
     status guest_status NOT NULL DEFAULT 'CREATED',
@@ -158,6 +160,7 @@ CREATE TABLE IF NOT EXISTS public.guests  (
     volunteer_note text,
     accommodation_unit_id uuid,
     validation_notes text,
+    system_comments text,
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now(),
     CONSTRAINT fk_accommodation_unit_id
