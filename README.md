@@ -43,3 +43,10 @@ $ export db_pass=postgres
 $ export db_name=salamlab-apartments
 $ functions-framework --target <function-name> --debug
 ```
+
+## Relationship with the infrastructure as code repo
+* The OpenAPI spec now lives in the iac repo
+  * Dev: https://github.com/KoalicjaOtwartyKrakow/iac/blob/dev/env/dev/api.yaml
+  * Prod: https://github.com/KoalicjaOtwartyKrakow/iac/blob/dev/env/prod/api.yaml
+* When adding/removing functions add/remove them from the cloudbuild setup as well at:
+  https://github.com/KoalicjaOtwartyKrakow/iac/blob/dev/modules/codebuild/backend/main.tf#L6
