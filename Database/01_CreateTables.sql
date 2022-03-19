@@ -11,11 +11,9 @@ $$ LANGUAGE plpgsql;
 
 /* those who work with spreadsheet  */
 CREATE TABLE IF NOT EXISTS public.teammembers (
-    id integer GENERATED ALWAYS AS IDENTITY,
-    guid uuid UNIQUE DEFAULT uuid_generate_v4(),
+    guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     full_name varchar(20),
-    phone_number varchar(20) ,
-    PRIMARY KEY(id)
+    phone_number varchar(20)
 );
 
 CREATE TABLE IF NOT EXISTS public.languages (
@@ -28,8 +26,7 @@ CREATE TABLE IF NOT EXISTS public.languages (
 CREATE TYPE public.host_status AS ENUM ('CREATED', 'VERIFIED', 'REJECTED');
 
 CREATE TABLE IF NOT EXISTS public.hosts (
-    id integer  GENERATED ALWAYS AS IDENTITY,
-    guid uuid UNIQUE DEFAULT uuid_generate_v4(),
+    guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     full_name varchar(256) NOT NULL,
     email varchar(100) NOT NULL,
     phone_number varchar(20) NOT NULL,
@@ -38,8 +35,7 @@ CREATE TABLE IF NOT EXISTS public.hosts (
     comments  text,
     status host_status NOT NULL DEFAULT 'CREATED',
     created_at timestamp DEFAULT now(),
-    updated_at timestamp DEFAULT now(),
-    PRIMARY KEY(id)
+    updated_at timestamp DEFAULT now()
 );
 
 CREATE TRIGGER set_host_timestamp
@@ -49,22 +45,21 @@ CREATE TRIGGER set_host_timestamp
     EXECUTE PROCEDURE public.trigger_set_timestamp();
 
 CREATE TABLE IF NOT EXISTS public.host_teammembers (
-    teammember_id integer,
+    teammember_id uuid,
     host_id uuid,
     PRIMARY KEY(host_id,teammember_id),
     CONSTRAINT fk_teammember
         FOREIGN KEY(teammember_id)
-            REFERENCES teammembers(id),
+            REFERENCES teammembers(guid),
     CONSTRAINT fk_host
         FOREIGN KEY(host_id)
             REFERENCES hosts(guid)
 );
 
 CREATE TABLE IF NOT EXISTS public.host_languages (
-    id integer GENERATED ALWAYS AS IDENTITY,
+    guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     language_code varchar(2),
     host_id uuid,
-    PRIMARY KEY(id),
     CONSTRAINT fk_language
         FOREIGN KEY(language_code)
         REFERENCES languages(code2),
@@ -95,8 +90,7 @@ CREATE TYPE public.voivodeship_enum AS ENUM (
 CREATE TYPE public.apartment_status AS ENUM ('CREATED', 'VERIFIED', 'REJECTED');
 
 CREATE TABLE IF NOT EXISTS public.accommodation_units (
-    id integer GENERATED ALWAYS AS IDENTITY,
-    guid uuid UNIQUE DEFAULT uuid_generate_v4(),
+    guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now(),
     city varchar(50), /* this should ideally be NOT NULL, but spreadsheet has very unstructured data */
@@ -115,7 +109,6 @@ CREATE TABLE IF NOT EXISTS public.accommodation_units (
     staff_comments varchar(255),
     host_id uuid NOT NULL,
     status apartment_status NOT NULL DEFAULT 'CREATED',
-    PRIMARY KEY(id),
     CONSTRAINT fk_host
         FOREIGN KEY(host_id)
             REFERENCES public.hosts(guid)
@@ -142,8 +135,7 @@ CREATE TYPE public.guest_priority_status AS ENUM (
 );
 
 CREATE TABLE IF NOT EXISTS public.guests  (
-    id integer GENERATED ALWAYS AS IDENTITY,
-    guid uuid UNIQUE DEFAULT uuid_generate_v4(),
+    guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     full_name varchar(255) NOT NULL,
     email varchar(255) NOT NULL,
     phone_number varchar(20) NULL,
@@ -168,7 +160,6 @@ CREATE TABLE IF NOT EXISTS public.guests  (
     validation_notes text,
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now(),
-    PRIMARY KEY(id),
     CONSTRAINT fk_accommodation_unit_id
         FOREIGN KEY(accommodation_unit_id)
             REFERENCES public.accommodation_units(guid)

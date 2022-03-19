@@ -21,8 +21,7 @@ class Teammember(Base):
 
     __tablename__ = "teammembers"
 
-    id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4)
+    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     full_name = Column("full_name", String(20), nullable=True)
     phone_number = Column("phone_number", String(20), nullable=True)
 
@@ -86,8 +85,7 @@ class Host(Base):
 
     __tablename__ = "hosts"
 
-    id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4)
+    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     full_name = Column("full_name", String(256))
     email = Column("email", String(100))
     phone_number = Column("phone_number", String(20))
@@ -132,8 +130,7 @@ class AccommodationUnit(Base):
 
     __tablename__ = "accommodation_units"
 
-    id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4)
+    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
     city = Column("city", String(50))
@@ -176,8 +173,7 @@ class Guest(Base):
 
     __tablename__ = "guests"
 
-    id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4)
+    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     full_name = Column("full_name", String(255))
     email = Column("email", String(255))
     phone_number = Column("phone_number", String(20))
