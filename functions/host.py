@@ -128,22 +128,21 @@ def handle_update_host(request):
     with Session() as session:
         try:
             res = session.execute(stmt1)
-            print(res)
             if res.rowcount == 0:
                 return flask.Response(
                     response=f"Host with id = {id} not found", status=404
                 )
 
             stmt = select(orm.Host).where(orm.Host.guid == id)
-            res = session.execute(stmt).scalar()
+            host = session.execute(stmt).scalar()
             if languages_spoken:
                 langs = list(session.execute(stmt2).scalars())
-                res.languages_spoken = langs
-                session.add(res)
+                host.languages_spoken = langs
+                session.add(host)
 
             session.commit()
-            session.refresh(res)
-            response = get_host_json(res)
+            session.refresh(host)
+            response = get_host_json(host)
         except ProgrammingError as e:
             if "invalid input syntax for type uuid" in str(e):
                 return flask.Response(
