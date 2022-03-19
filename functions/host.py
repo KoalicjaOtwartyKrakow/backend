@@ -23,10 +23,7 @@ def handle_get_all_hosts(request):
             print(
                 f"Could not understand status={status_parameter}. Filtering disabled."
             )
-            response = json.dumps([])
-            return flask.Response(
-                response=response, status=200, mimetype="application/json"
-            )
+            return flask.Response(response=f"Received invalid status: {status_parameter}", status=400)
 
     stmt = select(orm.Host)
     if status_parameter:
@@ -42,7 +39,7 @@ def handle_get_all_hosts(request):
                 response=response, status=200, mimetype="application/json"
             )
         except TypeError as e:
-            return flask.Response(response=f"Received invalid status: {e}", status=405)
+            return flask.Response(response=f"Received invalid status: {e}", status=400)
 
 
 def handle_add_host(request):
