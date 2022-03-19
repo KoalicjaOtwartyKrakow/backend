@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS public.languages (
     PRIMARY KEY(code2)
 );
 
-CREATE TYPE public.host_status AS ENUM ('CREATED', 'VERIFIED', 'REJECTED');
+CREATE TYPE public.verificationstatus AS ENUM ('CREATED', 'VERIFIED', 'REJECTED');
 
 CREATE TABLE IF NOT EXISTS public.hosts (
     guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS public.hosts (
     call_before varchar(20),
     comments  text,
     system_comments text,
-    status host_status NOT NULL DEFAULT 'CREATED',
+    status verificationstatus NOT NULL DEFAULT 'CREATED',
     created_at timestamp DEFAULT now(),
     updated_at timestamp DEFAULT now()
 );
@@ -88,8 +88,6 @@ CREATE TYPE public.voivodeship_enum AS ENUM (
     'ZACHODNIOPOMORSKIE'
 );
 
-CREATE TYPE public.apartment_status AS ENUM ('CREATED', 'VERIFIED', 'REJECTED');
-
 CREATE TABLE IF NOT EXISTS public.accommodation_units (
     guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     created_at timestamp DEFAULT now(),
@@ -110,7 +108,7 @@ CREATE TABLE IF NOT EXISTS public.accommodation_units (
     staff_comments text,
     system_comments text,
     host_id uuid NOT NULL,
-    status apartment_status NOT NULL DEFAULT 'CREATED',
+    status verificationstatus NOT NULL DEFAULT 'CREATED',
     CONSTRAINT fk_host
         FOREIGN KEY(host_id)
             REFERENCES public.hosts(guid)
@@ -125,7 +123,7 @@ CREATE TRIGGER set_accommodation_units_timestamp
 
 CREATE TYPE public.guest_status AS ENUM ('CREATED', 'VERIFIED', 'REJECTED');
 
-CREATE TYPE public.guest_priority_status AS ENUM (
+CREATE TYPE public.guestprioritystatus AS ENUM (
     'DOES_NOT_RESPOND',
     'ACCOMMODATION_NOT_NEEDED',
     'EN_ROUTE_UA',
@@ -136,36 +134,37 @@ CREATE TYPE public.guest_priority_status AS ENUM (
     'UPDATED'
 );
 
-CREATE TABLE IF NOT EXISTS public.guests  (
-    guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    full_name varchar(255) NOT NULL,
-    email varchar(255) NOT NULL,
-    phone_number varchar(20) NULL,
-    is_agent boolean DEFAULT False, /* is acting on behalf of an actual guest group */
-    document_number varchar(255),
-    people_in_group smallint not null DEFAULT 1,
-    adult_male_count smallint not null,
-    adult_female_count smallint not null,
-    children_count smallint not null,
-    children_ages smallint array null,
-    have_pets boolean,
-    pets_description text,
-    special_needs text,
-    priority_date  timestamp DEFAULT now(),
-    status guest_status NOT NULL DEFAULT 'CREATED',
-    priority_status guest_priority_status DEFAULT NULL,
-    finance_status varchar(255), /*could be enum ,bool , or text*/
-    how_long_to_stay  varchar(255),
-    preferred_location varchar(255),
-    volunteer_note text,
-    accommodation_unit_id uuid,
-    validation_notes text,
-    system_comments text,
-    created_at timestamp DEFAULT now(),
-    updated_at timestamp DEFAULT now(),
-    CONSTRAINT fk_accommodation_unit_id
-        FOREIGN KEY(accommodation_unit_id)
-            REFERENCES public.accommodation_units(guid)
+CREATE TABLE IF NOT EXISTS public.guests (
+	guid UUID DEFAULT uuid_generate_v4() NOT NULL,
+	full_name VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL,
+	phone_number VARCHAR(20) NOT NULL,
+	is_agent BOOLEAN DEFAULT false NOT NULL,
+	document_number VARCHAR(255),
+	people_in_group INTEGER DEFAULT 1 NOT NULL,
+	adult_male_count INTEGER DEFAULT 0 NOT NULL,
+	adult_female_count INTEGER DEFAULT 0 NOT NULL,
+	children_ages INTEGER[] NOT NULL,
+	have_pets BOOLEAN DEFAULT false NOT NULL,
+	pets_description VARCHAR(255),
+	special_needs TEXT,
+	food_allergies TEXT,
+	meat_free_diet BOOLEAN DEFAULT false NOT NULL,
+	gluten_free_diet BOOLEAN DEFAULT false NOT NULL,
+	lactose_free_diet BOOLEAN DEFAULT false NOT NULL,
+	finance_status VARCHAR(255),
+	how_long_to_stay VARCHAR(255),
+	desired_destination VARCHAR(255),
+	priority_status guestprioritystatus,
+	priority_date TIMESTAMP WITH TIME ZONE DEFAULT now(),
+	staff_comments TEXT,
+	verification_status verificationstatus DEFAULT 'CREATED' NOT NULL,
+	system_comments TEXT,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	accommodation_unit_id UUID,
+	PRIMARY KEY (guid),
+	CONSTRAINT fk_accommodation_unit_id FOREIGN KEY(accommodation_unit_id) REFERENCES accommodation_units (guid)
 );
 
 CREATE TRIGGER set_guests_timestamp

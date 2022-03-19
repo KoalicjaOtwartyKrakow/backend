@@ -6,9 +6,10 @@ import flask
 from sqlalchemy import exc, select
 
 from utils.db import get_engine, get_db_session
-from utils.orm import Guest, new_alchemy_encoder
-from utils import orm, mapper
-from utils.payload_parser import parse, GuestParserCreate
+from utils.orm import Guest
+from utils import orm
+
+from utils.serializers import GuestSchema, GuestSchemaFull, UUIDEncoder
 
 # Global pool, see
 # https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
@@ -20,34 +21,36 @@ def handle_get_all_guests(request):
     with Session() as session:
         stmt = select(Guest)
         result = session.execute(stmt)
+        guest_schema = GuestSchemaFull()
         response = json.dumps(
-            list(result.scalars()), cls=new_alchemy_encoder(Guest), check_circular=False
+            [guest_schema.dump(g) for g in result.scalars()], cls=UUIDEncoder
         )
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
 def handle_add_guest(request):
-    data = request.get_json()
-    result = parse(data, GuestParserCreate)
-    if not result.success:
-        return flask.Response(response=f"Failed: {','.join(result.errors)}", status=405)
+    guest_schema = GuestSchema()
+    guest_schema_full = GuestSchemaFull()
 
-    guest = result.payload
+    data = request.get_json()
 
     Session = get_db_session(global_pool)
     with Session() as session:
+        guest = guest_schema.load(data, session=session)
         session.add(guest)
         try:
             session.commit()
         except exc.SQLAlchemyError as e:
             return flask.Response(response=f"Transaction error: {e}", status=400)
         session.refresh(guest)
-        response = get_guest_json(guest)
+        response = guest_schema_full.dumps(guest)
 
     return flask.Response(response=response, status=201, mimetype="application/json")
 
 
 def handle_get_guest_by_id(request):
+    guest_schema_full = GuestSchemaFull()
+
     try:
         guest_id = request.args["guestId"]
     except KeyError:
@@ -64,7 +67,7 @@ def handle_get_guest_by_id(request):
             if guest is None:
                 return flask.Response("Not found", status=404)
 
-            response = get_guest_json(guest)
+            response = guest_schema_full.dumps(guest)
     except exc.ProgrammingError as e:
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(
@@ -102,23 +105,19 @@ def handle_delete_guest(request):
 
 
 def handle_update_guest(request):
+    guest_schema = GuestSchema()
+    guest_schema_full = GuestSchemaFull()
+
     try:
         guest_id = request.args["guestId"]
     except KeyError:
         return flask.Response("No guest id supplied!", status=400)
 
-    request_json = request.get_json()
-    mapped_data = mapper.map_guest_from_front_to_db(request_json)
+    data = request.get_json()
 
     Session = get_db_session(global_pool)
     try:
         with Session() as session:
-            result1 = (
-                session.query(Guest).filter(Guest.guid == guest_id).update(mapped_data)
-            )
-            result2 = session.commit()
-            print(f"result1: {result1} \n result2:{result2}")
-
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
 
@@ -126,7 +125,17 @@ def handle_update_guest(request):
             if guest is None:
                 return flask.Response("Not found", status=404)
 
-            response = get_guest_json(guest)
+            guest = guest_schema.load(data, session=session, instance=guest)
+
+            session.add(guest)
+
+            try:
+                session.commit()
+            except exc.SQLAlchemyError as e:
+                return flask.Response(response=f"Transaction error: {e}", status=400)
+
+            session.refresh(guest)
+            response = guest_schema_full.dumps(guest)
     except exc.ProgrammingError as e:
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(
@@ -135,11 +144,3 @@ def handle_update_guest(request):
         raise e
 
     return flask.Response(response=response, status=200, mimetype="application/json")
-
-
-def get_guest_json(obj):
-    return json.dumps(
-        obj,
-        cls=new_alchemy_encoder(Guest),
-        check_circular=False,
-    )

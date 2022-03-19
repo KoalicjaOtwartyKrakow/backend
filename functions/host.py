@@ -18,12 +18,14 @@ def handle_get_all_hosts(request):
     status_parameter = request.args.get("status", None)
     if status_parameter:
         try:
-            status_parameter = orm.Status(status_parameter)
+            status_parameter = orm.VerificationStatus(status_parameter)
         except ValueError:
             print(
                 f"Could not understand status={status_parameter}. Filtering disabled."
             )
-            return flask.Response(response=f"Received invalid status: {status_parameter}", status=400)
+            return flask.Response(
+                response=f"Received invalid status: {status_parameter}", status=400
+            )
 
     stmt = select(orm.Host)
     if status_parameter:

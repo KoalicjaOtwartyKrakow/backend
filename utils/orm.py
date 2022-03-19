@@ -8,10 +8,21 @@ from datetime import datetime, date
 
 import sqlalchemy.sql.functions as func
 
-from sqlalchemy import Column, Integer, String, Enum, Boolean, Text, Table, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Enum,
+    Boolean,
+    Text,
+    Table,
+    ForeignKey,
+    text,
+)
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP, ARRAY
 from sqlalchemy.orm import declarative_base, relationship, registry
+from sqlalchemy.sql import expression
 
 Base = declarative_base()
 
@@ -37,7 +48,7 @@ class Language(Base):
 
 
 # https://stackoverflow.com/a/51976841
-class Status(str, enum.Enum):
+class VerificationStatus(str, enum.Enum):
     """Class representing status enum in database."""
 
     CREATED = "created"
@@ -49,7 +60,7 @@ class Status(str, enum.Enum):
 
 
 # https://stackoverflow.com/a/51976841
-class PriorityStatus(str, enum.Enum):
+class GuestPriorityStatus(str, enum.Enum):
     """Class representing status enum in database."""
 
     DOES_NOT_RESPOND = "does_not_respond"
@@ -93,12 +104,14 @@ class Host(Base):
     call_before = Column("call_before", String(64), nullable=True)
     comments = Column("comments", Text, nullable=True)
     system_comments = Column("system_comments", Text, nullable=True)
-    status = Column("status", Enum(Status), default=Status.CREATED)
+    status = Column(
+        "status", Enum(VerificationStatus), default=VerificationStatus.CREATED
+    )
     languages_spoken = relationship("Language", secondary=host_languages)
     created_at = Column("created_at", TIMESTAMP, server_default=func.now())
     updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
 
-    apartments = relationship("AccommodationUnit")
+    accommodation_units = relationship("AccommodationUnit", back_populates="host")
 
     def __repr__(self):
         return f"Host: {self.__dict__}"
@@ -149,12 +162,17 @@ class AccommodationUnit(Base):
     owner_comments = Column("owner_comments", Text, nullable=True)
     staff_comments = Column("staff_comments", Text, nullable=True)
     system_comments = Column("system_comments", Text, nullable=True)
-    status = Column("status", Enum(Status), default=Status.CREATED, nullable=False)
+    status = Column(
+        "status",
+        Enum(VerificationStatus),
+        default=VerificationStatus.CREATED,
+        nullable=False,
+    )
 
     host_id = Column("host_id", ForeignKey("hosts.guid"))
 
-    host = relationship("Host")
-    guests = relationship("Guest", back_populates="accommodation")
+    host = relationship("Host", back_populates="accommodation_units")
+    guests = relationship("Guest", back_populates="accommodation_unit")
 
     def __repr__(self):
         return f"Apartment: {self.__dict__}"
@@ -169,44 +187,83 @@ class LanguageEnum(enum.Enum):
     RUSSIAN = "Ru"
 
 
-# #TODO: implementation does not match api.yaml "GuestCreate:"
 class Guest(Base):
     """ORM for Guests."""
 
     __tablename__ = "guests"
 
-    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    full_name = Column("full_name", String(255))
-    email = Column("email", String(255))
-    phone_number = Column("phone_number", String(20))
-    is_agent = Column("is_agent", Boolean, default=False)
-    document_number = Column("document_number", String(255), nullable=True)
-    people_in_group = Column("people_in_group", Integer, default=1)
-    adult_male_count = Column("adult_male_count", Integer, default=0)
-    adult_female_count = Column("adult_female_count", Integer, default=0)
-    children_count = Column("children_count", Integer, default=0)
-    children_ages = Column("children_ages", ARRAY(Integer), nullable=True)
-    have_pets = Column("have_pets", Boolean, nullable=True)
-    pets_description = Column("pets_description", String(255), nullable=True)
-    special_needs = Column("special_needs", Text, nullable=True)
-    priority_date = Column("priority_date", TIMESTAMP, server_default=func.now())
-    status = Column("status", Enum(Status), nullable=True, default=Status.CREATED)
-    priority_status = Column(
-        "priority_status", Enum(PriorityStatus), nullable=True, default=None
+    guid = Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
     )
-    finance_status = Column("finance_status", String(255), nullable=True)
-    how_long_to_stay = Column("how_long_to_stay", String(255), nullable=True)
-    preferred_location = Column("preferred_location", String(255), nullable=True)
-    volunteer_note = Column("volunteer_note", Text, nullable=True)
-    validation_notes = Column("validation_notes", Text, nullable=True)
+    full_name = Column("full_name", String(255), nullable=False)
+    email = Column("email", String(255), nullable=False)
+    phone_number = Column("phone_number", String(20), nullable=False)
+    is_agent = Column(
+        "is_agent", Boolean, server_default=expression.false(), nullable=False
+    )
+    document_number = Column("document_number", String(255))
+    people_in_group = Column(
+        "people_in_group", Integer, server_default=text("1"), nullable=False
+    )
+    adult_male_count = Column(
+        "adult_male_count", Integer, server_default=text("0"), nullable=False
+    )
+    adult_female_count = Column(
+        "adult_female_count", Integer, server_default=text("0"), nullable=False
+    )
+    children_ages = Column("children_ages", ARRAY(Integer), nullable=False)
+    have_pets = Column(
+        "have_pets", Boolean, server_default=expression.false(), nullable=False
+    )
+    pets_description = Column("pets_description", String(255))
+    special_needs = Column("special_needs", Text)
+    food_allergies = Column("food_allergies", Text)
+    meat_free_diet = Column(
+        "meat_free_diet", Boolean, server_default=expression.false(), nullable=False
+    )
+    gluten_free_diet = Column(
+        "gluten_free_diet", Boolean, server_default=expression.false(), nullable=False
+    )
+    lactose_free_diet = Column(
+        "lactose_free_diet", Boolean, server_default=expression.false(), nullable=False
+    )
+    finance_status = Column("finance_status", String(255))
+    how_long_to_stay = Column("how_long_to_stay", String(255))
+    desired_destination = Column("desired_destination", String(255))
+    priority_status = Column("priority_status", Enum(GuestPriorityStatus), default=None)
+    priority_date = Column(
+        "priority_date", TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    staff_comments = Column("staff_comments", Text)
+    verification_status = Column(
+        "verification_status",
+        Enum(VerificationStatus),
+        nullable=False,
+        server_default=VerificationStatus.CREATED.name,
+    )
     system_comments = Column("system_comments", Text, nullable=True)
-    created_at = Column("created_at", TIMESTAMP, server_default=func.now())
-    updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
+    created_at = Column(
+        "created_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at = Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
     accommodation_unit_id = Column(
-        "accommodation_unit_id", ForeignKey("accommodation_units.guid")
+        "accommodation_unit_id",
+        ForeignKey("accommodation_units.guid", name="fk_accommodation_unit_id"),
     )
-    accommodation = relationship("AccommodationUnit", back_populates="guests")
+    accommodation_unit = relationship("AccommodationUnit", back_populates="guests")
 
     def __repr__(self):
         return f"Guest: {self.__dict__}"
