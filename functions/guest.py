@@ -2,6 +2,7 @@
 import json
 
 import flask
+import marshmallow
 
 from sqlalchemy import exc, select
 
@@ -30,7 +31,14 @@ def handle_add_guest(request):
     data = request.get_json()
 
     with acquire_db_session() as session:
-        guest = guest_schema.load(data, session=session)
+        try:
+            guest = guest_schema.load(data, session=session)
+        except marshmallow.ValidationError as e:
+            return flask.Response(
+                {"validationErrors": e.messages},
+                status=422,
+                mimetype="application/json",
+            )
         session.add(guest)
         session.commit()
         session.refresh(guest)
@@ -112,7 +120,14 @@ def handle_update_guest(request):
             if guest is None:
                 return flask.Response("Not found", status=404)
 
-            guest = guest_schema.load(data, session=session, instance=guest)
+            try:
+                guest = guest_schema.load(data, session=session, instance=guest)
+            except marshmallow.ValidationError as e:
+                return flask.Response(
+                    {"validationErrors": e.messages},
+                    status=422,
+                    mimetype="application/json",
+                )
 
             session.add(guest)
             session.commit()

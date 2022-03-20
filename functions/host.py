@@ -2,6 +2,7 @@
 import json
 
 import flask
+import marshmallow
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import select, delete
 
@@ -45,7 +46,14 @@ def handle_add_host(request):
     data = request.get_json()
 
     with acquire_db_session() as session:
-        host = host_schema.load(data, session=session)
+        try:
+            host = host_schema.load(data, session=session)
+        except marshmallow.ValidationError as e:
+            return flask.Response(
+                {"validationErrors": e.messages},
+                status=422,
+                mimetype="application/json",
+            )
         session.add(host)
         session.commit()
         session.refresh(host)
@@ -101,7 +109,14 @@ def handle_update_host(request):
             if host is None:
                 return flask.Response("Not found", status=404)
 
-            host = host_schema.load(data, session=session, instance=host)
+            try:
+                host = host_schema.load(data, session=session, instance=host)
+            except marshmallow.ValidationError as e:
+                return flask.Response(
+                    {"validationErrors": e.messages},
+                    status=422,
+                    mimetype="application/json",
+                )
 
             session.add(host)
             session.commit()
