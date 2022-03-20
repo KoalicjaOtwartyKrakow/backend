@@ -362,6 +362,7 @@ def generate_accomodation_unit(all_hosts):
     host = random.choice(all_hosts)
     host_id = host["guid"]
     return {
+        "guid": str(uuid.uuid4()),
         "address_line": f"{address_line} {building_no}",
         "city": city,
         "zip": zip,
@@ -415,6 +416,7 @@ def generate_guest():
     priority_status = random.choice(PRIORITY_STATUS)
     validation_notes = "validation failed" if random.randint(1, 100) < 20 else ""
     return {
+        "guid": str(uuid.uuid4()),
         "full_name": " ".join([first_name, last_name]),
         "email": email,
         "phone_number": phone_number,
