@@ -7,32 +7,33 @@ from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
 
 from utils.db import get_engine, get_db_session
-from utils.orm import AccommodationUnit, new_alchemy_encoder
-from utils.payload_parser import parse, AccommodationParser
-from utils import mapper
+from utils.orm import AccommodationUnit
+from utils.serializers import (
+    AccommodationUnitSchemaFull,
+    UUIDEncoder,
+    AccommodationUnitSchema,
+)
 
-# Global pool, see
-# https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
 global_pool = get_engine()
+"""
+Global pool,
+see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
+"""
 
 
 def handle_add_accommodation(request):
+    schema = AccommodationUnitSchema()
+    schema_full = AccommodationUnitSchemaFull()
+
     data = request.get_json(silent=True)
-    result = parse(data, AccommodationParser)
-    if not result.success:
-        return flask.Response(response=f"Failed: {','.join(result.errors)}", status=405)
-
-    if result.warnings:
-        print(result.warnings)
-
-    accommodation = result.payload
 
     Session = get_db_session(global_pool)
     with Session() as session:
+        accommodation = schema.load(data, session=session)
         session.add(accommodation)
         session.commit()
         session.refresh(accommodation)
-        response = get_accommodation_json(accommodation)
+        response = schema_full.dumps(accommodation)
 
     return flask.Response(response=response, status=201, mimetype="application/json")
 
@@ -44,7 +45,10 @@ def handle_get_all_accommodations(request):
             AccommodationUnit.vacancies_free.desc()
         )
         result = session.execute(stmt)
-        response = get_accommodation_json(list(result.scalars()))
+        schema_full = AccommodationUnitSchemaFull()
+        response = json.dumps(
+            [schema_full.dump(a) for a in result.scalars()], cls=UUIDEncoder
+        )
 
     return flask.Response(response=response, status=200, mimetype="application/json")
 
@@ -81,6 +85,8 @@ def handle_delete_accommodation(request):
 
 
 def handle_get_accommodation_by_id(request):
+    schema_full = AccommodationUnitSchemaFull()
+
     try:
         accommodation_id = request.args["accommodationId"]
     except KeyError:
@@ -99,7 +105,7 @@ def handle_get_accommodation_by_id(request):
             if accommodation is None:
                 return flask.Response("Not found", status=404)
 
-            response = get_accommodation_json(accommodation)
+            response = schema_full.dumps(accommodation)
     except ProgrammingError as e:
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(
@@ -111,24 +117,19 @@ def handle_get_accommodation_by_id(request):
 
 
 def handle_update_accommodation(request):
+    schema = AccommodationUnitSchema()
+    schema_full = AccommodationUnitSchemaFull()
+
     try:
         accommodation_id = request.args["accommodationId"]
     except KeyError:
         return flask.Response("No accommodation id supplied!", status=400)
 
-    request_json = request.get_json(silent=True)
-    mapped_data = mapper.map_accommodation_from_front_to_db(request_json)
-    Session = get_db_session(global_pool)
+    data = request.get_json()
 
+    Session = get_db_session(global_pool)
     try:
         with Session() as session:
-            result = (
-                session.query(AccommodationUnit)
-                .filter(AccommodationUnit.guid == accommodation_id)
-                .update(mapped_data)
-            )
-            session.commit()
-
             stmt = select(AccommodationUnit).where(
                 AccommodationUnit.guid == accommodation_id
             )
@@ -138,7 +139,12 @@ def handle_update_accommodation(request):
             if accommodation is None:
                 return flask.Response("Not found", status=404)
 
-            response = get_accommodation_json(accommodation)
+            accommodation = schema.load(data, session=session, instance=accommodation)
+
+            session.add(accommodation)
+            session.commit()
+            session.refresh(accommodation)
+            response = schema_full.dumps(accommodation)
     except ProgrammingError as e:
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(
@@ -147,11 +153,3 @@ def handle_update_accommodation(request):
         raise e
 
     return flask.Response(response=response, status=200, mimetype="application/json")
-
-
-def get_accommodation_json(obj):
-    return json.dumps(
-        obj,
-        cls=new_alchemy_encoder(AccommodationUnit),
-        check_circular=False,
-    )

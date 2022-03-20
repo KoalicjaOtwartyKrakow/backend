@@ -27,28 +27,13 @@ class LanguageSchema(CamelCaseSchema):
         load_instance = True
 
 
-class AccommodationUnitSchema(CamelCaseSchema):
-    class Meta:
-        model = AccommodationUnit
-        include_fk = True
-        load_instance = True
-
-
-class AccommodationUnitSchemaFull(CamelCaseSchema):
-    class Meta:
-        model = AccommodationUnit
-        include_relationships = True
-        include_fk = True
-        load_instance = True
-
-
 class HostSchema(CamelCaseSchema):
     class Meta:
         model = Host
         include_fk = True
         load_instance = True
 
-    languages_spoken = fields.Nested(LanguageSchema, many=True)
+    languages_spoken = fields.Nested("LanguageSchema", many=True)
 
 
 class GuestSchema(CamelCaseSchema):
@@ -65,7 +50,25 @@ class GuestSchemaFull(CamelCaseSchema):
         include_fk = True
         load_instance = True
 
-    accommodation_unit = fields.Nested(AccommodationUnitSchema)
+    accommodation_unit = fields.Nested("AccommodationUnitSchema")
+
+
+class AccommodationUnitSchema(CamelCaseSchema):
+    class Meta:
+        model = AccommodationUnit
+        include_fk = True
+        load_instance = True
+
+
+class AccommodationUnitSchemaFull(CamelCaseSchema):
+    class Meta:
+        model = AccommodationUnit
+        include_relationships = True
+        include_fk = True
+        load_instance = True
+
+    host = fields.Nested("HostSchema")
+    guests = fields.Nested("GuestSchema", many=True)
 
 
 class UUIDEncoder(json.JSONEncoder):

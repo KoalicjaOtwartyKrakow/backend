@@ -3,8 +3,6 @@
 
 import uuid
 import enum
-import json
-from datetime import datetime, date
 
 import sqlalchemy.sql.functions as func
 
@@ -20,9 +18,8 @@ from sqlalchemy import (
     text,
     UniqueConstraint,
 )
-from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP, ARRAY
-from sqlalchemy.orm import declarative_base, relationship, registry
+from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import expression
 
 Base = declarative_base()
@@ -170,32 +167,51 @@ class AccommodationUnit(Base):
 
     __tablename__ = "accommodation_units"
 
-    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    created_at = Column("created_at", TIMESTAMP, server_default=func.now())
-    updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
-    city = Column("city", String(50))
+    guid = Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
+    )
+    host_id = Column(
+        "host_id", ForeignKey("hosts.guid", name="fk_host"), nullable=False
+    )
+    city = Column(
+        "city", String(50)
+    )  # This should ideally be NOT NULL, but spreadsheet has very unstructured data
     zip = Column("zip", String(10), nullable=False)
     voivodeship = Column("voivodeship", Enum(Voivodeship))
     address_line = Column("address_line", String(512), nullable=False)
     vacancies_total = Column("vacancies_total", Integer, nullable=False)
-    vacancies_free = Column("vacancies_free", Integer)
-    have_pets = Column("have_pets", Boolean)
-    accepts_pets = Column("accepts_pets", Boolean)
+    pets_present = Column("pets_present", Boolean)
+    pets_accepted = Column("pets_accepted", Boolean)
     disabled_people_friendly = Column("disabled_people_friendly", Boolean)
     lgbt_friendly = Column("lgbt_friendly", Boolean)
     parking_place_available = Column("parking_place_available", Boolean)
+    owner_comments = Column("owner_comments", Text)
     easy_ambulance_access = Column("easy_ambulance_access", Boolean)
-    owner_comments = Column("owner_comments", Text, nullable=True)
-    staff_comments = Column("staff_comments", Text, nullable=True)
-    system_comments = Column("system_comments", Text, nullable=True)
+    vacancies_free = Column("vacancies_free", Integer)
+    staff_comments = Column("staff_comments", Text)
     status = Column(
         "status",
         Enum(VerificationStatus),
-        default=VerificationStatus.CREATED,
+        server_default=VerificationStatus.CREATED,
         nullable=False,
     )
-
-    host_id = Column("host_id", ForeignKey("hosts.guid"))
+    system_comments = Column("system_comments", Text, nullable=True)
+    created_at = Column(
+        "created_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at = Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
     host = relationship("Host", back_populates="accommodation_units")
     guests = relationship("Guest", back_populates="accommodation_unit")
@@ -293,70 +309,3 @@ class Guest(Base):
 
     def __repr__(self):
         return f"Guest: {self.__dict__}"
-
-
-# https://stackoverflow.com/a/19053800/526604
-def to_camel_case(s):
-    components = s.split("_")
-    return components[0] + "".join(x.title() for x in components[1:])
-
-
-do_not_expand_list = {
-    "AccommodationUnit": ["guests"],
-    "Guest": ["accommodationUnit"],
-    "Host": ["apartments"],
-}
-
-
-# https://stackoverflow.com/a/10664192
-def new_alchemy_encoder(root_class):
-    _visited_objs = []
-    root_class_name = root_class.__class__.__name__
-
-    class AlchemyEncoder(json.JSONEncoder):
-        def default(self, obj):
-            try:
-                if isinstance(obj.__class__, DeclarativeMeta):
-                    # don't re-visit self
-                    if obj.__class__.__name__ != "Language" and obj in _visited_objs:
-                        return None
-                    _visited_objs.append(obj)
-
-                    # an SQLAlchemy class
-                    fields = {}
-
-                    def is_circular_ref_field(name):
-                        class_name = obj.__class__.__name__
-                        if root_class_name != class_name:
-                            return name in do_not_expand_list.get(class_name, [])
-                        return False
-
-                    for field in [
-                        x
-                        for x in dir(obj)
-                        if not x.startswith("_")
-                        and x != "metadata"
-                        and x != "registry"
-                        and not is_circular_ref_field(x)
-                    ]:
-                        camel_field = to_camel_case(field)
-                        fields[camel_field] = obj.__getattribute__(field)
-                    # a json-encodable dict
-                    return fields
-
-                if isinstance(obj, (datetime, date)):
-                    return obj.isoformat()
-
-                if isinstance(obj, uuid.UUID):
-                    return obj.hex
-
-                if isinstance(obj, registry):
-                    return None
-            except Exception:
-                print("Exception!!")
-                print(obj)
-                raise
-
-            return json.JSONEncoder.default(self, obj)
-
-    return AlchemyEncoder

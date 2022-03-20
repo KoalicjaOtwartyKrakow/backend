@@ -11,9 +11,11 @@ from utils import orm
 
 from utils.serializers import GuestSchema, GuestSchemaFull, UUIDEncoder
 
-# Global pool, see
-# https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
 global_pool = get_engine()
+"""
+Global pool,
+see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
+"""
 
 
 def handle_get_all_guests(request):
@@ -21,9 +23,9 @@ def handle_get_all_guests(request):
     with Session() as session:
         stmt = select(Guest)
         result = session.execute(stmt)
-        guest_schema = GuestSchemaFull()
+        guest_schema_full = GuestSchemaFull()
         response = json.dumps(
-            [guest_schema.dump(g) for g in result.scalars()], cls=UUIDEncoder
+            [guest_schema_full.dump(g) for g in result.scalars()], cls=UUIDEncoder
         )
     return flask.Response(response=response, status=200, mimetype="application/json")
 

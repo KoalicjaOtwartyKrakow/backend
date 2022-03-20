@@ -103,7 +103,7 @@ VALUES ('Ru', '7bf14e39-463b-4938-993f-ae9da0dc5f89'),
        ('Uk', 'e7993267-763c-41a5-864f-4d1d784432e8');
 
 INSERT INTO public.accommodation_units("address_line", "city", "zip", "voivodeship", "vacancies_total",
-                                       "vacancies_free", "have_pets", "accepts_pets", "owner_comments", "host_id")
+                                       "vacancies_free", "pets_present", "pets_accepted", "owner_comments", "host_id")
 VALUES ('ul. Daleszycka 41Km.27', 'Włochy', '14-658', 'MAZOWIECKIE', 32, 8, false, false, '',
         '3bd6a466-deb5-47cc-9db0-54eebed25e58'),
        ('ul. Ogrodowa 95M17', 'Piekary Śląskie', '24-711', 'SLASKIE', 9, 9, true, false, '',

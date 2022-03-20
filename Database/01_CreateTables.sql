@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS public.host_languages (
 	CONSTRAINT fk_host FOREIGN KEY(host_id) REFERENCES hosts (guid)
 );
 
-CREATE TYPE public.voivodeship_enum AS ENUM (
+CREATE TYPE public.voivodeship AS ENUM (
     'DOLNOSLASKIE',
     'KUJAWSKOPOMORSKIE',
     'LUBELSKIE',
@@ -88,29 +88,28 @@ CREATE TYPE public.voivodeship_enum AS ENUM (
 );
 
 CREATE TABLE IF NOT EXISTS public.accommodation_units (
-    guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    created_at timestamp DEFAULT now(),
-    updated_at timestamp DEFAULT now(),
-    city varchar(50), /* this should ideally be NOT NULL, but spreadsheet has very unstructured data */
-    zip varchar(10) NOT NULL,
-    voivodeship voivodeship_enum  NULL,
-    address_line varchar(512) NOT NULL,
-    vacancies_total smallint NOT NULL,
-    vacancies_free	smallint,
-    have_pets boolean,
-    accepts_pets boolean,
-    disabled_people_friendly boolean,
-    lgbt_friendly boolean,
-    parking_place_available boolean,
-    easy_ambulance_access boolean,
-    owner_comments text,
-    staff_comments text,
-    system_comments text,
-    host_id uuid NOT NULL,
-    status verificationstatus NOT NULL DEFAULT 'CREATED',
-    CONSTRAINT fk_host
-        FOREIGN KEY(host_id)
-            REFERENCES public.hosts(guid)
+	guid UUID DEFAULT uuid_generate_v4() NOT NULL,
+	host_id UUID NOT NULL,
+	city VARCHAR(50),
+	zip VARCHAR(10) NOT NULL,
+	voivodeship voivodeship,
+	address_line VARCHAR(512) NOT NULL,
+	vacancies_total INTEGER NOT NULL,
+	pets_present BOOLEAN,
+	pets_accepted BOOLEAN,
+	disabled_people_friendly BOOLEAN,
+	lgbt_friendly BOOLEAN,
+	parking_place_available BOOLEAN,
+	owner_comments TEXT,
+	easy_ambulance_access BOOLEAN,
+	vacancies_free INTEGER,
+	staff_comments TEXT,
+	status verificationstatus DEFAULT 'CREATED' NOT NULL,
+	system_comments TEXT,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	PRIMARY KEY (guid),
+	CONSTRAINT fk_host FOREIGN KEY(host_id) REFERENCES hosts (guid)
 );
 
 
