@@ -26,9 +26,17 @@ Regarding branching:
 - we still need `requirements.txt` for cloud functions
 - to generate `requirements.txt`: `pipenv lock -r > requirements.txt`
 
+Migrations using [alembic](https://alembic.sqlalchemy.org/en/latest/):
+- upgrade: `alembic upgrade head`
+- downgrade: `alembic downgrade -1`
+- new migration: `alembic revision --autogenerate -m <migration_name>` (then edit generated migration if required)
+- after migration added - ensure in dev that downgrade works properly
+
 ## Testing
 
 ```bash
+IS_LOCAL_DB=True db_name=kokon_test alembic upgrade head 
+
 pytest tests
 ```
 
@@ -56,7 +64,7 @@ Than you can run Google Cloud Function by running:
 $ export IS_LOCAL_DB=True
 $ export db_user=postgres
 $ export db_pass=postgres
-$ export db_name=salamlab-apartments
+$ export db_name=kokon_dev
 $ functions-framework --target <function-name> --debug
 ```
 
