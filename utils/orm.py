@@ -87,7 +87,12 @@ host_languages = Table(
     Base.metadata,
     Column("language_code", ForeignKey("languages.code2")),
     Column("host_id", ForeignKey("hosts.guid")),
-    Column("id", Integer, primary_key=True),
+    Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
+    ),
 )
 
 
