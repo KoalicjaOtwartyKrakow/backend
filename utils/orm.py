@@ -18,6 +18,7 @@ from sqlalchemy import (
     Table,
     ForeignKey,
     text,
+    UniqueConstraint,
 )
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP, ARRAY
@@ -85,14 +86,15 @@ class GuestPriorityStatus(str, enum.Enum):
 host_languages = Table(
     "host_languages",
     Base.metadata,
-    Column("language_code", ForeignKey("languages.code2")),
-    Column("host_id", ForeignKey("hosts.guid")),
+    Column("language_code", ForeignKey("languages.code2", name="fk_language")),
+    Column("host_id", ForeignKey("hosts.guid", name="fk_host")),
     Column(
         "guid",
         DB_UUID(as_uuid=True),
         server_default=text("uuid_generate_v4()"),
         primary_key=True,
     ),
+    UniqueConstraint("language_code", "host_id", name="lang_host_pair_unique"),
 )
 
 

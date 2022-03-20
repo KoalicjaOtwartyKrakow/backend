@@ -59,15 +59,13 @@ CREATE TABLE IF NOT EXISTS public.host_teammembers (
 );
 
 CREATE TABLE IF NOT EXISTS public.host_languages (
-    guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    language_code varchar(2),
-    host_id uuid,
-    CONSTRAINT fk_language
-        FOREIGN KEY(language_code)
-        REFERENCES languages(code2),
-    CONSTRAINT fk_hosts
-        FOREIGN KEY(host_id)
-            REFERENCES hosts(guid)
+	language_code VARCHAR(2),
+	host_id UUID,
+	guid UUID DEFAULT uuid_generate_v4() NOT NULL,
+	PRIMARY KEY (guid),
+	CONSTRAINT lang_host_pair_unique UNIQUE (language_code, host_id),
+	CONSTRAINT fk_language FOREIGN KEY(language_code) REFERENCES languages (code2),
+	CONSTRAINT fk_host FOREIGN KEY(host_id) REFERENCES hosts (guid)
 );
 
 CREATE TYPE public.voivodeship_enum AS ENUM (

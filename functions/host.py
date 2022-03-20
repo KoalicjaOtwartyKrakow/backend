@@ -8,11 +8,13 @@ from sqlalchemy import select, delete
 from utils.db import get_engine, get_db_session
 from utils import orm
 
-# Global pool,
-# see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
 from utils.serializers import HostSchema, UUIDEncoder
 
 global_pool = get_engine()
+"""
+Global pool,
+see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
+"""
 
 
 def handle_get_all_hosts(request):
