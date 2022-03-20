@@ -273,4 +273,8 @@ def downgrade():
     op.drop_table("teammembers")
     op.drop_table("languages")
     op.drop_table("hosts")
+
+    op.execute("DROP TYPE verificationstatus;")
+    op.execute("DROP TYPE voivodeship;")
+    op.execute("DROP TYPE guestprioritystatus;")
     # ### end Alembic commands ###
