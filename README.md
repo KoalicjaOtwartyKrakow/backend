@@ -21,7 +21,6 @@ Regarding branching:
 ## Testing
 
 ```bash
-pip install pytest
 pytest tests
 ```
 
