@@ -6,16 +6,10 @@ import marshmallow
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import select, delete
 
-from utils.db import get_engine, get_db_session
+from utils.db import acquire_db_session
 from utils import orm
 
 from utils.serializers import HostSchema, UUIDEncoder
-
-global_pool = get_engine()
-"""
-Global pool,
-see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
-"""
 
 
 def handle_get_all_hosts(request):
@@ -36,8 +30,7 @@ def handle_get_all_hosts(request):
         print(f"Filtering by status={status_parameter}")
         stmt = stmt.where(orm.Host.status == status_parameter)
 
-    session = get_db_session(global_pool)
-    with session() as s:
+    with acquire_db_session() as s:
         result = s.execute(stmt)
         host_schema = HostSchema()
         response = json.dumps(
@@ -52,8 +45,7 @@ def handle_add_host(request):
 
     data = request.get_json()
 
-    Session = get_db_session(global_pool)
-    with Session() as session:
+    with acquire_db_session() as session:
         try:
             host = host_schema.load(data, session=session)
         except marshmallow.ValidationError as e:
@@ -78,10 +70,8 @@ def handle_get_host_by_id(request):
     except KeyError:
         return flask.Response("No host id supplied!", status=400)
 
-    Session = get_db_session(global_pool)
-
     try:
-        with Session() as session:
+        with acquire_db_session() as session:
             stmt = select(orm.Host).where(orm.Host.guid == host_id)
             result = session.execute(stmt)
 
@@ -110,8 +100,7 @@ def handle_update_host(request):
 
     data = request.get_json()
 
-    Session = get_db_session(global_pool)
-    with Session() as session:
+    with acquire_db_session() as session:
         try:
             stmt = select(orm.Host).where(orm.Host.guid == host_id)
             result = session.execute(stmt)
@@ -151,8 +140,7 @@ def handle_delete_host(request):
     if id is None:
         return flask.Response(response="Received no hostId", status=400)
 
-    Session = get_db_session(global_pool)
-    with Session() as session:
+    with acquire_db_session() as session:
         try:
             stmt = (
                 delete(orm.Host)

@@ -6,22 +6,15 @@ import marshmallow
 
 from sqlalchemy import exc, select
 
-from utils.db import get_engine, get_db_session
+from utils.db import acquire_db_session
 from utils.orm import Guest
 from utils import orm
 
 from utils.serializers import GuestSchema, GuestSchemaFull, UUIDEncoder
 
-global_pool = get_engine()
-"""
-Global pool,
-see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
-"""
-
 
 def handle_get_all_guests(request):
-    Session = get_db_session(global_pool)
-    with Session() as session:
+    with acquire_db_session() as session:
         stmt = select(Guest)
         result = session.execute(stmt)
         guest_schema_full = GuestSchemaFull()
@@ -37,8 +30,7 @@ def handle_add_guest(request):
 
     data = request.get_json()
 
-    Session = get_db_session(global_pool)
-    with Session() as session:
+    with acquire_db_session() as session:
         try:
             guest = guest_schema.load(data, session=session)
         except marshmallow.ValidationError as e:
@@ -63,10 +55,8 @@ def handle_get_guest_by_id(request):
     except KeyError:
         return flask.Response("No guest id supplied!", status=400)
 
-    Session = get_db_session(global_pool)
-
     try:
-        with Session() as session:
+        with acquire_db_session() as session:
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
 
@@ -91,9 +81,8 @@ def handle_delete_guest(request):
     except KeyError:
         return flask.Response("No guest id supplied!", status=400)
 
-    Session = get_db_session(global_pool)
     try:
-        with Session() as session:
+        with acquire_db_session() as session:
             result1 = (
                 session.query(Guest)
                 .filter(Guest.guid == guest_id)
@@ -122,9 +111,8 @@ def handle_update_guest(request):
 
     data = request.get_json()
 
-    Session = get_db_session(global_pool)
     try:
-        with Session() as session:
+        with acquire_db_session() as session:
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
 
