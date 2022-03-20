@@ -2,7 +2,8 @@
 
 ## Before you start
 
-1. Make a virtual environment.
+Dev environment:
+1. make a virtual environment (Python 3.9,  use [pyenv](https://github.com/pyenv/pyenv))
 2. `pipenv install --dev` (passing `--dev` will include both the default and development)
 3. `pre-commit install`
 4. `docker-compose up --no-start && docker-compose start` (install [Docker Desktop](https://www.docker.com/products/docker-desktop/))
