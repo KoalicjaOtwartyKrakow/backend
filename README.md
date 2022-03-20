@@ -18,6 +18,13 @@ Regarding branching:
 - always merge to dev
 - merge to main only from dev
 
+## Testing
+
+```bash
+pip install pytest
+pytest tests
+```
+
 ## Local debuging
 
 To debug your Google Cloud Function locally, you need to first create database. Easiest way is to use prepared docker container:
