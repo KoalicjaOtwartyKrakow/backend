@@ -44,6 +44,12 @@ $ export db_name=salamlab-apartments
 $ functions-framework --target <function-name> --debug
 ```
 
+### Generating SQL from orm
+For example for the `Host` model:
+`print(CreateTable(Host.__table__).compile(global_pool))`
+
+Passing a working postgres connection pool is important, otherwise some features (like native enums) are not used.
+
 ## Relationship with the infrastructure as code repo
 * The OpenAPI spec now lives in the iac repo
   * Dev: https://github.com/KoalicjaOtwartyKrakow/iac/blob/dev/env/dev/api.yaml

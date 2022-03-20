@@ -26,17 +26,18 @@ CREATE TABLE IF NOT EXISTS public.languages (
 CREATE TYPE public.verificationstatus AS ENUM ('CREATED', 'VERIFIED', 'REJECTED');
 
 CREATE TABLE IF NOT EXISTS public.hosts (
-    guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    full_name varchar(256) NOT NULL,
-    email varchar(100) NOT NULL,
-    phone_number varchar(20) NOT NULL,
-    call_after varchar(20),
-    call_before varchar(20),
-    comments  text,
-    system_comments text,
-    status verificationstatus NOT NULL DEFAULT 'CREATED',
-    created_at timestamp DEFAULT now(),
-    updated_at timestamp DEFAULT now()
+	guid UUID DEFAULT uuid_generate_v4() NOT NULL,
+	full_name VARCHAR(256) NOT NULL,
+	email VARCHAR(100) NOT NULL,
+	phone_number VARCHAR(20) NOT NULL,
+	call_after VARCHAR(64),
+	call_before VARCHAR(64),
+	comments TEXT,
+	status verificationstatus DEFAULT 'CREATED' NOT NULL,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	system_comments TEXT,
+	PRIMARY KEY (guid)
 );
 
 CREATE TRIGGER set_host_timestamp

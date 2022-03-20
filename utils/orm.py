@@ -96,20 +96,39 @@ class Host(Base):
 
     __tablename__ = "hosts"
 
-    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    full_name = Column("full_name", String(256))
-    email = Column("email", String(100))
-    phone_number = Column("phone_number", String(20))
-    call_after = Column("call_after", String(64), nullable=True)
-    call_before = Column("call_before", String(64), nullable=True)
-    comments = Column("comments", Text, nullable=True)
-    system_comments = Column("system_comments", Text, nullable=True)
-    status = Column(
-        "status", Enum(VerificationStatus), default=VerificationStatus.CREATED
+    guid = Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
     )
+    full_name = Column("full_name", String(256), nullable=False)
+    email = Column("email", String(100), nullable=False)
+    phone_number = Column("phone_number", String(20), nullable=False)
+    call_after = Column("call_after", String(64))
+    call_before = Column("call_before", String(64))
+    comments = Column("comments", Text)
     languages_spoken = relationship("Language", secondary=host_languages)
-    created_at = Column("created_at", TIMESTAMP, server_default=func.now())
-    updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
+    status = Column(
+        "status",
+        Enum(VerificationStatus),
+        nullable=False,
+        server_default=VerificationStatus.CREATED,
+    )
+    created_at = Column(
+        "created_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at = Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+    system_comments = Column("system_comments", Text)
 
     accommodation_units = relationship("AccommodationUnit", back_populates="host")
 
@@ -242,7 +261,7 @@ class Guest(Base):
         "verification_status",
         Enum(VerificationStatus),
         nullable=False,
-        server_default=VerificationStatus.CREATED.name,
+        server_default=VerificationStatus.CREATED,
     )
     system_comments = Column("system_comments", Text, nullable=True)
     created_at = Column(

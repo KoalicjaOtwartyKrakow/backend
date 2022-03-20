@@ -38,10 +38,7 @@ def handle_add_guest(request):
     with Session() as session:
         guest = guest_schema.load(data, session=session)
         session.add(guest)
-        try:
-            session.commit()
-        except exc.SQLAlchemyError as e:
-            return flask.Response(response=f"Transaction error: {e}", status=400)
+        session.commit()
         session.refresh(guest)
         response = guest_schema_full.dumps(guest)
 
@@ -128,12 +125,7 @@ def handle_update_guest(request):
             guest = guest_schema.load(data, session=session, instance=guest)
 
             session.add(guest)
-
-            try:
-                session.commit()
-            except exc.SQLAlchemyError as e:
-                return flask.Response(response=f"Transaction error: {e}", status=400)
-
+            session.commit()
             session.refresh(guest)
             response = guest_schema_full.dumps(guest)
     except exc.ProgrammingError as e:

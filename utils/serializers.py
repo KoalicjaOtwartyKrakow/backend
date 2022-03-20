@@ -3,7 +3,7 @@ from uuid import UUID
 
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, fields
 
-from utils.orm import AccommodationUnit, Host, Guest
+from utils.orm import AccommodationUnit, Host, Guest, Language
 
 
 def camelcase(s):
@@ -18,6 +18,13 @@ class CamelCaseSchema(SQLAlchemyAutoSchema):
 
     def on_bind_field(self, field_name, field_obj):
         field_obj.data_key = camelcase(field_obj.data_key or field_name)
+
+
+class LanguageSchema(CamelCaseSchema):
+    class Meta:
+        model = Language
+        include_fk = True
+        load_instance = True
 
 
 class AccommodationUnitSchema(CamelCaseSchema):
@@ -38,9 +45,10 @@ class AccommodationUnitSchemaFull(CamelCaseSchema):
 class HostSchema(CamelCaseSchema):
     class Meta:
         model = Host
-        include_relationships = True
         include_fk = True
         load_instance = True
+
+    languages_spoken = fields.Nested(LanguageSchema, many=True)
 
 
 class GuestSchema(CamelCaseSchema):
