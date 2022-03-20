@@ -1,1 +1,0 @@
-from functions.accommodation import handle_add_accommodation

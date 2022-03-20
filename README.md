@@ -25,6 +25,8 @@ pip install pytest
 pytest tests
 ```
 
+If you need database filled with data - use `db` fixture, just add `db` argument to your test function.
+
 ## Local debuging
 
 To debug your Google Cloud Function locally, you need to first create database. Easiest way is to use prepared docker container:

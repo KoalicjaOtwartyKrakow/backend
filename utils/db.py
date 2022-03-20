@@ -31,15 +31,15 @@ QUERY = (
 )
 
 
-_connection_pull = None
+_db_connection_pool = None
 
 
-def get_connection_pool():
+def get_db_connection_pool():
     """Get database engine."""
-    global _connection_pull
+    global _db_connection_pool
 
-    if _connection_pull is None:
-        _connection_pull = sqlalchemy.create_engine(
+    if _db_connection_pool is None:
+        _db_connection_pool = sqlalchemy.create_engine(
             # See https://cloud.google.com/sql/docs/postgres/connect-functions#connect_to
             sqlalchemy.engine.url.URL.create(
                 drivername="postgresql+pg8000",
@@ -48,12 +48,12 @@ def get_connection_pool():
                 database=DB_NAME,  # e.g. "my-database-name"
                 query=QUERY,
             ),
-            pool_size=1,
+            pool_size=5,
             max_overflow=0,
         )
         print(f"Connecting to query={QUERY}, name={DB_NAME}")
 
-    return _connection_pull
+    return _db_connection_pool
 
 
 @contextmanager
@@ -62,5 +62,12 @@ def acquire_db_session():
     with acquire_db_session() as session:
         # use session here
     """
-    with sessionmaker(bind=get_connection_pool())() as session:
+    session = sessionmaker(bind=get_db_connection_pool())()
+    try:
         yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
