@@ -466,8 +466,6 @@ def import_mieszkania():
                 '___guest_id': guest_id
             }
             units.append(unit_data)
-            if len(units) > 10:
-                break
     return (hosts, units, languages)
 
 
