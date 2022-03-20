@@ -10,7 +10,7 @@
 ## Before you start
 
 1. Make a virtual environment.
-2. `pipenv install -d`
+2. `pipenv install`
 3. `pre-commit install`
 
 Regarding branching:
