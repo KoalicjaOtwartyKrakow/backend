@@ -10,19 +10,23 @@
 ## Before you start
 
 1. Make a virtual environment.
-2. `pipenv install`
+2. `pipenv install --dev` (passing `--dev` will include both the default and development)
 3. `pre-commit install`
+4. `docker-compose up --no-start && docker-compose start`
 
 Regarding branching:
 - try to make sure you work on issues on seperate branches (e.g. feature/get-guests)
 - always merge to dev
 - merge to main only from dev
 
+[Pipenv](https://pipenv-fork.readthedocs.io):
+- we use it as requirements.txt alternative
+- we still need `requirements.txt` for cloud functions
+- to generate `requirements.txt`: `pipenv lock -r > requirements.txt`
+
 ## Testing
 
 ```bash
-psql -h localhost -U postgres -d salamlab-test -f Database/01_CreateTables.sql
-
 pytest tests
 ```
 
