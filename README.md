@@ -1,18 +1,11 @@
 # Backend for KOK
 
-1. [Before you start](#before-you-start)
-2. [API Documentation](#api-documentation)
-    1. [Accommodation](#accommodation)
-    2. [Host](#host)
-    3. [Guest](#guest)
-    4. [Teammember](#teammember)
-
 ## Before you start
 
 1. Make a virtual environment.
 2. `pipenv install --dev` (passing `--dev` will include both the default and development)
 3. `pre-commit install`
-4. `docker-compose up --no-start && docker-compose start`
+4. `docker-compose up --no-start && docker-compose start` (install [Docker Desktop](https://www.docker.com/products/docker-desktop/))
 5. `alembic upgrade head`
 6. `PYTHONPATH=. python utils/data-generator/main.py --teryt-path=<path to teryt> --count=5 --db`
 
@@ -42,39 +35,25 @@ pytest tests
 
 If you need database filled with data - use `db` fixture, just add `db` argument to your test function.
 
-## Local debugging
+## Debugging
 
-To debug your Google Cloud Function locally, you need to first create database. Easiest way is to use prepared docker container:
-
-First, install [docker](https://docs.docker.com/get-docker/)
-To build container and recreate DB schema, run:
-```
-$ cd dockerfiles
-$ ./create_debug_container.sh
-```
-
-After this you can run:
-```
-docker run --rm -it -p 5432:5432 test-postgres-kok
-``` 
-(Note: remove `--rm` if you want to keep container after shut down and use `docker start -i <container_id>` in consequetive container starts)
-
-Than you can run Google Cloud Function by running:
+You can run Google Cloud Function by running:
 ```
 $ export IS_LOCAL_DB=True
-$ export db_user=postgres
-$ export db_pass=postgres
-$ export db_name=kokon_dev
 $ functions-framework --target <function-name> --debug
 ```
 
+Arguments (including request payload) should be passed as query params.
+
 ### Generating SQL from orm
+
 For example for the `Host` model:
 `print(CreateTable(Host.__table__).compile(global_pool))`
 
 Passing a working postgres connection pool is important, otherwise some features (like native enums) are not used.
 
 ## Relationship with the infrastructure as code repo
+
 * The OpenAPI spec now lives in the iac repo
   * Dev: https://github.com/KoalicjaOtwartyKrakow/iac/blob/dev/env/dev/api.yaml
   * Prod: https://github.com/KoalicjaOtwartyKrakow/iac/blob/dev/env/prod/api.yaml
