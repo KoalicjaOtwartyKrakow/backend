@@ -12,7 +12,6 @@ from generators import (
     generate_guest,
 )
 from pyrnalist import report
-from dotenv import load_dotenv
 
 from utils.db import acquire_db_session
 
@@ -87,6 +86,5 @@ def generate(count, teryt_path, sql, db):
 
 
 if __name__ == "__main__":
-    load_dotenv()
     generate()
     report.footer()

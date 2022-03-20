@@ -4,11 +4,13 @@
 
 Dev environment:
 1. make a virtual environment (Python 3.9,  use [pyenv](https://github.com/pyenv/pyenv))
-2. `pipenv install --dev` (passing `--dev` will include both the default and development)
-3. `pre-commit install`
-4. `docker-compose up --no-start && docker-compose start` (install [Docker Desktop](https://www.docker.com/products/docker-desktop/))
-5. `alembic upgrade head`
-6. `PYTHONPATH=. python utils/data-generator/main.py --teryt-path=<path to teryt> --count=5 --db`
+2. `pip install pipenv`
+3. `pipenv install --dev` (passing `--dev` will include both the default and development)
+4. `pre-commit install`
+5. `docker-compose up --no-start && docker-compose start` (install [Docker Desktop](https://www.docker.com/products/docker-desktop/))
+6. `export IS_LOCAL_DB=True`
+7. `alembic upgrade head`
+8. `PYTHONPATH=. python utils/data-generator/main.py --teryt-path=<path to teryt> --count=5 --db`
 
 Regarding branching:
 - try to make sure you work on issues on seperate branches (e.g. feature/get-guests)
