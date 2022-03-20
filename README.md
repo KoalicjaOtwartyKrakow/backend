@@ -35,7 +35,7 @@ Migrations using [alembic](https://alembic.sqlalchemy.org/en/latest/):
 ## Testing
 
 ```bash
-IS_LOCAL_DB=True db_name=kokon_test alembic upgrade head 
+IS_LOCAL_DB=True db_name=kokon_test alembic upgrade head
 
 pytest tests
 ```

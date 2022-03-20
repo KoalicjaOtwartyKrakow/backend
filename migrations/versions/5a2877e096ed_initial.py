@@ -270,23 +270,32 @@ def upgrade():
 
     op.execute(
         """
-    INSERT INTO public.languages("name", code2, code3)
-    VALUES
-        ('English',	'en',	'eng'),
-        ('Ukrainian',	'uk',	'ukr'),
-        ('Polish',	'pl',	'pol'),
-        ('Russian',	'ru',	'rus');
-    """
+        INSERT INTO public.languages("name", code2, code3)
+        VALUES
+            ('English',	'en',	'eng'),
+            ('Ukrainian',	'uk',	'ukr'),
+            ('Polish',	'pl',	'pol'),
+            ('Russian',	'ru',	'rus');
+        """
     )
 
     op.execute(
         """
-    CREATE USER ApiServiceUser WITH PASSWORD 'aB94cgg4s?FkLzsi';
-    ALTER DEFAULT PRIVILEGES IN SCHEMA public
-        GRANT select,insert,update,delete,truncate ON TABLES TO ApiServiceUser;
-    GRANT select,insert,update,delete,truncate ON ALL TABLES IN schema public TO ApiServiceUser;
-    REVOKE select,insert,update,delete,truncate ON public.languages from ApiServiceUser;
-    """
+        DO
+        $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT FROM pg_catalog.pg_user
+                WHERE usename = 'apiserviceuser') THEN
+                    CREATE USER ApiServiceUser WITH PASSWORD 'aB94cgg4s?FkLzsi';
+                    ALTER DEFAULT PRIVILEGES IN SCHEMA public
+                    GRANT select,insert,update,delete,truncate ON TABLES TO ApiServiceUser;
+                    GRANT select,insert,update,delete,truncate ON ALL TABLES IN schema public TO ApiServiceUser;
+                    REVOKE select,insert,update,delete,truncate ON public.languages from ApiServiceUser;
+            END IF;
+        END
+        $$;
+        """
     )
     # ### end Alembic commands ###
 
