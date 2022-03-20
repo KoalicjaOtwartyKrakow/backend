@@ -1,6 +1,8 @@
 """Module containing database connection."""
 
 import os
+from contextlib import contextmanager
+
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
@@ -29,32 +31,43 @@ QUERY = (
 )
 
 
-def get_engine():
+_db_connection_pool = None
+
+
+def get_db_connection_pool():
     """Get database engine."""
-    pool = sqlalchemy.create_engine(
-        # See https://cloud.google.com/sql/docs/postgres/connect-functions#connect_to
-        sqlalchemy.engine.url.URL.create(
-            drivername="postgresql+pg8000",
-            username=DB_USER,  # e.g. "my-database-user"
-            password=DB_PASS,  # e.g. "my-database-password"
-            database=DB_NAME,  # e.g. "my-database-name"
-            query=QUERY,
-        ),
-        pool_size=1,
-        max_overflow=0,
-    )
-    print(f"Connecting to query={QUERY}, name={DB_NAME}")
+    global _db_connection_pool
 
-    return pool
+    if _db_connection_pool is None:
+        _db_connection_pool = sqlalchemy.create_engine(
+            # See https://cloud.google.com/sql/docs/postgres/connect-functions#connect_to
+            sqlalchemy.engine.url.URL.create(
+                drivername="postgresql+pg8000",
+                username=DB_USER,  # e.g. "my-database-user"
+                password=DB_PASS,  # e.g. "my-database-password"
+                database=DB_NAME,  # e.g. "my-database-name"
+                query=QUERY,
+            ),
+            pool_size=5,
+            max_overflow=0,
+        )
+        print(f"Connecting to query={QUERY}, name={DB_NAME}")
+
+    return _db_connection_pool
 
 
-def get_db_session(pool) -> sessionmaker:
+@contextmanager
+def acquire_db_session():
     """Usage:
-    ```
-    pool = get_engine() # this is global variable
-
-    Session = get_db_session(pool)
-    with Session() as session:
+    with acquire_db_session() as session:
         # use session here
     """
-    return sessionmaker(bind=pool)
+    session = sessionmaker(bind=get_db_connection_pool())()
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()

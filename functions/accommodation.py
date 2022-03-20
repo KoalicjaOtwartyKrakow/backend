@@ -6,19 +6,13 @@ import flask
 from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
 
-from utils.db import get_engine, get_db_session
+from utils.db import acquire_db_session
 from utils.orm import AccommodationUnit
 from utils.serializers import (
     AccommodationUnitSchemaFull,
     UUIDEncoder,
     AccommodationUnitSchema,
 )
-
-global_pool = get_engine()
-"""
-Global pool,
-see https://github.com/KoalicjaOtwartyKrakow/backend/issues/80 for more info
-"""
 
 
 def handle_add_accommodation(request):
@@ -27,8 +21,7 @@ def handle_add_accommodation(request):
 
     data = request.get_json(silent=True)
 
-    Session = get_db_session(global_pool)
-    with Session() as session:
+    with acquire_db_session() as session:
         accommodation = schema.load(data, session=session)
         session.add(accommodation)
         session.commit()
@@ -39,8 +32,7 @@ def handle_add_accommodation(request):
 
 
 def handle_get_all_accommodations(request):
-    Session = get_db_session(global_pool)
-    with Session() as session:
+    with acquire_db_session() as session:
         stmt = select(AccommodationUnit).order_by(
             AccommodationUnit.vacancies_free.desc()
         )
@@ -59,10 +51,8 @@ def handle_delete_accommodation(request):
     except KeyError:
         return flask.Response("No accommodation id supplied!", status=400)
 
-    Session = get_db_session(global_pool)
-
     try:
-        with Session() as session:
+        with acquire_db_session() as session:
             stmt = (
                 delete(AccommodationUnit)
                 .where(AccommodationUnit.guid == accommodation_id)
@@ -92,10 +82,8 @@ def handle_get_accommodation_by_id(request):
     except KeyError:
         return flask.Response("No accommodation id supplied!", status=400)
 
-    Session = get_db_session(global_pool)
-
     try:
-        with Session() as session:
+        with acquire_db_session() as session:
             stmt = select(AccommodationUnit).where(
                 AccommodationUnit.guid == accommodation_id
             )
@@ -127,9 +115,8 @@ def handle_update_accommodation(request):
 
     data = request.get_json()
 
-    Session = get_db_session(global_pool)
     try:
-        with Session() as session:
+        with acquire_db_session() as session:
             stmt = select(AccommodationUnit).where(
                 AccommodationUnit.guid == accommodation_id
             )
