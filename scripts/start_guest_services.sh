@@ -4,7 +4,7 @@ pkill -f 'bin/functions-framework --target'
 export IS_LOCAL_DB=True
 export db_user=postgres
 export db_pass=postgres
-export db_name=salamlab-apartments
+export db_name=kokon_dev
 functions-framework --target get_all_guests --debug --port 6201&
 functions-framework --target add_guest --debug --port 6202&
 functions-framework --target get_guest_by_id --debug  --port 6203&

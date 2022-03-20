@@ -1,7 +1,5 @@
 # pylint: disable=too-few-public-methods
 """Module containing ORM."""
-
-import uuid
 import enum
 
 import sqlalchemy.sql.functions as func
@@ -30,7 +28,12 @@ class Teammember(Base):
 
     __tablename__ = "teammembers"
 
-    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    guid = Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
+    )
     full_name = Column("full_name", String(100), nullable=True)
     phone_number = Column("phone_number", String(20), nullable=True)
 

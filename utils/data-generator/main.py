@@ -12,7 +12,8 @@ from generators import (
     generate_guest,
 )
 from pyrnalist import report
-from dotenv import load_dotenv
+
+from utils.db import acquire_db_session
 
 
 def to_pgsql_value(v):
@@ -39,14 +40,14 @@ def to_sql(table, values):
             values_str = ", ".join([to_pgsql_value(x) for x in v.values()])
             value_inserts.append(f"({values_str})")
         sql += ", ".join(value_inserts)
-        print(sql + ";")
+        return sql + ";"
 
 
 @click.command()
 @click.option("--count", default=1, help="Number of.")
 @click.option("--teryt-path", help="Path to TERYT")
-@click.option("--sql/", is_flag=True)
-@click.option("--db", is_flag=True)
+@click.option("--sql/", is_flag=True, default=False)
+@click.option("--db", is_flag=True, default=False)
 def generate(count, teryt_path, sql, db):
     datasets = get_datasets(teryt_path)
     seed_generators(datasets)
@@ -62,19 +63,28 @@ def generate(count, teryt_path, sql, db):
     all_guests = [generate_guest(all_accomodations) for _ in range(count)]
     all_teammembers = [generate_teammember() for _ in range(count)]
 
+    hosts_sql = to_sql("public.hosts", all_hosts)
+    host_languages_sql = to_sql("public.host_languages", all_host_languages)
+    accommodations_sql = to_sql("public.accommodation_units", all_accomodations)
+    guests_sql = to_sql("public.guests", all_guests)
+    teammembers_sql = to_sql("public.teammembers", all_teammembers)
+
+    if db:
+        with acquire_db_session() as session:
+            session.execute(hosts_sql)
+            session.execute(host_languages_sql)
+            session.execute(accommodations_sql)
+            session.execute(guests_sql)
+            session.execute(teammembers_sql)
+
     if sql:
-        to_sql("public.hosts", all_hosts)
-        print()
-        to_sql("public.host_languages", all_host_languages)
-        print()
-        to_sql("public.accommodation_units", all_accomodations)
-        print()
-        to_sql("public.guests", all_guests)
-        print()
-        to_sql("public.teammembers", all_teammembers)
+        print(hosts_sql)
+        print(host_languages_sql)
+        print(accommodations_sql)
+        print(guests_sql)
+        print(teammembers_sql)
 
 
 if __name__ == "__main__":
-    load_dotenv()
     generate()
     report.footer()
