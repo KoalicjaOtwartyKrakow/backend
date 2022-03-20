@@ -3,14 +3,24 @@
 
 import uuid
 import enum
-import json
 
 import sqlalchemy.sql.functions as func
 
-from sqlalchemy import Column, Integer, String, Enum, Boolean, Text, Table, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, ARRAY
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Enum,
+    Boolean,
+    Text,
+    Table,
+    ForeignKey,
+    text,
+    UniqueConstraint,
+)
+from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP, ARRAY
 from sqlalchemy.orm import declarative_base, relationship
-
+from sqlalchemy.sql import expression
 
 Base = declarative_base()
 
@@ -20,9 +30,8 @@ class Teammember(Base):
 
     __tablename__ = "teammembers"
 
-    id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
-    full_name = Column("full_name", String(20), nullable=True)
+    guid = Column("guid", DB_UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    full_name = Column("full_name", String(100), nullable=True)
     phone_number = Column("phone_number", String(20), nullable=True)
 
 
@@ -36,12 +45,33 @@ class Language(Base):
     code3 = Column("code3", String(3))
 
 
-class Status(enum.Enum):
+# https://stackoverflow.com/a/51976841
+class VerificationStatus(str, enum.Enum):
     """Class representing status enum in database."""
 
-    CREATED = "created"
-    VERIFIED = "verified"
-    BANNED = "banned"
+    CREATED = "CREATED"
+    VERIFIED = "VERIFIED"
+    REJECTED = "REJECTED"
+
+    def __str__(self):
+        return self.value
+
+
+# https://stackoverflow.com/a/51976841
+class GuestPriorityStatus(str, enum.Enum):
+    """Class representing status enum in database."""
+
+    DOES_NOT_RESPOND = "DOES_NOT_RESPOND"
+    ACCOMMODATION_NOT_NEEDED = "ACCOMMODATION_NOT_NEEDED"
+    EN_ROUTE_UA = "EN_ROUTE_UA"
+    EN_ROUTE_PL = "EN_ROUTE_PL"
+    IN_KRK = "IN_KRK"
+    AT_R3 = "AT_R3"
+    ACCOMMODATION_FOUND = "ACCOMMODATION_FOUND"
+    UPDATED = "UPDATED"
+
+    def __str__(self):
+        return self.value
 
 
 # this will be useful in the future
@@ -53,9 +83,15 @@ class Status(enum.Enum):
 host_languages = Table(
     "host_languages",
     Base.metadata,
-    Column("language_code", ForeignKey("languages.code2")),
-    Column("host_id", ForeignKey("hosts.id")),
-    Column("id", Integer, primary_key=True),
+    Column("language_code", ForeignKey("languages.code2", name="fk_language")),
+    Column("host_id", ForeignKey("hosts.guid", name="fk_host")),
+    Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
+    ),
+    UniqueConstraint("language_code", "host_id", name="lang_host_pair_unique"),
 )
 
 
@@ -64,32 +100,54 @@ class Host(Base):
 
     __tablename__ = "hosts"
 
-    id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
-    full_name = Column("full_name", String(256))
-    email = Column("email", String(100))
-    phone_number = Column("phone_number", String(20))
-    call_after = Column("call_after", String(64), nullable=True)
-    call_before = Column("call_before", String(64), nullable=True)
-    comments = Column("comments", Text, nullable=True)
-    status = Column("status", Enum(Status), default=Status.CREATED)
+    guid = Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
+    )
+    full_name = Column("full_name", String(256), nullable=False)
+    email = Column("email", String(100), nullable=False)
+    phone_number = Column("phone_number", String(20), nullable=False)
+    call_after = Column("call_after", String(64))
+    call_before = Column("call_before", String(64))
+    comments = Column("comments", Text)
     languages_spoken = relationship("Language", secondary=host_languages)
-    created_at = Column("created_at", TIMESTAMP, server_default=func.now())
-    updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
+    status = Column(
+        "status",
+        Enum(VerificationStatus),
+        nullable=False,
+        server_default=VerificationStatus.CREATED,
+    )
+    created_at = Column(
+        "created_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at = Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+    system_comments = Column("system_comments", Text)
 
-    apartments = relationship("AccommodationUnit")
+    accommodation_units = relationship("AccommodationUnit", back_populates="host")
 
     def __repr__(self):
         return f"Host: {self.__dict__}"
 
 
-class Voivodeship(enum.Enum):
+# https://stackoverflow.com/a/51976841
+class Voivodeship(str, enum.Enum):
     """Class representing voivodeship enum in database."""
 
     DOLNOSLASKIE = "DOLNOŚLĄSKIE"
     KUJAWSKOPOMORSKIE = "KUJAWSKO-POMORSKIE"
     LUBELSKIE = "LUBELSKIE"
-    LUBUSKI = "LUBUSKIE"
+    LUBUSKIE = "LUBUSKIE"
     LODZKIE = "ŁÓDZKIE"
     MALOPOLSKIE = "MAŁOPOLSKIE"
     MAZOWIECKIE = "MAZOWIECKIE"
@@ -109,30 +167,57 @@ class AccommodationUnit(Base):
 
     __tablename__ = "accommodation_units"
 
-    id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
-    created_at = Column("created_at", TIMESTAMP, server_default=func.now())
-    updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
-    city = Column("city", String(50))
+    guid = Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
+    )
+    host_id = Column(
+        "host_id", ForeignKey("hosts.guid", name="fk_host"), nullable=False
+    )
+    city = Column(
+        "city", String(50)
+    )  # This should ideally be NOT NULL, but spreadsheet has very unstructured data
     zip = Column("zip", String(10), nullable=False)
     voivodeship = Column("voivodeship", Enum(Voivodeship))
     address_line = Column("address_line", String(512), nullable=False)
     vacancies_total = Column("vacancies_total", Integer, nullable=False)
+    pets_present = Column("pets_present", Boolean)
+    pets_accepted = Column("pets_accepted", Boolean)
+    disabled_people_friendly = Column("disabled_people_friendly", Boolean)
+    lgbt_friendly = Column("lgbt_friendly", Boolean)
+    parking_place_available = Column("parking_place_available", Boolean)
+    owner_comments = Column("owner_comments", Text)
+    easy_ambulance_access = Column("easy_ambulance_access", Boolean)
     vacancies_free = Column("vacancies_free", Integer)
-    have_pets = Column("have_pets", Boolean)
-    accepts_pets = Column("accepts_pets", Boolean)
-    comments = Column("comments", String(255))
-    status = Column("status", Enum(Status), default=Status.CREATED, nullable=False)
+    staff_comments = Column("staff_comments", Text)
+    status = Column(
+        "status",
+        Enum(VerificationStatus),
+        server_default=VerificationStatus.CREATED,
+        nullable=False,
+    )
+    system_comments = Column("system_comments", Text, nullable=True)
+    created_at = Column(
+        "created_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at = Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
-    host_id = Column("host_id", ForeignKey("hosts.guid"))
+    host = relationship("Host", back_populates="accommodation_units")
+    guests = relationship("Guest", back_populates="accommodation_unit")
 
     def __repr__(self):
         return f"Apartment: {self.__dict__}"
-
-    def to_json(self):
-        obj_dict = self.__dict__
-        obj_dict.pop("__sa_instance_state")
-        return json.dumps(dict, indent=4, sort_keys=True, default=str)
 
 
 class LanguageEnum(enum.Enum):
@@ -149,23 +234,78 @@ class Guest(Base):
 
     __tablename__ = "guests"
 
-    id = Column("id", Integer, primary_key=True)
-    guid = Column("guid", UUID(as_uuid=True), default=uuid.uuid4)
-    full_name = Column("full_name", String(255))
-    email = Column("email", String(100))
-    phone_number = Column("phone_number", String(20))
-    people_in_group = Column("people_in_group", Integer, default=1)
-    adult_male_count = Column("adult_male_count", Integer)
-    adult_female_count = Column("adult_female_count", Integer)
-    children_count = Column("children_count", Integer)
-    children_ages = Column("children_ages", ARRAY(Integer))
-    have_pets = Column("have_pets", Boolean, nullable=True)
-    pets_description = Column("pets_description", String(255), nullable=True)
-    special_needs = Column("special_needs", Text, nullable=True)
-    priority_date = Column("priority_date", TIMESTAMP, server_default=func.now())
-    status = Column("status", Enum(Status), nullable=True, default=Status.CREATED)
-    finance_status = Column("finance_status", String(255), nullable=True)
-    how_long_to_stay = Column("how_long_to_stay", String(255), nullable=True)
-    volunteer_note = Column("volunteer_note", Text, nullable=True)
-    created_at = Column("created_at", TIMESTAMP, server_default=func.now())
-    updated_at = Column("updated_at", TIMESTAMP, onupdate=func.now())
+    guid = Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
+    )
+    full_name = Column("full_name", String(255), nullable=False)
+    email = Column("email", String(255), nullable=False)
+    phone_number = Column("phone_number", String(20), nullable=False)
+    is_agent = Column(
+        "is_agent", Boolean, server_default=expression.false(), nullable=False
+    )
+    document_number = Column("document_number", String(255))
+    people_in_group = Column(
+        "people_in_group", Integer, server_default=text("1"), nullable=False
+    )
+    adult_male_count = Column(
+        "adult_male_count", Integer, server_default=text("0"), nullable=False
+    )
+    adult_female_count = Column(
+        "adult_female_count", Integer, server_default=text("0"), nullable=False
+    )
+    children_ages = Column("children_ages", ARRAY(Integer), nullable=False)
+    have_pets = Column(
+        "have_pets", Boolean, server_default=expression.false(), nullable=False
+    )
+    pets_description = Column("pets_description", String(255))
+    special_needs = Column("special_needs", Text)
+    food_allergies = Column("food_allergies", Text)
+    meat_free_diet = Column(
+        "meat_free_diet", Boolean, server_default=expression.false(), nullable=False
+    )
+    gluten_free_diet = Column(
+        "gluten_free_diet", Boolean, server_default=expression.false(), nullable=False
+    )
+    lactose_free_diet = Column(
+        "lactose_free_diet", Boolean, server_default=expression.false(), nullable=False
+    )
+    finance_status = Column("finance_status", String(255))
+    how_long_to_stay = Column("how_long_to_stay", String(255))
+    desired_destination = Column("desired_destination", String(255))
+    priority_status = Column("priority_status", Enum(GuestPriorityStatus), default=None)
+    priority_date = Column(
+        "priority_date", TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    staff_comments = Column("staff_comments", Text)
+    verification_status = Column(
+        "verification_status",
+        Enum(VerificationStatus),
+        nullable=False,
+        server_default=VerificationStatus.CREATED,
+    )
+    system_comments = Column("system_comments", Text, nullable=True)
+    created_at = Column(
+        "created_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at = Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    accommodation_unit_id = Column(
+        "accommodation_unit_id",
+        ForeignKey("accommodation_units.guid", name="fk_accommodation_unit_id"),
+    )
+    accommodation_unit = relationship("AccommodationUnit", back_populates="guests")
+
+    def __repr__(self):
+        return f"Guest: {self.__dict__}"

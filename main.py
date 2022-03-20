@@ -1,69 +1,128 @@
 # pylint: disable=fixme,invalid-name,no-member,unused-argument
 """Module containing Google Cloud functions for deployment."""
 
-import flask
 import functions_framework
+import sentry_sdk
 
-from sqlalchemy import exc, select
-from utils.db import get_db_session
-
-from utils import orm
-from functions import handle_create_host
 from functions import accommodation
+from functions import host
+from functions import guest
+from utils.secret import access_secret_version_or_none
+
+from utils.sentry import sentry
+
+# See https://github.com/getsentry/sentry-python/issues/1081
+sentry_sdk.init(  # pylint: disable=abstract-class-instantiated # noqa: E0110
+    access_secret_version_or_none("sentry_dsn") or "https://0123456789@invalid/0",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=(
+        access_secret_version_or_none("sentry_traces_sample_rate") or 0
+    ),
+)
 
 
+@sentry
 @functions_framework.http
 def add_accommodation(request):
     """HTTP Cloud Function for posting new accommodation units."""
     return accommodation.handle_add_accommodation(request)
 
 
+@sentry
 @functions_framework.http
 def get_all_accommodations(request):
     """HTTP Cloud Function for getting all available accommodation units."""
     return accommodation.handle_get_all_accommodations(request)
 
 
+@sentry
 @functions_framework.http
-def create_host(request):
-    return handle_create_host(request)
+def delete_accommodation(request):
+    """HTTP Cloud Function for deleting an accommodation unit."""
+    return accommodation.handle_delete_accommodation(request)
 
 
+@sentry
+@functions_framework.http
+def get_accommodation_by_id(request):
+    """HTTP Cloud Function for getting an accommodation unit."""
+    return accommodation.handle_get_accommodation_by_id(request)
+
+
+@sentry
+@functions_framework.http
+def update_accommodation(request):
+    """HTTP Cloud function for updating an accommodation unit."""
+    return accommodation.handle_update_accommodation(request)
+
+
+@sentry
 @functions_framework.http
 def get_all_guests(request):
     """HTTP Cloud Function for getting all guests."""
-    Session = get_db_session()
-    session = Session()
-
-    stmt = select(orm.Guest)
-    result = session.execute(stmt)
-
-    print(result)
-
-    return flask.Response(status=200)
+    return guest.handle_get_all_guests(request)
 
 
+@sentry
 @functions_framework.http
 def add_guest(request):
     """HTTP Cloud Function for posting new guests."""
-    # parse request
-    request_json = request.get_json()
+    return guest.handle_add_guest(request)
 
-    # create Guest object from json
-    try:
-        guest = orm.Guest(**request_json)
-    except TypeError as e:
-        return flask.Response(
-            response=f"Received invalid parameter(s) for guest: {e}", status=405
-        )
 
-    Session = get_db_session()
-    with Session() as session:
-        session.add(guest)
-        # db transaction
-        try:
-            session.commit()
-        except exc.SQLAlchemyError as e:
-            return flask.Response(response=f"Transaction error: {e}", status=400)
+@sentry
+@functions_framework.http
+def get_guest_by_id(request):
+    """HTTP Cloud Function for getting selected guests."""
+    return guest.handle_get_guest_by_id(request)
 
-        return flask.Response(status=201)
+
+@sentry
+@functions_framework.http
+def delete_guest(request):
+    """HTTP Cloud Function for deleting selected guests."""
+    return guest.handle_delete_guest(request)
+
+
+@sentry
+@functions_framework.http
+def update_guest(request):
+    """HTTP Cloud Function for updating selected guests."""
+    return guest.handle_update_guest(request)
+
+
+@sentry
+@functions_framework.http
+def get_all_hosts(request):
+    """HTTP Cloud Function for getting all hosts."""
+    return host.handle_get_all_hosts(request)
+
+
+@sentry
+@functions_framework.http
+def delete_host(request):
+    """HTTP Cloud Function for deleting a host with a given id."""
+    return host.handle_delete_host(request)
+
+
+@sentry
+@functions_framework.http
+def update_host(request):
+    """HTTP Cloud Function for updating a host."""
+    return host.handle_update_host(request)
+
+
+@sentry
+@functions_framework.http
+def add_host(request):
+    """HTTP Cloud Function for posting a new host."""
+    return host.handle_add_host(request)
+
+
+@sentry
+@functions_framework.http
+def get_host_by_id(request):
+    """HTTP Cloud Function for getting a host with a given id."""
+    return host.handle_get_host_by_id(request)

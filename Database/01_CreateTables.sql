@@ -11,11 +11,9 @@ $$ LANGUAGE plpgsql;
 
 /* those who work with spreadsheet  */
 CREATE TABLE IF NOT EXISTS public.teammembers (
-    id integer GENERATED ALWAYS AS IDENTITY,
-    guid uuid DEFAULT uuid_generate_v4(),
-    full_name varchar(20),
-    phone_number varchar(20) ,
-    PRIMARY KEY(id)
+    guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    full_name varchar(100),
+    phone_number varchar(20)
 );
 
 CREATE TABLE IF NOT EXISTS public.languages (
@@ -25,21 +23,21 @@ CREATE TABLE IF NOT EXISTS public.languages (
     PRIMARY KEY(code2)
 );
 
-CREATE TYPE public.host_status AS ENUM ('CREATED', 'VERIFIED', 'BANNED');
+CREATE TYPE public.verificationstatus AS ENUM ('CREATED', 'VERIFIED', 'REJECTED');
 
 CREATE TABLE IF NOT EXISTS public.hosts (
-    id integer  GENERATED ALWAYS AS IDENTITY,
-    guid uuid UNIQUE DEFAULT uuid_generate_v4(),
-    full_name varchar(256) NOT NULL,
-    email varchar(100) NOT NULL,
-    phone_number varchar(20) NOT NULL,
-    call_after varchar(20),
-    call_before varchar(20),
-    comments  text,
-    status host_status NOT NULL DEFAULT 'CREATED',
-    created_at timestamp DEFAULT now(),
-    updated_at timestamp DEFAULT now(),
-    PRIMARY KEY(id)
+	guid UUID DEFAULT uuid_generate_v4() NOT NULL,
+	full_name VARCHAR(256) NOT NULL,
+	email VARCHAR(100) NOT NULL,
+	phone_number VARCHAR(20) NOT NULL,
+	call_after VARCHAR(64),
+	call_before VARCHAR(64),
+	comments TEXT,
+	status verificationstatus DEFAULT 'CREATED' NOT NULL,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	system_comments TEXT,
+	PRIMARY KEY (guid)
 );
 
 CREATE TRIGGER set_host_timestamp
@@ -49,71 +47,69 @@ CREATE TRIGGER set_host_timestamp
     EXECUTE PROCEDURE public.trigger_set_timestamp();
 
 CREATE TABLE IF NOT EXISTS public.host_teammembers (
-    teammember_id integer,
-    host_id integer,
+    teammember_id uuid,
+    host_id uuid,
     PRIMARY KEY(host_id,teammember_id),
     CONSTRAINT fk_teammember
         FOREIGN KEY(teammember_id)
-            REFERENCES teammembers(id),
+            REFERENCES teammembers(guid),
     CONSTRAINT fk_host
         FOREIGN KEY(host_id)
-            REFERENCES hosts(id)
+            REFERENCES hosts(guid)
 );
 
 CREATE TABLE IF NOT EXISTS public.host_languages (
-    id integer GENERATED ALWAYS AS IDENTITY,
-    language_code varchar(2),
-    host_id integer,
-    PRIMARY KEY(id),
-    CONSTRAINT fk_language
-        FOREIGN KEY(language_code)
-        REFERENCES languages(code2),
-    CONSTRAINT fk_hosts
-        FOREIGN KEY(host_id)
-            REFERENCES hosts(id)
+	language_code VARCHAR(2),
+	host_id UUID,
+	guid UUID DEFAULT uuid_generate_v4() NOT NULL,
+	PRIMARY KEY (guid),
+	CONSTRAINT lang_host_pair_unique UNIQUE (language_code, host_id),
+	CONSTRAINT fk_language FOREIGN KEY(language_code) REFERENCES languages (code2),
+	CONSTRAINT fk_host FOREIGN KEY(host_id) REFERENCES hosts (guid)
 );
 
-CREATE TYPE public.voivodeship_enum AS ENUM (
-    'DOLNOŚLĄSKIE',
-    'KUJAWSKO-POMORSKIE',
+CREATE TYPE public.voivodeship AS ENUM (
+    'DOLNOSLASKIE',
+    'KUJAWSKOPOMORSKIE',
     'LUBELSKIE',
     'LUBUSKIE',
-    'ŁÓDZKIE',
-    'MAŁOPOLSKIE',
+    'LODZKIE',
+    'MALOPOLSKIE',
     'MAZOWIECKIE',
     'OPOLSKIE',
     'PODKARPACKIE',
     'PODLASKIE',
     'POMORSKIE',
-    'ŚLĄSKIE',
-    'ŚWIĘTOKRZYSKIE',
-    'WARMIŃSKO-MAZURSKIE',
+    'SLASKIE',
+    'SWIETOKRZYSKIE',
+    'WARMINSKOMAZURSKIE',
     'WIELKOPOLSKIE',
     'ZACHODNIOPOMORSKIE'
 );
 
-CREATE TYPE public.apartment_status AS ENUM ('CREATED', 'VERIFIED', 'BANNED');
-
 CREATE TABLE IF NOT EXISTS public.accommodation_units (
-    id integer GENERATED ALWAYS AS IDENTITY,
-    guid uuid DEFAULT uuid_generate_v4(),
-    created_at timestamp DEFAULT now(),
-    updated_at timestamp DEFAULT now(),
-    city varchar(50), /* this should ideally be NOT NULL, but spreadsheet has very unstructured data */
-    zip varchar(10) NOT NULL,
-    voivodeship voivodeship_enum  NULL,
-    address_line varchar(512) NOT NULL,
-    vacancies_total smallint NOT NULL,
-    vacancies_free	smallint,
-    have_pets boolean,
-    accepts_pets boolean,
-    comments varchar(255),
-    host_id uuid NOT NULL,
-    status apartment_status NOT NULL DEFAULT 'CREATED',
-    PRIMARY KEY(id),
-    CONSTRAINT fk_host
-        FOREIGN KEY(host_id)
-            REFERENCES public.hosts(guid)
+	guid UUID DEFAULT uuid_generate_v4() NOT NULL,
+	host_id UUID NOT NULL,
+	city VARCHAR(50),
+	zip VARCHAR(10) NOT NULL,
+	voivodeship voivodeship,
+	address_line VARCHAR(512) NOT NULL,
+	vacancies_total INTEGER NOT NULL,
+	pets_present BOOLEAN,
+	pets_accepted BOOLEAN,
+	disabled_people_friendly BOOLEAN,
+	lgbt_friendly BOOLEAN,
+	parking_place_available BOOLEAN,
+	owner_comments TEXT,
+	easy_ambulance_access BOOLEAN,
+	vacancies_free INTEGER,
+	staff_comments TEXT,
+	status verificationstatus DEFAULT 'CREATED' NOT NULL,
+	system_comments TEXT,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	PRIMARY KEY (guid),
+	CONSTRAINT fk_host FOREIGN KEY(host_id) REFERENCES hosts (guid)
 );
 
 
@@ -123,30 +119,50 @@ CREATE TRIGGER set_accommodation_units_timestamp
     FOR EACH ROW
     EXECUTE PROCEDURE public.trigger_set_timestamp();
 
-CREATE TYPE public.guest_status AS ENUM ('CREATED', 'VERIFIED', 'BANNED');
+CREATE TYPE public.guest_status AS ENUM ('CREATED', 'VERIFIED', 'REJECTED');
 
-CREATE TABLE IF NOT EXISTS public.guests  (
-    id integer GENERATED ALWAYS AS IDENTITY,
-    guid uuid DEFAULT uuid_generate_v4(),
-    full_name varchar(255) NOT NULL,
-    email varchar(255) NOT NULL,
-    phone_number varchar(20) NULL,
-    people_in_group smallint not null DEFAULT 1,
-    adult_male_count smallint not null,
-    adult_female_count smallint not null,
-    children_count smallint not null,
-    children_ages smallint array null,
-    have_pets boolean,
-    pets_description varchar(255),
-    special_needs text,
-    priority_date  timestamp DEFAULT now(),
-    status guest_status NOT NULL DEFAULT 'CREATED',
-    finance_status varchar(255), /*could be enum ,bool , or text*/
-    how_long_to_stay  varchar(255),
-    volunteer_note text,
-    created_at timestamp DEFAULT now(),
-    updated_at timestamp DEFAULT now(),
-    PRIMARY KEY(id)
+CREATE TYPE public.guestprioritystatus AS ENUM (
+    'DOES_NOT_RESPOND',
+    'ACCOMMODATION_NOT_NEEDED',
+    'EN_ROUTE_UA',
+    'EN_ROUTE_PL',
+    'IN_KRK',
+    'AT_R3',
+    'ACCOMMODATION_FOUND',
+    'UPDATED'
+);
+
+CREATE TABLE IF NOT EXISTS public.guests (
+	guid UUID DEFAULT uuid_generate_v4() NOT NULL,
+	full_name VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL,
+	phone_number VARCHAR(20) NOT NULL,
+	is_agent BOOLEAN DEFAULT false NOT NULL,
+	document_number VARCHAR(255),
+	people_in_group INTEGER DEFAULT 1 NOT NULL,
+	adult_male_count INTEGER DEFAULT 0 NOT NULL,
+	adult_female_count INTEGER DEFAULT 0 NOT NULL,
+	children_ages INTEGER[] NOT NULL,
+	have_pets BOOLEAN DEFAULT false NOT NULL,
+	pets_description VARCHAR(255),
+	special_needs TEXT,
+	food_allergies TEXT,
+	meat_free_diet BOOLEAN DEFAULT false NOT NULL,
+	gluten_free_diet BOOLEAN DEFAULT false NOT NULL,
+	lactose_free_diet BOOLEAN DEFAULT false NOT NULL,
+	finance_status VARCHAR(255),
+	how_long_to_stay VARCHAR(255),
+	desired_destination VARCHAR(255),
+	priority_status guestprioritystatus,
+	priority_date TIMESTAMP WITH TIME ZONE DEFAULT now(),
+	staff_comments TEXT,
+	verification_status verificationstatus DEFAULT 'CREATED' NOT NULL,
+	system_comments TEXT,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	accommodation_unit_id UUID,
+	PRIMARY KEY (guid),
+	CONSTRAINT fk_accommodation_unit_id FOREIGN KEY(accommodation_unit_id) REFERENCES accommodation_units (guid)
 );
 
 CREATE TRIGGER set_guests_timestamp
