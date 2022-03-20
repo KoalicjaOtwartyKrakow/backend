@@ -21,12 +21,14 @@ Regarding branching:
 ## Testing
 
 ```bash
+psql -h localhost -U postgres -d salamlab-test -f Database/01_CreateTables.sql
+
 pytest tests
 ```
 
 If you need database filled with data - use `db` fixture, just add `db` argument to your test function.
 
-## Local debuging
+## Local debugging
 
 To debug your Google Cloud Function locally, you need to first create database. Easiest way is to use prepared docker container:
 
