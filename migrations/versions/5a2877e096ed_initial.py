@@ -262,6 +262,27 @@ def upgrade():
         ),
         sa.PrimaryKeyConstraint("guid"),
     )
+
+    op.execute(
+        """
+    INSERT INTO public.languages("name", code2, code3)
+    VALUES
+        ('English',	'en',	'eng'),
+        ('Ukrainian',	'uk',	'ukr'),
+        ('Polish',	'pl',	'pol'),
+        ('Russian',	'ru',	'rus');
+    """
+    )
+
+    op.execute(
+        """
+    CREATE USER ApiServiceUser WITH PASSWORD 'aB94cgg4s?FkLzsi';
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public
+        GRANT select,insert,update,delete,truncate ON TABLES TO ApiServiceUser;
+    GRANT select,insert,update,delete,truncate ON ALL TABLES IN schema public TO ApiServiceUser;
+    REVOKE select,insert,update,delete,truncate ON public.languages from ApiServiceUser;
+    """
+    )
     # ### end Alembic commands ###
 
 
@@ -277,4 +298,6 @@ def downgrade():
     op.execute("DROP TYPE verificationstatus;")
     op.execute("DROP TYPE voivodeship;")
     op.execute("DROP TYPE guestprioritystatus;")
+
+    op.execute("DROP OWNED BY ApiServiceUser; DROP USER ApiServiceUser;")
     # ### end Alembic commands ###
