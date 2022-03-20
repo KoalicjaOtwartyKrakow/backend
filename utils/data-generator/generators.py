@@ -283,10 +283,9 @@ languages = ["en", "uk", "pl", "ru"]
 languages_weights = [8, 2, 10, 2]
 
 
-def generate_languages(all_hosts):
-    sample = random.sample(languages, counts=languages_weights, k=1)
-    host = random.choice(all_hosts)
-    return {"language_code": sample[0], "host_id": host["guid"]}
+def generate_languages(host):
+    langs = random.sample(languages, counts=languages_weights, k=random.randint(1, 4))
+    return [{"language_code": i, "host_id": host["guid"]} for i in set(langs)]
 
 
 def generate_teammember():
@@ -320,7 +319,7 @@ WOJEWODZTWA_MAP = {
 }
 
 
-def generate_accomodation_unit(all_hosts):
+def generate_accommodation_unit(all_hosts):
     ulic = random.choices(ulice, weights=ulice_weights, k=1)[0]
     woj = ulic["woj"]
     pow = ulic["pow"]
@@ -357,8 +356,8 @@ def generate_accomodation_unit(all_hosts):
         if random.randint(0, 100) < 40
         else vacancies_total
     )
-    have_pets = random.randint(0, 100) < 30
-    accept_pets = random.randint(0, 100) < 20
+    pets_accepted = random.randint(0, 100) < 20
+    pets_present = random.randint(0, 100) < 20
     host = random.choice(all_hosts)
     host_id = host["guid"]
     return {
@@ -369,9 +368,9 @@ def generate_accomodation_unit(all_hosts):
         "voivodeship": voivodeship,
         "vacancies_total": vacancies_total,
         "vacancies_free": vacancies_free,
-        "have_pets": have_pets,
-        "accepts_pets": accept_pets,
-        "comments": "",
+        "pets_accepted": pets_accepted,
+        "pets_present": pets_present,
+        "staff_comments": "",
         "host_id": host_id,
     }
 
@@ -389,7 +388,7 @@ PRIORITY_STATUS = [
 ]
 
 
-def generate_guest():
+def generate_guest(all_accommodation_units):
     assigned_sex = generate_assigned_sex()
     first_name = generate_first_name(assigned_sex)
     last_name = generate_last_name(assigned_sex)
@@ -414,7 +413,10 @@ def generate_guest():
     special_needs = ""
     how_long_to_stay = random.choice(STAYS)
     priority_status = random.choice(PRIORITY_STATUS)
-    validation_notes = "validation failed" if random.randint(1, 100) < 20 else ""
+
+    accommodation_unit_id = random.choice(
+        [None, random.choice(all_accommodation_units)["guid"]]
+    )
     return {
         "guid": str(uuid.uuid4()),
         "full_name": " ".join([first_name, last_name]),
@@ -423,12 +425,11 @@ def generate_guest():
         "people_in_group": people_in_group,
         "adult_male_count": adult_men_count,
         "adult_female_count": adult_woman_count,
-        "children_count": children_count,
         "children_ages": children_ages,
         "have_pets": have_pets,
         "pets_description": pets_description,
         "special_needs": special_needs,
         "how_long_to_stay": how_long_to_stay,
         "priority_status": priority_status,
-        "validation_notes": validation_notes,
+        "accommodation_unit_id": accommodation_unit_id,
     }

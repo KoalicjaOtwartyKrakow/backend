@@ -12,7 +12,7 @@ $$ LANGUAGE plpgsql;
 /* those who work with spreadsheet  */
 CREATE TABLE IF NOT EXISTS public.teammembers (
     guid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    full_name varchar(20),
+    full_name varchar(100),
     phone_number varchar(20)
 );
 
