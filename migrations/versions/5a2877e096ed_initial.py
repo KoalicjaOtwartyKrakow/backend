@@ -64,7 +64,12 @@ def upgrade():
     )
     op.create_table(
         "teammembers",
-        sa.Column("guid", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column(
+            "guid",
+            postgresql.UUID(as_uuid=True),
+            server_default=sa.text("uuid_generate_v4()"),
+            nullable=False,
+        ),
         sa.Column("full_name", sa.String(length=100), nullable=True),
         sa.Column("phone_number", sa.String(length=20), nullable=True),
         sa.PrimaryKeyConstraint("guid"),

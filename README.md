@@ -13,6 +13,8 @@
 2. `pipenv install --dev` (passing `--dev` will include both the default and development)
 3. `pre-commit install`
 4. `docker-compose up --no-start && docker-compose start`
+5. `alembic upgrade head`
+6. `PYTHONPATH=. python utils/data-generator/main.py --teryt-path=<path to teryt> --count=5 --db`
 
 Regarding branching:
 - try to make sure you work on issues on seperate branches (e.g. feature/get-guests)
