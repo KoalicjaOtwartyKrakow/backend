@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS public.languages (
 CREATE TYPE public.verificationstatus AS ENUM ('CREATED', 'VERIFIED', 'REJECTED');
 
 CREATE TABLE IF NOT EXISTS public.hosts (
-	guid UUID NOT NULL,
+	guid UUID DEFAULT uuid_generate_v4() NOT NULL,
 	full_name VARCHAR(256) NOT NULL,
 	email VARCHAR(100) NOT NULL,
 	phone_number VARCHAR(20) NOT NULL,
@@ -88,7 +88,7 @@ CREATE TYPE public.voivodeship AS ENUM (
 );
 
 CREATE TABLE IF NOT EXISTS public.accommodation_units (
-	guid UUID NOT NULL,
+	guid UUID DEFAULT uuid_generate_v4() NOT NULL,
 	host_id UUID NOT NULL,
 	city VARCHAR(50),
 	zip VARCHAR(10) NOT NULL,
@@ -133,7 +133,7 @@ CREATE TYPE public.guestprioritystatus AS ENUM (
 );
 
 CREATE TABLE IF NOT EXISTS public.guests (
-	guid UUID NOT NULL,
+	guid UUID DEFAULT uuid_generate_v4() NOT NULL,
 	full_name VARCHAR(255) NOT NULL,
 	email VARCHAR(255) NOT NULL,
 	phone_number VARCHAR(20) NOT NULL,

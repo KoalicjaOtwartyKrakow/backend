@@ -100,7 +100,12 @@ class Host(Base):
 
     __tablename__ = "hosts"
 
-    guid = Column("guid", DB_UUID(as_uuid=True), primary_key=True)
+    guid = Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
+    )
     full_name = Column("full_name", String(256), nullable=False)
     email = Column("email", String(100), nullable=False)
     phone_number = Column("phone_number", String(20), nullable=False)
@@ -162,7 +167,12 @@ class AccommodationUnit(Base):
 
     __tablename__ = "accommodation_units"
 
-    guid = Column("guid", DB_UUID(as_uuid=True), primary_key=True)
+    guid = Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
+    )
     host_id = Column(
         "host_id", ForeignKey("hosts.guid", name="fk_host"), nullable=False
     )
