@@ -9,6 +9,7 @@ click = "*"
 requests = "*"
 appdata = "*"
 python-dotenv = "*"
+uuid = "*"
 
 [dev-packages]
 pre-commit = "==2.17.0"

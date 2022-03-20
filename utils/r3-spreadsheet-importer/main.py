@@ -2,6 +2,7 @@ import click
 import csv
 import datetime
 import re
+import uuid
 from pyrnalist import report
 from dotenv import load_dotenv
 
@@ -27,6 +28,7 @@ RECEPCJA_HEADERS = ['va', 'Notatki', 'Timestamp', "Imię | Ім'я ", 'Nazwisko 
                     'Czy mają własny transport? | Чи є власний транспорт?', 'Miejscowość | Місцевість',
                     'Od jakiej daty  jest potrzebne zakwaterowanie? | Від якого числа (дати) потрібне житло?',
                     'Notatki i komentarze dotyczące zwierząt domowych, zakwaterowania, stanu zdrowia, edukacji itd (opcjonalnie) | Нотатки і коментарі відносно домашніх тварин, житла, стану здоров"я, освіти та інше', 'Czy osoba zostaje na noc w naszym punkcie pomocy przy ul. Radziwiłłowska 3? | Чи особа залишається в нашому пункті допомоги на Radziwiłłowska 3?', 'Numer telefonu (wolontariusza akceptującego zgłoszenie) | Номер телефону (волонтера, що приймає заявку)', 'Oświadczenie znajomości reguł przebywania | Підтвердження знайомості правил перебування', 'Czy osoba potrzebuje mieszkania? | Чи особа шукає житло?', '', '', '']
+MIESZKANIA_HEADERS = ['25151', 'NASZE UWAGI', 'KIM jest juz zajety? (ID czlowieka) / Data kiedy aktualizowane', '', 'Timestamp', 'W jaki sposób chcesz pomóc?', 'Miasto lokalu', 'Adres lokalu', 'Imię i nazwisko:', 'Adres email:', 'Numer telefonu', 'Numer telefonu / adres email', 'Maksymalna ilość ludzi, które możesz przyjąć w swoim lokalu mieszkalnym?', 'Uwagi: Czy posiadasz zwierzęta? Czy akceptujesz gości ze zwierzętami? Godziny w których możemy do Ciebie dzwonić? Masz inne uwagi?', 'Numer telefonu/ adres email', 'Jakie znasz języki?', 'Czy masz doświadczenie w tłumaczeniach?', 'Jeśli tak, czy możesz krótko opisać Twoje doświadczenie?', 'Czy masz doświadczenie w pomocy edukacyjnej?', 'Jeśli tak, czy możesz krótko opisać Twoje doświadczenie?', 'Jeśli masz jakieś pytania, uwagi lub dodatkowe komentarze, na które nie znalazł_ś miejsca w formularzu, napisz je proszę poniżej:', 'Wyrażam zgodę na przetwarzanie moich danych osobowych przez Stowarzyszenie Laboratorium Działań dla Pokoju w celu organizacji pomocy osobom uchodźczym z Ukrainy.']
 CHILDREN_AGES_LAT_REGEXP = r"\s?lat"
 
 
@@ -110,10 +112,7 @@ def get_preferred_location(string, vn):
         return None
     return ", ".join(filter(lambda x: x, [map_location(x, vn) for x in string.split(",")]))
 
-
-@click.command()
-@click.option('-n', '--dry-run', is_flag=True)
-def import_data(dry_run):
+def import_ludzi():
     ludzi = []
     with open("[salam] Ludzi (Ukrainska) - Ludzi.tsv", encoding='utf-8', newline='') as cf:
         cr = csv.reader(cf, delimiter="\t")
@@ -219,7 +218,10 @@ def import_data(dry_run):
             }
             if full_name != ' ' and full_name != '':
                 ludzi.append(data)
+    return ludzi
 
+
+def import_recepcja():
     recepcja = []
     with open("[salam] Ludzi (Ukrainska) - UPD Data from Reception.tsv", encoding='utf-8', newline='') as cf:
         cr = csv.reader(cf, delimiter="\t")
@@ -335,10 +337,11 @@ def import_data(dry_run):
             }
             if full_name != ' ' and full_name != '':
                 recepcja.append(data)
+    return recepcja
 
-    report.info(f'Imported {len(ludzi)} from Ludzi')
-    report.info(f'Imported {len(recepcja)} from UPD Data from Reception')
 
+def merge_ludzi_recepcja(ludzi, recepcja):
+    merged = [x for x in ludzi]
     phone_numbers_dict = {}
     full_name_dict = {}
     for x in recepcja:
@@ -346,7 +349,7 @@ def import_data(dry_run):
         full_name_dict[x['full_name']] = x
 
     duplicate_ludzi = {}
-    for i, x in enumerate(ludzi):
+    for i, x in enumerate(merged):
         key = x['full_name']
         r = full_name_dict.get(key, None)
         if r:
@@ -378,25 +381,146 @@ def import_data(dry_run):
                     merge_issues_arr.append(row)
             merge_issues_str = "\n".join(merge_issues_arr)
             x['validation_notes'].append(f'Could not merge following data:\n{merge_issues_str}')
-            ludzi[i] = x
+            merged[i] = x
             full_name_dict.pop(key, None)
-
-    report.info(f'Found {len(duplicate_ludzi.keys())} duplicate Ludzi')
-
-    # first process "Ludzi"
-    import json
-    with open("dupa.json", "w", encoding='utf-8') as f:
-        f.write(json.dumps(ludzi))
-    with open("recepcja.json", "w", encoding='utf-8') as f:
-        f.write(json.dumps(full_name_dict))
-    for l in ludzi:
-        pass
-
-    # then process Reception, that are not in "Ludzi"
-    for l in recepcja:
-        pass
+    [merged.append(x) for x in full_name_dict.values()]
+    return merged
 
 
+def import_mieszkania():
+    hosts = []
+    units = []
+    languages = []
+    with open("[salam] Mieszkania (Polska) - Automated Mieszkania.tsv", encoding='utf-8', newline='') as cf:
+        cr = csv.reader(cf, delimiter="\t")
+        headers = next(cr, [0])
+        headers_match = all(i for i in [i == j for i, j in zip(headers, MIESZKANIA_HEADERS)])
+        if not headers_match:
+            report.error("Headers do not match with Mieszkania tab format")
+            print(MIESZKANIA_HEADERS)
+            print(headers)
+            return
+
+        for row in cr:
+            host_validation_notes = []
+            unit_validation_notes = []
+
+            host_guid = str(uuid.uuid4())
+            host_fullname = row[8]
+            host_email = row[9]
+            host_phone_number = row[10]
+            host_comments = row[13]
+
+            created_at = datetime.datetime.now().isoformat()
+            try:
+                created_at = datetime.datetime.strptime(row[2], "%d/%m/%Y %H:%M:%S").isoformat()
+            except:
+                host_validation_notes.append(f'Could not understand created_at: {row[2]}')
+                unit_validation_notes.append(f'Could not understand created_at: {row[2]}')
+
+            host_langs = row[15].lower()
+            languages.append({'host_id': host_guid, 'language_code': 'pl'}) if "polski" in host_langs else None
+            languages.append({'host_id': host_guid, 'language_code': 'en'}) if "angielski" in host_langs else None
+            languages.append({'host_id': host_guid, 'language_code': 'ru'}) if "rosyjski" in host_langs else None
+            languages.append({'host_id': host_guid, 'language_code': 'uk'}) if "ukraiński" in host_langs else None
+
+            host_data = {
+                'guid': host_guid,
+                'full_name': host_fullname,
+                'email': host_email,
+                'phone_number': host_phone_number,
+                'comments': host_comments,
+                'created_at': created_at,
+                'system_comments': "\n".join(host_validation_notes)
+            }
+            hosts.append(host_data)
+
+            staff_comments = "\n".join([row[0], row[1]])
+            guest_id = row[2]
+            city = row[6]
+            address_line = row[7]
+            additional_comments = row[16]
+            vacancies_total = 0
+            vtstr = row[12]
+            if vtstr == "1-2":
+                vacancies_total = 2
+            elif vtstr == "3-5":
+                vacancies_total = 5
+            elif vtstr == "6-10":
+                vacancies_total = 10
+            elif vtstr == "Więcej niż 10":
+                vacancies_total = 12
+                unit_validation_notes.append("Vacancies_total upper bound not specified")
+            else:
+                unit_validation_notes.append('Vacancies total not understood')
+
+            unit_data = {
+                'city': city,
+                'zip': 'N/A',
+                'address_line': address_line,
+                'vacancies_total': vacancies_total,
+                'owner_comments': additional_comments,
+                'staff_comments': staff_comments,
+                'system_comments': "\n".join(unit_validation_notes),
+                'host_id': host_guid,
+                '___guest_id': guest_id
+            }
+            units.append(unit_data)
+            if len(units) > 10:
+                break
+    return (hosts, units, languages)
+
+
+def to_pgsql_value(v):
+    if isinstance(v, list):
+        return "'{" + ", ".join([to_pgsql_value(x) for x in v]) + "}'"
+    elif isinstance(v, str):
+        return f"'{v}'"
+    elif isinstance(v, bool):
+        return 'true' if v else 'false'
+    else:
+        return str(v)
+
+
+def to_sql(table, values):
+    if len(values)>0:
+        with open(f'{table}.sql', 'w', encoding='utf-8') as file:
+            keys = [x for x in values[0].keys() if not x.startswith("__")]
+            keys_quoted = [f'"{x}"' for x in keys]
+            keys_str = ", ".join(keys_quoted)
+            sql = f'INSERT INTO {table}({keys_str}) VALUES'
+            value_inserts = []
+            for v in values:
+                values_str = ", ".join([to_pgsql_value(v[k]) for k in keys])
+                value_inserts.append(f'({values_str})')
+            sql += ", ".join(value_inserts)
+            file.write(sql)
+
+
+@click.command()
+def import_data():
+    ludzi = import_ludzi()
+    recepcja = import_recepcja()
+
+    report.info(f'Imported {len(ludzi)} from Ludzi')
+    report.info(f'Imported {len(recepcja)} from UPD Data from Reception')
+
+    merged = merge_ludzi_recepcja(ludzi, recepcja)
+    report.info(f'Total guests after merge: {len(merged)}')
+
+    (hosts, units, languages) = import_mieszkania()
+    report.info(f'Imported {len(hosts)} hosts from Mieszkania (live)')
+    report.info(f'Imported {len(units)} units from Mieszkania (live)')
+    report.info(f'Imported {len(languages)} languages from Mieszkania (live)')
+
+    to_sql('public.hosts', hosts)
+    to_sql('public.host_languages', languages)
+    to_sql('public.accommodation_units', units)
+    to_sql('public.guests', merged)
+
+
+# TODO: try to match guest to accommodation by __old_id, __guest_id
+# TODO: try to extract zip out of address_line. what to do if failed?
 if __name__ == '__main__':
     load_dotenv()
     import_data()
