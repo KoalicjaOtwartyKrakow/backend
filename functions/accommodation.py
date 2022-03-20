@@ -2,6 +2,7 @@
 import json
 
 import flask
+import marshmallow
 
 from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
@@ -29,7 +30,14 @@ def handle_add_accommodation(request):
 
     Session = get_db_session(global_pool)
     with Session() as session:
-        accommodation = schema.load(data, session=session)
+        try:
+            accommodation = schema.load(data, session=session)
+        except marshmallow.ValidationError as e:
+            return flask.Response(
+                {"validationErrors": e.messages},
+                status=422,
+                mimetype="application/json",
+            )
         session.add(accommodation)
         session.commit()
         session.refresh(accommodation)
@@ -139,7 +147,16 @@ def handle_update_accommodation(request):
             if accommodation is None:
                 return flask.Response("Not found", status=404)
 
-            accommodation = schema.load(data, session=session, instance=accommodation)
+            try:
+                accommodation = schema.load(
+                    data, session=session, instance=accommodation
+                )
+            except marshmallow.ValidationError as e:
+                return flask.Response(
+                    {"validationErrors": e.messages},
+                    status=422,
+                    mimetype="application/json",
+                )
 
             session.add(accommodation)
             session.commit()
