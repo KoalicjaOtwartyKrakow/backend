@@ -1,4 +1,5 @@
 import functools
+import json
 from typing import Optional
 
 from flask import Response, Request as FlaskRequest
@@ -27,7 +28,7 @@ def function_wrapper(func):
             )
             if user_guid is None:
                 return Response(
-                    {"message": "Not authenticated."},
+                    json.dumps({"message": "Not authenticated."}),
                     status=403,
                     mimetype="application/json",
                 )

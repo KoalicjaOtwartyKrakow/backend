@@ -16,6 +16,7 @@ def test_jwt_auth():
     request.headers = {"Authorization": ""}
     res = handle_example(request)
     assert res.status_code == 403
+    assert res.json == {"message": "Not authenticated."}
 
     payload = {
         "given_name": "John",
