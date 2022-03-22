@@ -8,13 +8,14 @@ import sentry_sdk
 
 from utils.db import DB
 from .auth import upsert_user_from_jwt
+from .orm import User
 
 
 class Request(FlaskRequest):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.db: Optional[DB] = None
-        self.user_guid: Optional[str] = None
+        self.user: Optional[User] = None
 
 
 def function_wrapper(func):
@@ -23,17 +24,17 @@ def function_wrapper(func):
         try:
             auth_header = request.headers.get("Authorization", "")
             db = DB()
-            user_guid = upsert_user_from_jwt(
+            user = upsert_user_from_jwt(
                 db, jwt_payload=auth_header.strip("Bearer").strip()
             )
-            if user_guid is None:
+            if user is None:
                 return Response(
                     json.dumps({"message": "Not authenticated."}),
                     status=403,
                     mimetype="application/json",
                 )
 
-            request.user_guid = user_guid
+            request.user = user
             request.db = db
 
             return func(request)
