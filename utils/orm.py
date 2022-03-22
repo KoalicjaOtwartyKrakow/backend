@@ -325,8 +325,8 @@ class User(Base):
         server_default=text("uuid_generate_v4()"),
         primary_key=True,
     )
-    given_name = Column("given_name", String(255), nullable=False)
-    family_name = Column("family_name", String(255), nullable=False)
+    given_name = Column("given_name", String(100), nullable=False)
+    family_name = Column("family_name", String(100), nullable=False)
     email = Column("email", String(255), nullable=False, unique=True)
     google_sub = Column("google_sub", String(255), nullable=False, unique=True)
     google_picture = Column("google_picture", String(255), nullable=False)
