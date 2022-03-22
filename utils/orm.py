@@ -303,6 +303,11 @@ class Guest(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    claimed_by_id = Column(
+        "claimed_by_id",
+        ForeignKey("users.guid", name="fk_guests_claimed_by_id"),
+    )
+    claimed_by = relationship("User", back_populates="claimed_guests")
 
     accommodation_unit_id = Column(
         "accommodation_unit_id",
@@ -330,6 +335,7 @@ class User(Base):
     email = Column("email", String(255), nullable=False, unique=True)
     google_sub = Column("google_sub", String(255), nullable=False, unique=True)
     google_picture = Column("google_picture", String(255), nullable=False)
+    claimed_guests = relationship("Guest", back_populates="claimed_by")
 
     def __repr__(self):
         return f"User: {self.__dict__}"
