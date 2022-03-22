@@ -312,3 +312,24 @@ class Guest(Base):
 
     def __repr__(self):
         return f"Guest: {self.__dict__}"
+
+
+class User(Base):
+    """ORM for Users."""
+
+    __tablename__ = "users"
+
+    guid = Column(
+        "guid",
+        DB_UUID(as_uuid=True),
+        server_default=text("uuid_generate_v4()"),
+        primary_key=True,
+    )
+    given_name = Column("given_name", String(100), nullable=False)
+    family_name = Column("family_name", String(100), nullable=False)
+    email = Column("email", String(255), nullable=False, unique=True)
+    google_sub = Column("google_sub", String(255), nullable=False, unique=True)
+    google_picture = Column("google_picture", String(255), nullable=False)
+
+    def __repr__(self):
+        return f"User: {self.__dict__}"
