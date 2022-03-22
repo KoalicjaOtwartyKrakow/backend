@@ -7,20 +7,18 @@ import sentry_sdk
 from functions import accommodation
 from functions import host
 from functions import guest
-from utils.secret import access_secret_version_or_none
 
+from utils import settings
 from utils.functions import function_wrapper
 
 
 # See https://github.com/getsentry/sentry-python/issues/1081
 sentry_sdk.init(  # pylint: disable=abstract-class-instantiated # noqa: E0110
-    access_secret_version_or_none("sentry_dsn") or "https://0123456789@invalid/0",
+    settings.SENTRY_DSN,
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for performance monitoring.
     # We recommend adjusting this value in production.
-    traces_sample_rate=(
-        access_secret_version_or_none("sentry_traces_sample_rate") or 0
-    ),
+    traces_sample_rate=settings.SENTRY_TRACES_SAMPLE_RATE,
 )
 
 

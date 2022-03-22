@@ -26,3 +26,6 @@ DB_QUERY = (
 )
 
 JWT_SECRET = get_secret_var("jwt_secret", default="secret")
+
+SENTRY_DSN = get_secret_var("sentry_dsn")
+SENTRY_TRACES_SAMPLE_RATE = get_secret_var("sentry_traces_sample_rate", 0)
