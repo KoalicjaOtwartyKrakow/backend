@@ -9,9 +9,8 @@ from repos import Repos
 
 def function_wrapper(func):
     """
-    Adds repos, handles errors.
+    Adds repos, user, handles errors.
     """
-
     @functools.wraps(func)
     def wrapper(request):
         try:
