@@ -13,7 +13,7 @@ from utils.serializers import GuestSchema, GuestSchemaFull, UUIDEncoder
 
 
 def handle_get_all_guests(request: Request):
-    with request.repos.db.acquire() as session:
+    with request.db.acquire() as session:
         stmt = select(Guest)
         result = session.execute(stmt)
         guest_schema_full = GuestSchemaFull()
@@ -29,7 +29,7 @@ def handle_add_guest(request: Request):
 
     data = request.get_json()
 
-    with request.repos.db.acquire() as session:
+    with request.db.acquire() as session:
         guest = guest_schema.load(data, session=session)
         session.add(guest)
         session.commit()
@@ -48,7 +48,7 @@ def handle_get_guest_by_id(request: Request):
         return flask.Response("No guest id supplied!", status=400)
 
     try:
-        with request.repos.db.acquire() as session:
+        with request.db.acquire() as session:
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
 
@@ -74,7 +74,7 @@ def handle_delete_guest(request: Request):
         return flask.Response("No guest id supplied!", status=400)
 
     try:
-        with request.repos.db.acquire() as session:
+        with request.db.acquire() as session:
             result1 = (
                 session.query(Guest)
                 .filter(Guest.guid == guest_id)
@@ -104,7 +104,7 @@ def handle_update_guest(request: Request):
     data = request.get_json()
 
     try:
-        with request.repos.db.acquire() as session:
+        with request.db.acquire() as session:
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
 

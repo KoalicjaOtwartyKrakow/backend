@@ -7,7 +7,7 @@ from utils.functions import function_wrapper
 
 @function_wrapper
 def handle_example(request):
-    assert request.user["given_name"] == "John"
+    assert request.user_guid
     return "ok"
 
 

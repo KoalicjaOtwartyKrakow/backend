@@ -22,7 +22,7 @@ def handle_add_accommodation(request: Request):
 
     data = request.get_json(silent=True)
 
-    with request.repos.db.acquire() as session:
+    with request.db.acquire() as session:
         accommodation = schema.load(data, session=session)
         session.add(accommodation)
         session.commit()
@@ -33,7 +33,7 @@ def handle_add_accommodation(request: Request):
 
 
 def handle_get_all_accommodations(request: Request):
-    with request.repos.db.acquire() as session:
+    with request.db.acquire() as session:
         stmt = select(AccommodationUnit).order_by(
             AccommodationUnit.vacancies_free.desc()
         )
@@ -53,7 +53,7 @@ def handle_delete_accommodation(request: Request):
         return flask.Response("No accommodation id supplied!", status=400)
 
     try:
-        with request.repos.db.acquire() as session:
+        with request.db.acquire() as session:
             stmt = (
                 delete(AccommodationUnit)
                 .where(AccommodationUnit.guid == accommodation_id)
@@ -84,7 +84,7 @@ def handle_get_accommodation_by_id(request: Request):
         return flask.Response("No accommodation id supplied!", status=400)
 
     try:
-        with request.repos.db.acquire() as session:
+        with request.db.acquire() as session:
             stmt = select(AccommodationUnit).where(
                 AccommodationUnit.guid == accommodation_id
             )
@@ -117,7 +117,7 @@ def handle_update_accommodation(request: Request):
     data = request.get_json()
 
     try:
-        with request.repos.db.acquire() as session:
+        with request.db.acquire() as session:
             stmt = select(AccommodationUnit).where(
                 AccommodationUnit.guid == accommodation_id
             )

@@ -29,7 +29,7 @@ def handle_get_all_hosts(request: Request):
         print(f"Filtering by status={status_parameter}")
         stmt = stmt.where(orm.Host.status == status_parameter)
 
-    with request.repos.db.acquire() as s:
+    with request.db.acquire() as s:
         result = s.execute(stmt)
         host_schema = HostSchema()
         response = json.dumps(
@@ -44,7 +44,7 @@ def handle_add_host(request: Request):
 
     data = request.get_json()
 
-    with request.repos.db.acquire() as session:
+    with request.db.acquire() as session:
         host = host_schema.load(data, session=session)
         session.add(host)
         session.commit()
@@ -63,7 +63,7 @@ def handle_get_host_by_id(request: Request):
         return flask.Response("No host id supplied!", status=400)
 
     try:
-        with request.repos.db.acquire() as session:
+        with request.db.acquire() as session:
             stmt = select(orm.Host).where(orm.Host.guid == host_id)
             result = session.execute(stmt)
 
@@ -93,7 +93,7 @@ def handle_update_host(request: Request):
 
     data = request.get_json()
 
-    with request.repos.db.acquire() as session:
+    with request.db.acquire() as session:
         try:
             stmt = select(orm.Host).where(orm.Host.guid == host_id)
             result = session.execute(stmt)
@@ -133,7 +133,7 @@ def handle_delete_host(request: Request):
     if id is None:
         return flask.Response(response="Received no hostId", status=400)
 
-    with request.repos.db.acquire() as session:
+    with request.db.acquire() as session:
         try:
             stmt = (
                 delete(orm.Host)

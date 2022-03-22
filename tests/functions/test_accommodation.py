@@ -1,12 +1,12 @@
 from unittest.mock import Mock
 
 from functions.accommodation import handle_add_accommodation
-from repos import Repos
+from utils.db import DB
 
 
 def test_add_accommodation(db):
     request = Mock()
-    request.repos = Repos()
+    request.db = DB()
     request.get_json.return_value = {
         "vacanciesTotal": 1,
         "zip": "12345",
