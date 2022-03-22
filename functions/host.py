@@ -7,11 +7,11 @@ from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import select, delete
 
 from utils import orm
-
+from utils.functions import Request
 from utils.serializers import HostSchema, UUIDEncoder
 
 
-def handle_get_all_hosts(request):
+def handle_get_all_hosts(request: Request):
     status_parameter = request.args.get("status", None)
     if status_parameter:
         try:
@@ -39,7 +39,7 @@ def handle_get_all_hosts(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_add_host(request):
+def handle_add_host(request: Request):
     host_schema = HostSchema()
 
     data = request.get_json()
@@ -54,7 +54,7 @@ def handle_add_host(request):
     return flask.Response(response=response, status=201, mimetype="application/json")
 
 
-def handle_get_host_by_id(request):
+def handle_get_host_by_id(request: Request):
     host_schema = HostSchema()
 
     try:
@@ -83,7 +83,7 @@ def handle_get_host_by_id(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_update_host(request):
+def handle_update_host(request: Request):
     host_schema = HostSchema()
 
     try:
@@ -125,7 +125,7 @@ def handle_update_host(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_delete_host(request):
+def handle_delete_host(request: Request):
     try:
         id = request.args.get("hostId")
     except KeyError:

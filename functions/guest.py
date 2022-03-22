@@ -6,13 +6,13 @@ import marshmallow
 
 from sqlalchemy import exc, select
 
-from utils.orm import Guest
 from utils import orm
-
+from utils.functions import Request
+from utils.orm import Guest
 from utils.serializers import GuestSchema, GuestSchemaFull, UUIDEncoder
 
 
-def handle_get_all_guests(request):
+def handle_get_all_guests(request: Request):
     with request.repos.db.acquire() as session:
         stmt = select(Guest)
         result = session.execute(stmt)
@@ -23,7 +23,7 @@ def handle_get_all_guests(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_add_guest(request):
+def handle_add_guest(request: Request):
     guest_schema = GuestSchema()
     guest_schema_full = GuestSchemaFull()
 
@@ -39,7 +39,7 @@ def handle_add_guest(request):
     return flask.Response(response=response, status=201, mimetype="application/json")
 
 
-def handle_get_guest_by_id(request):
+def handle_get_guest_by_id(request: Request):
     guest_schema_full = GuestSchemaFull()
 
     try:
@@ -67,7 +67,7 @@ def handle_get_guest_by_id(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_delete_guest(request):
+def handle_delete_guest(request: Request):
     try:
         guest_id = request.args["guestId"]
     except KeyError:
@@ -92,7 +92,7 @@ def handle_delete_guest(request):
     return flask.Response(response=f"Guest with id = {guest_id} deleted", status=204)
 
 
-def handle_update_guest(request):
+def handle_update_guest(request: Request):
     guest_schema = GuestSchema()
     guest_schema_full = GuestSchemaFull()
 

@@ -9,7 +9,10 @@ from .base import BaseRepo
 
 class UsersRepo(BaseRepo):
     def upsert_from_jwt(self, jwt_payload):
-        payload = jwt.decode(jwt_payload, settings.JWT_SECRET, algorithms=["HS256"])
+        try:
+            payload = jwt.decode(jwt_payload, settings.JWT_SECRET, algorithms=["HS256"])
+        except Exception:
+            return None
 
         with self.db.acquire() as session:
             stmt = sa.select(orm.User).where(orm.User.google_sub == payload["sub"])

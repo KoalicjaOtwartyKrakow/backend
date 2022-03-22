@@ -1,23 +1,41 @@
 import functools
+from typing import Optional
 
-from flask import Response
+from flask import Response, Request as FlaskRequest
 from marshmallow import ValidationError
 import sentry_sdk
 
 from repos import Repos
 
 
+class Request(FlaskRequest):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.repos: Optional[Repos] = None
+        self.user: Optional[dict] = None
+
+
 def function_wrapper(func):
     """
     Adds repos, user, handles errors.
     """
+
     @functools.wraps(func)
-    def wrapper(request):
+    def wrapper(request: FlaskRequest):
         try:
             repos = Repos()
+
+            auth_header = request.headers.get("Authorization", "")
+            user = repos.users.upsert_from_jwt(auth_header.strip("Bearer").strip())
+            if not user:
+                return Response(
+                    {"message": "Not authenticated."},
+                    status=403,
+                    mimetype="application/json",
+                )
+
+            request.user = user
             request.repos = repos
-            # TODO: extract jwt from request
-            # request.user = repos.users.upsert_from_jwt(request.headers['...'])
             return func(request)
         except ValidationError as e:
             return Response(
