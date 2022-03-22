@@ -17,6 +17,7 @@ pyrnalist = "==0.0.9"
 appdata = ">=2.1.2,<2.2"
 click = ">=8.0.4,<8.1"
 requests = ">=2.27.1,<2.28"
+pyjwt = "*"
 
 [dev-packages]
 pre-commit = "==2.17.0"

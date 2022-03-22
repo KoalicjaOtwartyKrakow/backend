@@ -3,7 +3,7 @@ from uuid import UUID
 
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, fields
 
-from utils.orm import AccommodationUnit, Host, Guest, Language
+from utils.orm import AccommodationUnit, Host, Guest, Language, User
 
 
 def camelcase(s):
@@ -69,6 +69,13 @@ class AccommodationUnitSchemaFull(CamelCaseSchema):
 
     host = fields.Nested("HostSchema")
     guests = fields.Nested("GuestSchema", many=True)
+
+
+class UserSchema(CamelCaseSchema):
+    class Meta:
+        model = User
+        include_fk = True
+        load_instance = True
 
 
 class UUIDEncoder(json.JSONEncoder):

@@ -10,7 +10,7 @@ from alembic import context
 
 
 sys.path.append(os.getcwd())
-from utils.db import DB_NAME, DB_PASS, DB_USER, QUERY
+from utils import settings
 from utils.orm import Base
 
 # this is the Alembic Config object, which provides
@@ -35,7 +35,10 @@ target_metadata = Base.metadata
 
 
 PG_URI = "postgresql+pg8000://{user}:{password}@localhost:5432/{db}?{query}".format(
-    user=DB_USER, password=DB_PASS, db=DB_NAME, query=urlencode(QUERY) if QUERY else ""
+    user=settings.DB_USER,
+    password=settings.DB_PASS,
+    db=settings.DB_NAME,
+    query=urlencode(settings.DB_QUERY) if settings.DB_QUERY else "",
 )
 
 

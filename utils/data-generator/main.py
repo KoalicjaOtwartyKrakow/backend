@@ -13,7 +13,7 @@ from generators import (
 )
 from pyrnalist import report
 
-from utils.db import acquire_db_session
+from utils.db import DB
 
 
 def to_pgsql_value(v):
@@ -70,7 +70,7 @@ def generate(count, teryt_path, sql, db):
     teammembers_sql = to_sql("public.teammembers", all_teammembers)
 
     if db:
-        with acquire_db_session() as session:
+        with DB().acquire() as session:
             session.execute(hosts_sql)
             session.execute(host_languages_sql)
             session.execute(accommodations_sql)

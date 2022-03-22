@@ -7,7 +7,6 @@ import marshmallow
 from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
 
-from utils.db import acquire_db_session
 from utils.orm import AccommodationUnit
 from utils.serializers import (
     AccommodationUnitSchemaFull,
@@ -22,15 +21,8 @@ def handle_add_accommodation(request):
 
     data = request.get_json(silent=True)
 
-    with acquire_db_session() as session:
-        try:
-            accommodation = schema.load(data, session=session)
-        except marshmallow.ValidationError as e:
-            return flask.Response(
-                {"validationErrors": e.messages},
-                status=422,
-                mimetype="application/json",
-            )
+    with request.repos.db.acquire() as session:
+        accommodation = schema.load(data, session=session)
         session.add(accommodation)
         session.commit()
         session.refresh(accommodation)
@@ -40,7 +32,7 @@ def handle_add_accommodation(request):
 
 
 def handle_get_all_accommodations(request):
-    with acquire_db_session() as session:
+    with request.repos.db.acquire() as session:
         stmt = select(AccommodationUnit).order_by(
             AccommodationUnit.vacancies_free.desc()
         )
@@ -60,7 +52,7 @@ def handle_delete_accommodation(request):
         return flask.Response("No accommodation id supplied!", status=400)
 
     try:
-        with acquire_db_session() as session:
+        with request.repos.db.acquire() as session:
             stmt = (
                 delete(AccommodationUnit)
                 .where(AccommodationUnit.guid == accommodation_id)
@@ -91,7 +83,7 @@ def handle_get_accommodation_by_id(request):
         return flask.Response("No accommodation id supplied!", status=400)
 
     try:
-        with acquire_db_session() as session:
+        with request.repos.db.acquire() as session:
             stmt = select(AccommodationUnit).where(
                 AccommodationUnit.guid == accommodation_id
             )
@@ -124,7 +116,7 @@ def handle_update_accommodation(request):
     data = request.get_json()
 
     try:
-        with acquire_db_session() as session:
+        with request.repos.db.acquire() as session:
             stmt = select(AccommodationUnit).where(
                 AccommodationUnit.guid == accommodation_id
             )
