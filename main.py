@@ -7,6 +7,7 @@ import sentry_sdk
 from functions import accommodation
 from functions import host
 from functions import guest
+from functions import user
 from utils.secret import access_secret_version_or_none
 
 from utils.sentry import sentry
@@ -126,3 +127,10 @@ def add_host(request):
 def get_host_by_id(request):
     """HTTP Cloud Function for getting a host with a given id."""
     return host.handle_get_host_by_id(request)
+
+
+@sentry
+@functions_framework.http
+def get_all_users(request):
+    """HTTP Cloud Function for getting all users."""
+    return user.handle_get_all_users(request)
