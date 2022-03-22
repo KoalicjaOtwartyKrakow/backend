@@ -18,6 +18,7 @@ appdata = ">=2.1.2,<2.2"
 click = ">=8.0.4,<8.1"
 requests = ">=2.27.1,<2.28"
 pyjwt = ">=2.3.0,<2.4"
+cryptography = "*"
 
 [dev-packages]
 pre-commit = "==2.17.0"
@@ -26,6 +27,7 @@ flake8 = "==4.0.1"
 pylint = "==2.12.2"
 pytest = "==7.1.1"
 pytest-env = "==0.6.2"
+black = "*"
 
 [requires]
 python_version = "3.9"
