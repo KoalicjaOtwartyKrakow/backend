@@ -311,7 +311,8 @@ class Guest(Base):
     claimed_at = Column(
         "claimed_at",
         TIMESTAMP(timezone=True),
-        nullable=True,
+        nullable=False,
+        server_default=func.now(),
     )
 
     accommodation_unit_id = Column(
