@@ -76,7 +76,7 @@ def handle_get_host_by_id(request: Request):
             )
         raise e
 
-    return JSONResponse(response, status=200)
+    return JSONResponse(response)
 
 
 def handle_update_host(request: Request):
