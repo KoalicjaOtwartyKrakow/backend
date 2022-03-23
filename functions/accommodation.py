@@ -26,7 +26,7 @@ def handle_add_accommodation(request: Request):
         session.refresh(accommodation)
         response = schema_full.dumps(accommodation)
 
-    return JSONResponse(response=response, status=201)
+    return JSONResponse(response, status=201)
 
 
 def handle_get_all_accommodations(request: Request):
@@ -38,7 +38,7 @@ def handle_get_all_accommodations(request: Request):
         schema_full = AccommodationUnitSchemaFull()
         response = [schema_full.dump(a) for a in result.scalars()]
 
-    return JSONResponse(response=response)
+    return JSONResponse(response)
 
 
 def handle_delete_accommodation(request: Request):
@@ -97,7 +97,7 @@ def handle_get_accommodation_by_id(request: Request):
             )
         raise e
 
-    return JSONResponse(response=response, status=200)
+    return JSONResponse(response, status=200)
 
 
 def handle_update_accommodation(request: Request):
@@ -143,4 +143,4 @@ def handle_update_accommodation(request: Request):
             )
         raise e
 
-    return JSONResponse(response=response)
+    return JSONResponse(response)

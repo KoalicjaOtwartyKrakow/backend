@@ -15,7 +15,7 @@ def handle_get_all_guests(request: Request):
         guest_schema_full = GuestSchemaFull()
         response = [guest_schema_full.dump(g) for g in result.scalars()]
 
-    return JSONResponse(response=response, status=200)
+    return JSONResponse(response, status=200)
 
 
 def handle_add_guest(request: Request):
@@ -31,7 +31,7 @@ def handle_add_guest(request: Request):
         session.refresh(guest)
         response = guest_schema_full.dumps(guest)
 
-    return JSONResponse(response=response, status=201)
+    return JSONResponse(response, status=201)
 
 
 def handle_get_guest_by_id(request: Request):
@@ -59,7 +59,7 @@ def handle_get_guest_by_id(request: Request):
             )
         raise e
 
-    return JSONResponse(response=response)
+    return JSONResponse(response)
 
 
 def handle_delete_guest(request: Request):
@@ -120,4 +120,4 @@ def handle_update_guest(request: Request):
             )
         raise e
 
-    return JSONResponse(response=response)
+    return JSONResponse(response)
