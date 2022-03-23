@@ -1,6 +1,5 @@
-import jwt
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.backends import default_backend as crypto_default_backend
+import base64
+import json
 
 from utils.auth import upsert_user_from_jwt
 from utils.db import DB
@@ -15,18 +14,13 @@ def test_upsert_user_from_jwt__no_change():
         "sub": "10769150350006150715113082367",
         "picture": "https://google.com/123",
     }
-    jwt_encoded = jwt.encode(
-        payload,
-        rsa.generate_private_key(
-            backend=crypto_default_backend(), public_exponent=65537, key_size=2048
-        ),
-        algorithm="RS256",
-    )
-    user = upsert_user_from_jwt(db, jwt_encoded)
+    payload_encoded = base64.urlsafe_b64encode(json.dumps(payload).encode("utf-8"))
+    print(payload_encoded)
+    user = upsert_user_from_jwt(db, payload_encoded)
 
     assert user
 
-    user_again = upsert_user_from_jwt(db, jwt_encoded)
+    user_again = upsert_user_from_jwt(db, payload_encoded)
 
     assert user_again.guid == user.guid
 
@@ -40,14 +34,10 @@ def test_upsert_user_from_jwt__name_changed():
         "sub": "10769150350006150715113082367",
         "picture": "https://google.com/123",
     }
-    jwt_encoded_one = jwt.encode(
-        payload_one,
-        rsa.generate_private_key(
-            backend=crypto_default_backend(), public_exponent=65537, key_size=2048
-        ),
-        algorithm="RS256",
+    payload_one_encoded = base64.urlsafe_b64encode(
+        json.dumps(payload_one).encode("utf-8")
     )
-    user = upsert_user_from_jwt(db, jwt_encoded_one)
+    user = upsert_user_from_jwt(db, payload_one_encoded)
 
     assert user
 
@@ -58,15 +48,10 @@ def test_upsert_user_from_jwt__name_changed():
         "sub": "10769150350006150715113082367",
         "picture": "https://google.com/123",
     }
-    jwt_encoded_two = jwt.encode(
-        payload_two,
-        rsa.generate_private_key(
-            backend=crypto_default_backend(), public_exponent=65537, key_size=2048
-        ),
-        algorithm="RS256",
+    payload_two_encoded = base64.urlsafe_b64encode(
+        json.dumps(payload_two).encode("utf-8")
     )
-
-    user_changed = upsert_user_from_jwt(db, jwt_encoded_two)
+    user_changed = upsert_user_from_jwt(db, payload_two_encoded)
 
     assert user_changed.guid == user.guid
     assert user_changed.given_name != user.given_name
