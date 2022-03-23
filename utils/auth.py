@@ -1,4 +1,5 @@
-import jwt
+import base64
+import json
 
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import insert
@@ -7,19 +8,9 @@ from utils import orm
 from utils.serializers import UserSchema
 
 
-def upsert_user_from_jwt(db, jwt_payload):
+def upsert_user_from_jwt(db, jwt_header_encoded):
     try:
-        payload = jwt.decode(
-            jwt_payload,
-            algorithms=["RS256"],
-            # XXX(mlazowik): we do not validate the jwt, as it is already validated
-            #  by cloud endpoints, before it reaches any backend functions. Makes
-            #  tests and the temporarry mobile app api_key based access easier.
-            #
-            #  This _might_ not be the case when we switch to the proper auth flow.
-            #  Remember to rethink this then.
-            options={"verify_signature": False},
-        )
+        payload = json.loads(_base64_decode(jwt_header_encoded))
     except Exception:
         return None
 
@@ -50,3 +41,12 @@ def upsert_user_from_jwt(db, jwt_payload):
 
         session.expunge_all()
         return user
+
+
+# https://github.com/GoogleCloudPlatform/python-docs-samples/blob/main/endpoints/getting-started/main.py#L35
+def _base64_decode(encoded_str):
+    # Add paddings manually if necessary.
+    num_missed_paddings = 4 - len(encoded_str) % 4
+    if num_missed_paddings != 4:
+        encoded_str += b"=" * num_missed_paddings
+    return base64.b64decode(encoded_str).decode("utf-8")
