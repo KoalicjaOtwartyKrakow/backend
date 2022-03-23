@@ -308,6 +308,11 @@ class Guest(Base):
         ForeignKey("users.guid", name="fk_guests_claimed_by_id"),
     )
     claimed_by = relationship("User", back_populates="claimed_guests")
+    claimed_at = Column(
+        "claimed_at",
+        TIMESTAMP(timezone=True),
+        nullable=True,
+    )
 
     accommodation_unit_id = Column(
         "accommodation_unit_id",
