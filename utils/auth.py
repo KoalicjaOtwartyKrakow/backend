@@ -11,9 +11,7 @@ from utils.serializers import UserSchema
 
 def upsert_user_from_jwt(db, jwt_header_encoded):
     try:
-        payload = json.loads(
-            base64.urlsafe_b64decode(jwt_header_encoded).decode("utf-8")
-        )
+        payload = json.loads(_base64_decode(jwt_header_encoded))
     except Exception as e:
         # We don't except this to happen, as right now auth happens before requests
         # hit the backend. Let's log to sentry.
@@ -48,3 +46,12 @@ def upsert_user_from_jwt(db, jwt_header_encoded):
 
         session.expunge_all()
         return user
+
+
+# https://github.com/GoogleCloudPlatform/python-docs-samples/blob/main/endpoints/getting-started/main.py#L35
+def _base64_decode(encoded_str):
+    # Add paddings manually if necessary.
+    num_missed_paddings = 4 - len(encoded_str) % 4
+    if num_missed_paddings != 4:
+        encoded_str += "=" * num_missed_paddings
+    return base64.urlsafe_b64decode(encoded_str).decode("utf-8")
