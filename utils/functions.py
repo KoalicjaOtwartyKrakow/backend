@@ -7,6 +7,7 @@ from marshmallow import ValidationError
 import sentry_sdk
 
 from utils.db import DB
+from utils.serializers import UUIDEncoder
 from .auth import upsert_user_from_jwt
 from .orm import User
 
@@ -18,6 +19,15 @@ class Request(FlaskRequest):
         self.user: Optional[User] = None
 
 
+class JSONResponse(Response):
+    def __init__(self, response, status=200, **kwargs):
+        if not isinstance(response, str):
+            response = json.dumps(response, cls=UUIDEncoder)
+        super(JSONResponse, self).__init__(
+            response=response, status=status, mimetype="application/json", **kwargs
+        )
+
+
 def function_wrapper(func):
     @functools.wraps(func)
     def wrapper(request: FlaskRequest):
@@ -27,22 +37,14 @@ def function_wrapper(func):
             db = DB()
             user = upsert_user_from_jwt(db, jwt_header_encoded)
             if user is None:
-                return Response(
-                    json.dumps({"message": "Not authenticated."}),
-                    status=403,
-                    mimetype="application/json",
-                )
+                return JSONResponse({"message": "Not authenticated."}, status=403)
 
             request.user = user
             request.db = db
 
             return func(request)
         except ValidationError as e:
-            return Response(
-                {"validationErrors": e.messages},
-                status=422,
-                mimetype="application/json",
-            )
+            return JSONResponse({"validationErrors": e.messages}, status=422)
         except Exception as e:
             sentry_sdk.capture_exception(e)
             sentry_sdk.flush()

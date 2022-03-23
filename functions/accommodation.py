@@ -1,17 +1,14 @@
 """Module containing function handlers for accommodation requests."""
-import json
-
 import flask
 import marshmallow
 
 from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
 
-from utils.functions import Request
+from utils.functions import Request, JSONResponse
 from utils.orm import AccommodationUnit
 from utils.serializers import (
     AccommodationUnitSchemaFull,
-    UUIDEncoder,
     AccommodationUnitSchema,
 )
 
@@ -29,7 +26,7 @@ def handle_add_accommodation(request: Request):
         session.refresh(accommodation)
         response = schema_full.dumps(accommodation)
 
-    return flask.Response(response=response, status=201, mimetype="application/json")
+    return JSONResponse(response, status=201)
 
 
 def handle_get_all_accommodations(request: Request):
@@ -39,11 +36,9 @@ def handle_get_all_accommodations(request: Request):
         )
         result = session.execute(stmt)
         schema_full = AccommodationUnitSchemaFull()
-        response = json.dumps(
-            [schema_full.dump(a) for a in result.scalars()], cls=UUIDEncoder
-        )
+        response = [schema_full.dump(a) for a in result.scalars()]
 
-    return flask.Response(response=response, status=200, mimetype="application/json")
+    return JSONResponse(response, status=200)
 
 
 def handle_delete_accommodation(request: Request):
@@ -102,7 +97,7 @@ def handle_get_accommodation_by_id(request: Request):
             )
         raise e
 
-    return flask.Response(response=response, status=200, mimetype="application/json")
+    return JSONResponse(response, status=200)
 
 
 def handle_update_accommodation(request: Request):
@@ -132,10 +127,9 @@ def handle_update_accommodation(request: Request):
                     data, session=session, instance=accommodation
                 )
             except marshmallow.ValidationError as e:
-                return flask.Response(
+                return JSONResponse(
                     {"validationErrors": e.messages},
                     status=422,
-                    mimetype="application/json",
                 )
 
             session.add(accommodation)
@@ -149,4 +143,4 @@ def handle_update_accommodation(request: Request):
             )
         raise e
 
-    return flask.Response(response=response, status=200, mimetype="application/json")
+    return JSONResponse(response, status=200)
