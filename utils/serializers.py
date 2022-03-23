@@ -1,7 +1,7 @@
 import json
 from uuid import UUID
 
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, fields
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, fields, auto_field
 
 from utils.orm import AccommodationUnit, Host, Guest, Language, User
 
@@ -50,6 +50,8 @@ class GuestSchema(CamelCaseSchema):
         model = Guest
         include_fk = True
         load_instance = True
+
+    claimed_at = auto_field(dump_only=True)
 
 
 class GuestSchemaFull(CamelCaseSchema):
