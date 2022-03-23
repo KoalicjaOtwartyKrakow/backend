@@ -32,11 +32,10 @@ def function_wrapper(func):
     @functools.wraps(func)
     def wrapper(request: FlaskRequest):
         try:
-            auth_header = request.headers.get("Authorization", "")
+            # https://cloud.google.com/endpoints/docs/openapi/migrate-to-esp-v2#receiving_auth_results_in_your_api
+            jwt_header_encoded = request.headers.get("X-Endpoint-API-UserInfo", "")
             db = DB()
-            user = upsert_user_from_jwt(
-                db, jwt_payload=auth_header.strip("Bearer").strip()
-            )
+            user = upsert_user_from_jwt(db, jwt_header_encoded)
             if user is None:
                 return JSONResponse({"message": "Not authenticated."}, status=403)
 
@@ -49,6 +48,6 @@ def function_wrapper(func):
         except Exception as e:
             sentry_sdk.capture_exception(e)
             sentry_sdk.flush()
-            return JSONResponse({"message": "Internal server error."}, status=500)
+            raise e
 
     return wrapper

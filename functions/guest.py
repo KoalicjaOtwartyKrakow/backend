@@ -59,7 +59,7 @@ def handle_get_guest_by_id(request: Request):
             )
         raise e
 
-    return JSONResponse(response)
+    return JSONResponse(response, status=200)
 
 
 def handle_delete_guest(request: Request):
@@ -120,4 +120,4 @@ def handle_update_guest(request: Request):
             )
         raise e
 
-    return JSONResponse(response)
+    return JSONResponse(response, status=200)

@@ -32,7 +32,7 @@ def handle_get_all_hosts(request: Request):
         host_schema = HostSchema()
         response = [host_schema.dump(g) for g in result.scalars()]
 
-    return JSONResponse(response)
+    return JSONResponse(response, status=200)
 
 
 def handle_add_host(request: Request):
@@ -76,7 +76,7 @@ def handle_get_host_by_id(request: Request):
             )
         raise e
 
-    return JSONResponse(response)
+    return JSONResponse(response, status=200)
 
 
 def handle_update_host(request: Request):
@@ -118,7 +118,7 @@ def handle_update_host(request: Request):
                 )
             raise e
 
-    return JSONResponse(response)
+    return JSONResponse(response, status=200)
 
 
 def handle_delete_host(request: Request):

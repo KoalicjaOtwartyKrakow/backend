@@ -12,4 +12,4 @@ def handle_get_all_users(request):
         user_schema = UserSchema()
         response = [user_schema.dump(g) for g in result.scalars()]
 
-    return JSONResponse(response)
+    return JSONResponse(response, status=200)
