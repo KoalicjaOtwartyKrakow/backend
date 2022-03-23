@@ -15,7 +15,6 @@ def test_upsert_user_from_jwt__no_change():
         "picture": "https://google.com/123",
     }
     payload_encoded = base64.urlsafe_b64encode(json.dumps(payload).encode("utf-8"))
-    print(payload_encoded)
     user = upsert_user_from_jwt(db, payload_encoded)
 
     assert user
