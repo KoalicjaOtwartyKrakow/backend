@@ -1,6 +1,7 @@
 import base64
 import json
 
+import sentry_sdk
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import insert
 
@@ -11,7 +12,11 @@ from utils.serializers import UserSchema
 def upsert_user_from_jwt(db, jwt_header_encoded):
     try:
         payload = json.loads(_base64_decode(jwt_header_encoded))
-    except Exception:
+    except Exception as e:
+        # We don't except this to happen, as right now auth happens before requests
+        # hit the backend. Let's log to sentry.
+        sentry_sdk.capture_exception(e)
+        sentry_sdk.flush()
         return None
 
     with db.acquire() as session:
