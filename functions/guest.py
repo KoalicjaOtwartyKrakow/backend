@@ -1,15 +1,11 @@
 """Module containing function handlers for guest requests."""
-import json
-
 import flask
-import marshmallow
-
 from sqlalchemy import exc, select
 
 from utils import orm
-from utils.functions import Request
+from utils.functions import Request, JSONResponse
 from utils.orm import Guest
-from utils.serializers import GuestSchema, GuestSchemaFull, UUIDEncoder
+from utils.serializers import GuestSchema, GuestSchemaFull
 
 
 def handle_get_all_guests(request: Request):
@@ -17,10 +13,9 @@ def handle_get_all_guests(request: Request):
         stmt = select(Guest)
         result = session.execute(stmt)
         guest_schema_full = GuestSchemaFull()
-        response = json.dumps(
-            [guest_schema_full.dump(g) for g in result.scalars()], cls=UUIDEncoder
-        )
-    return flask.Response(response=response, status=200, mimetype="application/json")
+        response = [guest_schema_full.dump(g) for g in result.scalars()]
+
+    return JSONResponse(response=response, status=200)
 
 
 def handle_add_guest(request: Request):
@@ -36,7 +31,7 @@ def handle_add_guest(request: Request):
         session.refresh(guest)
         response = guest_schema_full.dumps(guest)
 
-    return flask.Response(response=response, status=201, mimetype="application/json")
+    return JSONResponse(response=response, status=201)
 
 
 def handle_get_guest_by_id(request: Request):
@@ -64,7 +59,7 @@ def handle_get_guest_by_id(request: Request):
             )
         raise e
 
-    return flask.Response(response=response, status=200, mimetype="application/json")
+    return JSONResponse(response=response)
 
 
 def handle_delete_guest(request: Request):
@@ -112,14 +107,7 @@ def handle_update_guest(request: Request):
             if guest is None:
                 return flask.Response("Not found", status=404)
 
-            try:
-                guest = guest_schema.load(data, session=session, instance=guest)
-            except marshmallow.ValidationError as e:
-                return flask.Response(
-                    {"validationErrors": e.messages},
-                    status=422,
-                    mimetype="application/json",
-                )
+            guest = guest_schema.load(data, session=session, instance=guest)
 
             session.add(guest)
             session.commit()
@@ -132,4 +120,4 @@ def handle_update_guest(request: Request):
             )
         raise e
 
-    return flask.Response(response=response, status=200, mimetype="application/json")
+    return JSONResponse(response=response)

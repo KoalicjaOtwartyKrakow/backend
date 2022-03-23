@@ -1,14 +1,12 @@
 """Module containing function handlers for host requests."""
-import json
-
 import flask
 import marshmallow
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import select, delete
 
 from utils import orm
-from utils.functions import Request
-from utils.serializers import HostSchema, UUIDEncoder
+from utils.functions import Request, JSONResponse
+from utils.serializers import HostSchema
 
 
 def handle_get_all_hosts(request: Request):
@@ -32,11 +30,9 @@ def handle_get_all_hosts(request: Request):
     with request.db.acquire() as s:
         result = s.execute(stmt)
         host_schema = HostSchema()
-        response = json.dumps(
-            [host_schema.dump(g) for g in result.scalars()], cls=UUIDEncoder
-        )
+        response = [host_schema.dump(g) for g in result.scalars()]
 
-    return flask.Response(response=response, status=200, mimetype="application/json")
+    return JSONResponse(response=response)
 
 
 def handle_add_host(request: Request):
@@ -51,7 +47,7 @@ def handle_add_host(request: Request):
         session.refresh(host)
         response = host_schema.dumps(host)
 
-    return flask.Response(response=response, status=201, mimetype="application/json")
+    return JSONResponse(response=response, status=201)
 
 
 def handle_get_host_by_id(request: Request):
@@ -80,7 +76,7 @@ def handle_get_host_by_id(request: Request):
             )
         raise e
 
-    return flask.Response(response=response, status=200, mimetype="application/json")
+    return JSONResponse(response=response, status=200)
 
 
 def handle_update_host(request: Request):
@@ -122,7 +118,7 @@ def handle_update_host(request: Request):
                 )
             raise e
 
-    return flask.Response(response=response, status=200, mimetype="application/json")
+    return JSONResponse(response=response)
 
 
 def handle_delete_host(request: Request):
