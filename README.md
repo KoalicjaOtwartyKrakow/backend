@@ -48,6 +48,16 @@ $ functions-framework --target <function-name> --debug
 
 Arguments (including request payload) should be passed as query params.
 
+You'll need to add an authorization header with the following value as well. Either pass it with `-H` to curl,
+or install a browser extension that allows customizing headers. For example header hacker for Chrome.
+
+```
+Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJnaXZlbl9uYW1lIjoiSm9obiIsImZhbWlseV9uYW1lIjoiRG9lIiwiZW1haWwiOiJqb2huLmRvZUBleGFtcGxlLmNvbSIsInN1YiI6IjEwNzY5MTUwMzUwMDA2MTUwNzE1MTEzMDgyMzY3IiwicGljdHVyZSI6Imh0dHBzOi8vZ29vZ2xlLmNvbS8xMjMifQ.kVDaaGkjVeRgbM0AbQhQQy9LlgpdCpbgq32-BuFLjObQZ4FEiYEZdKKh_u3BZVKiYftGtvFCRmNQ07KTugZXBz7RrXH-qM_UilN7A6i-rxPTAVW56AP7Hh8zOyCAn7lTrnTdkH1ujGx7zNo2sE9k9J5OzObtsc6TLbPS5q5_07SBVL1dll2hP84-kslMfi5ThxN61nv5ImKpY2C5zqQJvKMMfHo1o9UIYXSb99sYN6uy_uERGdJQP3IhOnQjSX6ldnCwMHzXwgGQztDfLuGWXoYc2UY9s6XkLX5d5_ndMrP5z1n7uZu7I7of75bSEgaEt4QLl-asGqCykQiPBaQ0AQ
+```
+
+This value is an (purposefully) invalid jwt, but because the validation of JWTs (at least now) happens before requests
+hit the backend, our backend accepts any JWTs, without checking the signature.
+
 ### Generating SQL from orm
 
 For example for the `Host` model:

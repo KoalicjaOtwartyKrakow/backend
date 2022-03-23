@@ -6,13 +6,12 @@ import marshmallow
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import select, delete
 
-from utils.db import acquire_db_session
 from utils import orm
-
+from utils.functions import Request
 from utils.serializers import HostSchema, UUIDEncoder
 
 
-def handle_get_all_hosts(request):
+def handle_get_all_hosts(request: Request):
     status_parameter = request.args.get("status", None)
     if status_parameter:
         try:
@@ -30,7 +29,7 @@ def handle_get_all_hosts(request):
         print(f"Filtering by status={status_parameter}")
         stmt = stmt.where(orm.Host.status == status_parameter)
 
-    with acquire_db_session() as s:
+    with request.db.acquire() as s:
         result = s.execute(stmt)
         host_schema = HostSchema()
         response = json.dumps(
@@ -40,20 +39,13 @@ def handle_get_all_hosts(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_add_host(request):
+def handle_add_host(request: Request):
     host_schema = HostSchema()
 
     data = request.get_json()
 
-    with acquire_db_session() as session:
-        try:
-            host = host_schema.load(data, session=session)
-        except marshmallow.ValidationError as e:
-            return flask.Response(
-                {"validationErrors": e.messages},
-                status=422,
-                mimetype="application/json",
-            )
+    with request.db.acquire() as session:
+        host = host_schema.load(data, session=session)
         session.add(host)
         session.commit()
         session.refresh(host)
@@ -62,7 +54,7 @@ def handle_add_host(request):
     return flask.Response(response=response, status=201, mimetype="application/json")
 
 
-def handle_get_host_by_id(request):
+def handle_get_host_by_id(request: Request):
     host_schema = HostSchema()
 
     try:
@@ -71,7 +63,7 @@ def handle_get_host_by_id(request):
         return flask.Response("No host id supplied!", status=400)
 
     try:
-        with acquire_db_session() as session:
+        with request.db.acquire() as session:
             stmt = select(orm.Host).where(orm.Host.guid == host_id)
             result = session.execute(stmt)
 
@@ -81,6 +73,7 @@ def handle_get_host_by_id(request):
 
             response = host_schema.dumps(host)
     except ProgrammingError as e:
+        # TODO: raise a validation error here, handle in utils/functions.
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(
                 f"Invaild id format, uuid expected, got {host_id}", status=400
@@ -90,7 +83,7 @@ def handle_get_host_by_id(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_update_host(request):
+def handle_update_host(request: Request):
     host_schema = HostSchema()
 
     try:
@@ -100,7 +93,7 @@ def handle_update_host(request):
 
     data = request.get_json()
 
-    with acquire_db_session() as session:
+    with request.db.acquire() as session:
         try:
             stmt = select(orm.Host).where(orm.Host.guid == host_id)
             result = session.execute(stmt)
@@ -132,7 +125,7 @@ def handle_update_host(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_delete_host(request):
+def handle_delete_host(request: Request):
     try:
         id = request.args.get("hostId")
     except KeyError:
@@ -140,7 +133,7 @@ def handle_delete_host(request):
     if id is None:
         return flask.Response(response="Received no hostId", status=400)
 
-    with acquire_db_session() as session:
+    with request.db.acquire() as session:
         try:
             stmt = (
                 delete(orm.Host)

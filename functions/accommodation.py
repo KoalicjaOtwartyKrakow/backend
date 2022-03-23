@@ -7,7 +7,7 @@ import marshmallow
 from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
 
-from utils.db import acquire_db_session
+from utils.functions import Request
 from utils.orm import AccommodationUnit
 from utils.serializers import (
     AccommodationUnitSchemaFull,
@@ -16,21 +16,14 @@ from utils.serializers import (
 )
 
 
-def handle_add_accommodation(request):
+def handle_add_accommodation(request: Request):
     schema = AccommodationUnitSchema()
     schema_full = AccommodationUnitSchemaFull()
 
     data = request.get_json(silent=True)
 
-    with acquire_db_session() as session:
-        try:
-            accommodation = schema.load(data, session=session)
-        except marshmallow.ValidationError as e:
-            return flask.Response(
-                {"validationErrors": e.messages},
-                status=422,
-                mimetype="application/json",
-            )
+    with request.db.acquire() as session:
+        accommodation = schema.load(data, session=session)
         session.add(accommodation)
         session.commit()
         session.refresh(accommodation)
@@ -39,8 +32,8 @@ def handle_add_accommodation(request):
     return flask.Response(response=response, status=201, mimetype="application/json")
 
 
-def handle_get_all_accommodations(request):
-    with acquire_db_session() as session:
+def handle_get_all_accommodations(request: Request):
+    with request.db.acquire() as session:
         stmt = select(AccommodationUnit).order_by(
             AccommodationUnit.vacancies_free.desc()
         )
@@ -53,14 +46,14 @@ def handle_get_all_accommodations(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_delete_accommodation(request):
+def handle_delete_accommodation(request: Request):
     try:
         accommodation_id = request.args["accommodationId"]
     except KeyError:
         return flask.Response("No accommodation id supplied!", status=400)
 
     try:
-        with acquire_db_session() as session:
+        with request.db.acquire() as session:
             stmt = (
                 delete(AccommodationUnit)
                 .where(AccommodationUnit.guid == accommodation_id)
@@ -82,7 +75,7 @@ def handle_delete_accommodation(request):
         return flask.Response("Not found", status=404)
 
 
-def handle_get_accommodation_by_id(request):
+def handle_get_accommodation_by_id(request: Request):
     schema_full = AccommodationUnitSchemaFull()
 
     try:
@@ -91,7 +84,7 @@ def handle_get_accommodation_by_id(request):
         return flask.Response("No accommodation id supplied!", status=400)
 
     try:
-        with acquire_db_session() as session:
+        with request.db.acquire() as session:
             stmt = select(AccommodationUnit).where(
                 AccommodationUnit.guid == accommodation_id
             )
@@ -112,7 +105,7 @@ def handle_get_accommodation_by_id(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_update_accommodation(request):
+def handle_update_accommodation(request: Request):
     schema = AccommodationUnitSchema()
     schema_full = AccommodationUnitSchemaFull()
 
@@ -124,7 +117,7 @@ def handle_update_accommodation(request):
     data = request.get_json()
 
     try:
-        with acquire_db_session() as session:
+        with request.db.acquire() as session:
             stmt = select(AccommodationUnit).where(
                 AccommodationUnit.guid == accommodation_id
             )

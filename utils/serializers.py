@@ -16,7 +16,16 @@ class CamelCaseSchema(SQLAlchemyAutoSchema):
     and snake-case for its internal representation.
     """
 
+    camel_case = True
+
+    def __init__(self, camel_case=True, *args, **kwargs):
+        self.camel_case = camel_case
+        super().__init__(*args, **kwargs)
+
     def on_bind_field(self, field_name, field_obj):
+        if not self.camel_case:
+            return
+
         field_obj.data_key = camelcase(field_obj.data_key or field_name)
 
 

@@ -6,15 +6,14 @@ import marshmallow
 
 from sqlalchemy import exc, select
 
-from utils.db import acquire_db_session
-from utils.orm import Guest
 from utils import orm
-
+from utils.functions import Request
+from utils.orm import Guest
 from utils.serializers import GuestSchema, GuestSchemaFull, UUIDEncoder
 
 
-def handle_get_all_guests(request):
-    with acquire_db_session() as session:
+def handle_get_all_guests(request: Request):
+    with request.db.acquire() as session:
         stmt = select(Guest)
         result = session.execute(stmt)
         guest_schema_full = GuestSchemaFull()
@@ -24,21 +23,14 @@ def handle_get_all_guests(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_add_guest(request):
+def handle_add_guest(request: Request):
     guest_schema = GuestSchema()
     guest_schema_full = GuestSchemaFull()
 
     data = request.get_json()
 
-    with acquire_db_session() as session:
-        try:
-            guest = guest_schema.load(data, session=session)
-        except marshmallow.ValidationError as e:
-            return flask.Response(
-                {"validationErrors": e.messages},
-                status=422,
-                mimetype="application/json",
-            )
+    with request.db.acquire() as session:
+        guest = guest_schema.load(data, session=session)
         session.add(guest)
         session.commit()
         session.refresh(guest)
@@ -47,7 +39,7 @@ def handle_add_guest(request):
     return flask.Response(response=response, status=201, mimetype="application/json")
 
 
-def handle_get_guest_by_id(request):
+def handle_get_guest_by_id(request: Request):
     guest_schema_full = GuestSchemaFull()
 
     try:
@@ -56,7 +48,7 @@ def handle_get_guest_by_id(request):
         return flask.Response("No guest id supplied!", status=400)
 
     try:
-        with acquire_db_session() as session:
+        with request.db.acquire() as session:
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
 
@@ -75,14 +67,14 @@ def handle_get_guest_by_id(request):
     return flask.Response(response=response, status=200, mimetype="application/json")
 
 
-def handle_delete_guest(request):
+def handle_delete_guest(request: Request):
     try:
         guest_id = request.args["guestId"]
     except KeyError:
         return flask.Response("No guest id supplied!", status=400)
 
     try:
-        with acquire_db_session() as session:
+        with request.db.acquire() as session:
             result1 = (
                 session.query(Guest)
                 .filter(Guest.guid == guest_id)
@@ -100,7 +92,7 @@ def handle_delete_guest(request):
     return flask.Response(response=f"Guest with id = {guest_id} deleted", status=204)
 
 
-def handle_update_guest(request):
+def handle_update_guest(request: Request):
     guest_schema = GuestSchema()
     guest_schema_full = GuestSchemaFull()
 
@@ -112,7 +104,7 @@ def handle_update_guest(request):
     data = request.get_json()
 
     try:
-        with acquire_db_session() as session:
+        with request.db.acquire() as session:
             stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
             result = session.execute(stmt)
 
