@@ -17,8 +17,12 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP, ARRAY
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import declarative_base, relationship, configure_mappers
 from sqlalchemy.sql import expression
+from sqlalchemy_continuum import make_versioned
+
+
+make_versioned(user_cls=None)
 
 Base = declarative_base()
 
@@ -168,6 +172,7 @@ class Voivodeship(str, enum.Enum):
 class AccommodationUnit(Base):
     """ORM for Apartments."""
 
+    __versioned__ = {}
     __tablename__ = "accommodation_units"
 
     guid = Column(
@@ -235,6 +240,7 @@ class LanguageEnum(enum.Enum):
 class Guest(Base):
     """ORM for Guests."""
 
+    __versioned__ = {}
     __tablename__ = "guests"
 
     guid = Column(
@@ -345,3 +351,7 @@ class User(Base):
 
     def __repr__(self):
         return f"User: {self.__dict__}"
+
+
+# https://sqlalchemy-continuum.readthedocs.io/en/latest/intro.html
+configure_mappers()

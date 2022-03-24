@@ -24,7 +24,7 @@ def handle_add_accommodation(request: Request):
         session.add(accommodation)
         session.commit()
         session.refresh(accommodation)
-        response = schema_full.dumps(accommodation)
+        response = schema_full.dump(accommodation)
 
     return JSONResponse(response, status=201)
 
@@ -89,7 +89,7 @@ def handle_get_accommodation_by_id(request: Request):
             if accommodation is None:
                 return flask.Response("Not found", status=404)
 
-            response = schema_full.dumps(accommodation)
+            response = schema_full.dump(accommodation)
     except ProgrammingError as e:
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(
@@ -135,7 +135,7 @@ def handle_update_accommodation(request: Request):
             session.add(accommodation)
             session.commit()
             session.refresh(accommodation)
-            response = schema_full.dumps(accommodation)
+            response = schema_full.dump(accommodation)
     except ProgrammingError as e:
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(

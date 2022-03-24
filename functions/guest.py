@@ -29,7 +29,7 @@ def handle_add_guest(request: Request):
         session.add(guest)
         session.commit()
         session.refresh(guest)
-        response = guest_schema_full.dumps(guest)
+        response = guest_schema_full.dump(guest)
 
     return JSONResponse(response, status=201)
 
@@ -51,7 +51,7 @@ def handle_get_guest_by_id(request: Request):
             if guest is None:
                 return flask.Response("Not found", status=404)
 
-            response = guest_schema_full.dumps(guest)
+            response = guest_schema_full.dump(guest)
     except exc.ProgrammingError as e:
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(
@@ -112,7 +112,7 @@ def handle_update_guest(request: Request):
             session.add(guest)
             session.commit()
             session.refresh(guest)
-            response = guest_schema_full.dumps(guest)
+            response = guest_schema_full.dump(guest)
     except exc.ProgrammingError as e:
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(
