@@ -17,7 +17,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP, ARRAY
-from sqlalchemy.orm import declarative_base, relationship, configure_mappers
+from sqlalchemy.orm import configure_mappers, declarative_base, relationship
 from sqlalchemy.sql import expression
 from sqlalchemy_continuum import make_versioned
 
