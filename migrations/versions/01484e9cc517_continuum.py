@@ -395,6 +395,6 @@ def downgrade():
     op.execute(
         """
         DELETE FROM users WHERE guid = '28ab1bf2-f735-4603-b7f0-7938ba2ab059'; 
-    """
+        """
     )
     # ### end Alembic commands ###
