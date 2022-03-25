@@ -1,6 +1,8 @@
 import json
 from uuid import UUID
 
+from marshmallow import Schema
+from marshmallow.fields import Integer
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, fields, auto_field
 
 from utils.orm import AccommodationUnit, Host, Guest, Language, User
@@ -27,6 +29,17 @@ class CamelCaseSchema(SQLAlchemyAutoSchema):
             return
 
         field_obj.data_key = camelcase(field_obj.data_key or field_name)
+
+
+class PaginationSchema(Schema):
+    """
+    Schema that does validation for pagination inputs in the request object
+
+    Used in: utils.pagination.get_pagination_from_request
+    """
+
+    page = Integer(allow_none=True)
+    per_page = Integer(data_key='per-page', allow_none=True)
 
 
 class LanguageSchema(CamelCaseSchema):
