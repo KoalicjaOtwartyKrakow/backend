@@ -156,39 +156,6 @@ class Pagination:
             return None
         return self.page + 1
 
-    def iter_pages(self, left_edge=2, left_current=2, right_current=5, right_edge=2):
-        """Iterates over the page numbers in the pagination.  The four
-        parameters control the thresholds how many numbers should be produced
-        from the sides.  Skipped page numbers are represented as `None`.
-        This is how you could render such a pagination in the templates:
-        .. sourcecode:: html+jinja
-            {% macro render_pagination(pagination, endpoint) %}
-              <div class=pagination>
-              {%- for page in pagination.iter_pages() %}
-                {% if page %}
-                  {% if page != pagination.page %}
-                    <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
-                  {% else %}
-                    <strong>{{ page }}</strong>
-                  {% endif %}
-                {% else %}
-                  <span class=ellipsis>…</span>
-                {% endif %}
-              {%- endfor %}
-              </div>
-            {% endmacro %}
-        """
-        last = 0
-        for num in range(1, self.pages + 1):
-            on_left_edge = num <= left_edge
-            on_right_edge = num > self.pages - right_edge
-            in_middle = self.page - left_current - 1 < num < self.page + right_current
-            if on_left_edge or in_middle or on_right_edge:
-                if last + 1 != num:
-                    yield None
-                yield num
-                last = num
-
 
 def get_pagination_from_request(request):
     """Get pagination information from request object"""
