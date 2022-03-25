@@ -3,6 +3,7 @@ from uuid import UUID
 
 from marshmallow import Schema
 from marshmallow.fields import Integer
+from marshmallow.validate import Range
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, fields, auto_field
 
 from utils.orm import AccommodationUnit, Host, Guest, Language, User
@@ -38,7 +39,7 @@ class PaginationSchema(Schema):
     Used in: utils.pagination.get_pagination_from_request
     """
 
-    page = Integer(allow_none=True)
+    page = Integer(allow_none=True, validate=Range(min=1))
     per_page = Integer(data_key='per-page', allow_none=True)
 
 
