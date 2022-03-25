@@ -156,6 +156,17 @@ class Pagination:
             return None
         return self.page + 1
 
+    def make_response(self, serializer_schema):
+        extra = dict()
+        if self.total is not None:
+            extra['total'] = self.total
+        results = [serializer_schema.dump(item) for item in self.items]
+        return dict(
+            page=self.page,
+            per_page=self.per_page,
+            results=results,
+            **extra)
+
 
 def get_pagination_from_request(request):
     """Get pagination information from request object"""
