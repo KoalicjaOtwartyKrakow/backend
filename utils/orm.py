@@ -19,6 +19,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP, ARRAY
 from sqlalchemy.orm import configure_mappers, declarative_base, relationship
 from sqlalchemy.sql import expression
+from sqlalchemy.util import FacadeDict
 from sqlalchemy_continuum import make_versioned
 
 
@@ -309,11 +310,22 @@ class Guest(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    updated_by_id = Column(
+        "updated_by_id",
+        ForeignKey("users.guid", name="fk_guests_updated_by_id"),
+        nullable=False,
+    )
+    updated_by = relationship(
+        "User", back_populates="updated_guests", foreign_keys=[updated_by_id]
+    )
+
     claimed_by_id = Column(
         "claimed_by_id",
         ForeignKey("users.guid", name="fk_guests_claimed_by_id"),
     )
-    claimed_by = relationship("User", back_populates="claimed_guests")
+    claimed_by = relationship(
+        "User", back_populates="claimed_guests", foreign_keys=[claimed_by_id]
+    )
     claimed_at = Column(
         "claimed_at",
         TIMESTAMP(timezone=True),
@@ -347,7 +359,12 @@ class User(Base):
     email = Column("email", String(255), nullable=False, unique=True)
     google_sub = Column("google_sub", String(255), nullable=False, unique=True)
     google_picture = Column("google_picture", String(255), nullable=False)
-    claimed_guests = relationship("Guest", back_populates="claimed_by")
+    claimed_guests = relationship(
+        "Guest", back_populates="claimed_by", foreign_keys=[Guest.claimed_by_id]
+    )
+    updated_guests = relationship(
+        "Guest", back_populates="updated_by", foreign_keys=[Guest.updated_by_id]
+    )
 
     def __repr__(self):
         return f"User: {self.__dict__}"
@@ -355,3 +372,23 @@ class User(Base):
 
 # https://sqlalchemy-continuum.readthedocs.io/en/latest/intro.html
 configure_mappers()
+
+
+def set_continuum_schema(metadata, schema="continuum"):
+    """
+    sqlalchemy-continuum supports schema for tables,
+    but it uses original table schema
+    and there is no native way to specify a different schema for tables created by continuum.
+    """
+    tables = {}
+    for key in list(Base.metadata.tables.keys()):
+        if key == "transaction" or key.endswith("_version"):
+            metadata.tables[key].schema = schema
+            tables[schema + "." + key.split(".")[-1]] = Base.metadata.tables[key]
+        else:
+            tables[key] = Base.metadata.tables[key]
+
+    metadata.tables = FacadeDict(tables)
+
+
+set_continuum_schema(Base.metadata)
