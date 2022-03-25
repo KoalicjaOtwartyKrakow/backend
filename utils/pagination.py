@@ -22,6 +22,24 @@ DEFAULT_MAX_PER_PAGE = 100
 NO_MAX_PER_PAGE = object()
 
 
+def get_pagination_from_request(request):
+    """Get pagination information from request object"""
+    from utils.serializers import PaginationSchema
+    schema = PaginationSchema()
+    params = schema.load(request.args, unknown=EXCLUDE)
+    page = params.get('page', DEFAULT_PAGE)
+    per_page = params.get('per_page', DEFAULT_PER_PAGE)
+    return page, per_page
+
+
+def get_statement_pagination(request, session, statement):
+    """Get pagination object for sqlalchemy statement"""
+    page, per_page = get_pagination_from_request(request)
+    paginator = SqlAlchemyPaginator(session, statement)
+    pagination = paginator.paginate(page, per_page)
+    return pagination
+
+
 class Paginator:
     """Paginator abstraction used to filter """
     def get_total(self):
@@ -166,22 +184,4 @@ class Pagination:
             per_page=self.per_page,
             results=results,
             **extra)
-
-
-def get_pagination_from_request(request):
-    """Get pagination information from request object"""
-    from utils.serializers import PaginationSchema
-    schema = PaginationSchema()
-    params = schema.load(request.args, unknown=EXCLUDE)
-    page = params.get('page', DEFAULT_PAGE)
-    per_page = params.get('per_page', DEFAULT_PER_PAGE)
-    return page, per_page
-
-
-def get_statement_pagination(request, session, statement):
-    """Get pagination object for sqlalchemy statement"""
-    page, per_page = get_pagination_from_request(request)
-    paginator = SqlAlchemyPaginator(session, statement)
-    pagination = paginator.paginate(page, per_page)
-    return pagination
 
