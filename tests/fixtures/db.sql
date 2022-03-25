@@ -21,6 +21,8 @@ TRUNCATE users RESTART IDENTITY CASCADE;
 
 INSERT INTO users (guid, given_name, family_name, email, google_sub, google_picture)
 VALUES ('782962fc-dc11-4a33-8f08-b7da532dd40d', 'John', 'Doe',
-        'john.doe@example.com', '10769150350006150715113082367', 'https://img.google.com/1.jpg');
+        'john.doe@example.com', '10769150350006150715113082367', 'https://img.google.com/1.jpg'),
+       ('46389922-28b5-430f-a2e1-04fcddd70117', 'Jane', 'Doe',
+        'jane.doe@example.com', '10769150350006150715113082000', 'https://img.google.com/2.jpg');
 
 TRUNCATE transaction RESTART IDENTITY;

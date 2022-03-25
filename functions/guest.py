@@ -26,6 +26,7 @@ def handle_add_guest(request: Request):
 
     with request.db.acquire() as session:
         guest = guest_schema.load(data, session=session)
+        guest.updated_by_id = request.user.guid
         session.add(guest)
         session.commit()
         session.refresh(guest)
@@ -70,13 +71,14 @@ def handle_delete_guest(request: Request):
 
     try:
         with request.db.acquire() as session:
-            result1 = (
-                session.query(Guest)
-                .filter(Guest.guid == guest_id)
-                .delete(synchronize_session=False)
-            )
-            result2 = session.commit()
-            print(f"result1: {result1} \n result2:{result2}")
+            guest = session.query(Guest).filter(Guest.guid == guest_id).one()
+
+            # record last editor
+            guest.updated_by_id = request.user.guid
+            session.commit()
+
+            session.delete(guest)
+            session.commit()
     except exc.ProgrammingError as e:
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(
@@ -108,8 +110,8 @@ def handle_update_guest(request: Request):
                 return flask.Response("Not found", status=404)
 
             guest = guest_schema.load(data, session=session, instance=guest)
+            guest.updated_by_id = request.user.guid
 
-            session.add(guest)
             session.commit()
             session.refresh(guest)
             response = guest_schema_full.dump(guest)

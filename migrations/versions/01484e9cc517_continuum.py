@@ -376,8 +376,10 @@ def downgrade():
     op.drop_table("accommodation_units_version")
 
     op.execute(
+        sa.text(
+            """
+        DELETE FROM users WHERE guid = :user_guid; 
         """
-        DELETE FROM users WHERE guid = '28ab1bf2-f735-4603-b7f0-7938ba2ab059'; 
-        """
+        ).params(user_guid=SYSTEM_USER_GUID)
     )
     # ### end Alembic commands ###
