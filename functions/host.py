@@ -31,7 +31,7 @@ def handle_get_all_hosts(request: Request):
     with request.db.acquire() as s:
         pagination = get_statement_pagination(request, s, stmt)
         host_schema = HostSchema()
-        response = [host_schema.dump(g) for g in pagination.items]
+        response = pagination.make_response(host_schema)
 
     return JSONResponse(response, status=200)
 

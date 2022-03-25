@@ -14,7 +14,7 @@ def handle_get_all_guests(request: Request):
         stmt = select(Guest)
         pagination = get_statement_pagination(request, session, stmt)
         guest_schema_full = GuestSchemaFull()
-        response = [guest_schema_full.dump(g) for g in pagination.items]
+        response = pagination.make_response(guest_schema_full)
 
     return JSONResponse(response, status=200)
 

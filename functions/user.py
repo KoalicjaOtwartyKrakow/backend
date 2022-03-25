@@ -11,6 +11,6 @@ def handle_get_all_users(request):
         stmt = select(User)
         pagination = get_statement_pagination(request, session, stmt)
         user_schema = UserSchema()
-        response = [user_schema.dump(g) for g in pagination.items]
+        response = pagination.make_response(user_schema)
 
     return JSONResponse(response, status=200)

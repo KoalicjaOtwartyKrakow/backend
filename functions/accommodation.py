@@ -7,6 +7,7 @@ from sqlalchemy.exc import ProgrammingError
 
 from utils.functions import Request, JSONResponse
 from utils.orm import AccommodationUnit
+from utils.pagination import get_statement_pagination
 from utils.serializers import (
     AccommodationUnitSchemaFull,
     AccommodationUnitSchema,
@@ -34,9 +35,9 @@ def handle_get_all_accommodations(request: Request):
         stmt = select(AccommodationUnit).order_by(
             AccommodationUnit.vacancies_free.desc()
         )
-        result = session.execute(stmt)
+        pagination = get_statement_pagination(request, session, stmt)
         schema_full = AccommodationUnitSchemaFull()
-        response = [schema_full.dump(a) for a in result.scalars()]
+        response = pagination.make_response(schema_full)
 
     return JSONResponse(response, status=200)
 
