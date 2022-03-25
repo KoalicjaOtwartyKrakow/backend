@@ -372,23 +372,3 @@ class User(Base):
 
 # https://sqlalchemy-continuum.readthedocs.io/en/latest/intro.html
 configure_mappers()
-
-
-def set_continuum_schema(metadata, schema="continuum"):
-    """
-    sqlalchemy-continuum supports schema for tables,
-    but it uses original table schema
-    and there is no native way to specify a different schema for tables created by continuum.
-    """
-    tables = {}
-    for key in list(Base.metadata.tables.keys()):
-        if key == "transaction" or key.endswith("_version"):
-            metadata.tables[key].schema = schema
-            tables[schema + "." + key.split(".")[-1]] = Base.metadata.tables[key]
-        else:
-            tables[key] = Base.metadata.tables[key]
-
-    metadata.tables = FacadeDict(tables)
-
-
-set_continuum_schema(Base.metadata)

@@ -17,6 +17,7 @@ def test_guests_claimed_at(db):
             children_ages=[1, 10],
             have_pets=False,
             how_long_to_stay="1w",
+            updated_by_id="782962fc-dc11-4a33-8f08-b7da532dd40d",
         )
         session.add(guest)
         session.commit()
@@ -57,6 +58,7 @@ def test_versioning(db):
             email="auz-oxloij-dxfv@yahoo.com",
             phone_number="499-330-497",
             children_ages=[1, 10],
+            updated_by_id="782962fc-dc11-4a33-8f08-b7da532dd40d",
         )
         session.add(guest)
         session.commit()
