@@ -50,7 +50,10 @@ class GuestSchema(CamelCaseSchema):
         model = Guest
         include_fk = True
         load_instance = True
+        exclude = ("updated_by_id",)
 
+    created_at = auto_field(dump_only=True)
+    updated_at = auto_field(dump_only=True)
     claimed_at = auto_field(dump_only=True)
 
 

@@ -17,8 +17,13 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP, ARRAY
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import configure_mappers, declarative_base, relationship
 from sqlalchemy.sql import expression
+from sqlalchemy.util import FacadeDict
+from sqlalchemy_continuum import make_versioned
+
+
+make_versioned(user_cls=None)
 
 Base = declarative_base()
 
@@ -168,6 +173,7 @@ class Voivodeship(str, enum.Enum):
 class AccommodationUnit(Base):
     """ORM for Apartments."""
 
+    __versioned__ = {}
     __tablename__ = "accommodation_units"
 
     guid = Column(
@@ -235,6 +241,7 @@ class LanguageEnum(enum.Enum):
 class Guest(Base):
     """ORM for Guests."""
 
+    __versioned__ = {}
     __tablename__ = "guests"
 
     guid = Column(
@@ -303,11 +310,22 @@ class Guest(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    updated_by_id = Column(
+        "updated_by_id",
+        ForeignKey("users.guid", name="fk_guests_updated_by_id"),
+        nullable=False,
+    )
+    updated_by = relationship(
+        "User", back_populates="updated_guests", foreign_keys=[updated_by_id]
+    )
+
     claimed_by_id = Column(
         "claimed_by_id",
         ForeignKey("users.guid", name="fk_guests_claimed_by_id"),
     )
-    claimed_by = relationship("User", back_populates="claimed_guests")
+    claimed_by = relationship(
+        "User", back_populates="claimed_guests", foreign_keys=[claimed_by_id]
+    )
     claimed_at = Column(
         "claimed_at",
         TIMESTAMP(timezone=True),
@@ -341,7 +359,16 @@ class User(Base):
     email = Column("email", String(255), nullable=False, unique=True)
     google_sub = Column("google_sub", String(255), nullable=False, unique=True)
     google_picture = Column("google_picture", String(255), nullable=False)
-    claimed_guests = relationship("Guest", back_populates="claimed_by")
+    claimed_guests = relationship(
+        "Guest", back_populates="claimed_by", foreign_keys=[Guest.claimed_by_id]
+    )
+    updated_guests = relationship(
+        "Guest", back_populates="updated_by", foreign_keys=[Guest.updated_by_id]
+    )
 
     def __repr__(self):
         return f"User: {self.__dict__}"
+
+
+# https://sqlalchemy-continuum.readthedocs.io/en/latest/intro.html
+configure_mappers()
