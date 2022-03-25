@@ -5,15 +5,16 @@ from sqlalchemy import exc, select
 from utils import orm
 from utils.functions import Request, JSONResponse
 from utils.orm import Guest
+from utils.pagination import get_statement_pagination
 from utils.serializers import GuestSchema, GuestSchemaFull
 
 
 def handle_get_all_guests(request: Request):
     with request.db.acquire() as session:
         stmt = select(Guest)
-        result = session.execute(stmt)
+        pagination = get_statement_pagination(request, session, stmt)
         guest_schema_full = GuestSchemaFull()
-        response = [guest_schema_full.dump(g) for g in result.scalars()]
+        response = [guest_schema_full.dump(g) for g in pagination.items]
 
     return JSONResponse(response, status=200)
 

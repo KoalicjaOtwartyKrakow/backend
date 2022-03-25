@@ -6,6 +6,7 @@ from sqlalchemy import select, delete
 
 from utils import orm
 from utils.functions import Request, JSONResponse
+from utils.pagination import get_statement_pagination
 from utils.serializers import HostSchema
 
 
@@ -28,9 +29,9 @@ def handle_get_all_hosts(request: Request):
         stmt = stmt.where(orm.Host.status == status_parameter)
 
     with request.db.acquire() as s:
-        result = s.execute(stmt)
+        pagination = get_statement_pagination(request, s, stmt)
         host_schema = HostSchema()
-        response = [host_schema.dump(g) for g in result.scalars()]
+        response = [host_schema.dump(g) for g in pagination.items]
 
     return JSONResponse(response, status=200)
 
