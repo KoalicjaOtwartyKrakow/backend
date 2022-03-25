@@ -40,7 +40,7 @@ class PaginationSchema(Schema):
     """
 
     page = Integer(allow_none=True, validate=Range(min=1))
-    per_page = Integer(data_key='per-page', allow_none=True)
+    per_page = Integer(data_key='per-page', allow_none=True, validate=Range(min=1))
 
 
 class LanguageSchema(CamelCaseSchema):
