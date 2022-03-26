@@ -1,7 +1,7 @@
 from sqlalchemy_continuum.utils import count_versions
 
-from utils.db import DB
-from utils.orm import AccommodationUnit, Guest
+from kokon.utils.db import DB
+from kokon.orm import AccommodationUnit, Guest
 
 
 def test_guests_claimed_at(db):

@@ -3,7 +3,7 @@ import json
 
 from unittest.mock import Mock
 
-from utils.functions import function_wrapper
+from kokon.utils.functions import function_wrapper
 
 
 @function_wrapper

@@ -1,8 +1,8 @@
 import base64
 import json
 
-from utils.auth import upsert_user_from_jwt
-from utils.db import DB
+from kokon.utils.auth import upsert_user_from_jwt
+from kokon.utils.db import DB
 
 
 def test_upsert_user_from_jwt__no_change():
