@@ -1,8 +1,8 @@
 from sqlalchemy import select
 
-from kokon.utils.functions import JSONResponse
 from kokon.orm import User
 from kokon.serializers import UserSchema
+from kokon.utils.functions import JSONResponse
 
 
 def handle_get_all_users(request):

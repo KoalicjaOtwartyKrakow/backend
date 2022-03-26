@@ -2,10 +2,9 @@
 import flask
 from sqlalchemy import exc, select
 
-from kokon import orm
-from kokon.utils.functions import Request, JSONResponse
 from kokon.orm import Guest
 from kokon.serializers import GuestSchema, GuestSchemaFull
+from kokon.utils.functions import Request, JSONResponse
 
 
 def handle_get_all_guests(request: Request):
@@ -45,7 +44,7 @@ def handle_get_guest_by_id(request: Request):
 
     try:
         with request.db.acquire() as session:
-            stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
+            stmt = select(Guest).where(Guest.guid == guest_id)
             result = session.execute(stmt)
 
             guest = result.scalar()
@@ -102,7 +101,7 @@ def handle_update_guest(request: Request):
 
     try:
         with request.db.acquire() as session:
-            stmt = select(orm.Guest).where(orm.Guest.guid == guest_id)
+            stmt = select(Guest).where(Guest.guid == guest_id)
             result = session.execute(stmt)
 
             guest = result.scalar()

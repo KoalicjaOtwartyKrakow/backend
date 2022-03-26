@@ -6,10 +6,10 @@ from flask import Response, Request as FlaskRequest
 from marshmallow import ValidationError
 import sentry_sdk
 
-from kokon.utils.db import DB
+from kokon.orm import User
 from kokon.serializers import UUIDEncoder
 from .auth import upsert_user_from_jwt
-from kokon.orm import User
+from .db import DB
 
 
 class Request(FlaskRequest):

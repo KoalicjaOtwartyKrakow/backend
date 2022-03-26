@@ -4,16 +4,16 @@ import marshmallow
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import select, delete
 
-from kokon import orm
-from kokon.utils.functions import Request, JSONResponse
+from kokon.orm import Host, enums
 from kokon.serializers import HostSchema
+from kokon.utils.functions import Request, JSONResponse
 
 
 def handle_get_all_hosts(request: Request):
     status_parameter = request.args.get("status", None)
     if status_parameter:
         try:
-            status_parameter = orm.VerificationStatus(status_parameter)
+            status_parameter = enums.VerificationStatus(status_parameter)
         except ValueError:
             print(
                 f"Could not understand status={status_parameter}. Filtering disabled."
@@ -22,10 +22,10 @@ def handle_get_all_hosts(request: Request):
                 response=f"Received invalid status: {status_parameter}", status=400
             )
 
-    stmt = select(orm.Host)
+    stmt = select(Host)
     if status_parameter:
         print(f"Filtering by status={status_parameter}")
-        stmt = stmt.where(orm.Host.status == status_parameter)
+        stmt = stmt.where(Host.status == status_parameter)
 
     with request.db.acquire() as s:
         result = s.execute(stmt)
@@ -60,7 +60,7 @@ def handle_get_host_by_id(request: Request):
 
     try:
         with request.db.acquire() as session:
-            stmt = select(orm.Host).where(orm.Host.guid == host_id)
+            stmt = select(Host).where(Host.guid == host_id)
             result = session.execute(stmt)
 
             host = result.scalar()
@@ -91,7 +91,7 @@ def handle_update_host(request: Request):
 
     with request.db.acquire() as session:
         try:
-            stmt = select(orm.Host).where(orm.Host.guid == host_id)
+            stmt = select(Host).where(Host.guid == host_id)
             result = session.execute(stmt)
 
             host = result.scalar()
@@ -132,8 +132,8 @@ def handle_delete_host(request: Request):
     with request.db.acquire() as session:
         try:
             stmt = (
-                delete(orm.Host)
-                .where(orm.Host.guid == id)
+                delete(Host)
+                .where(Host.guid == id)
                 .execution_options(synchronize_session="fetch")
             )
             res = session.execute(stmt)

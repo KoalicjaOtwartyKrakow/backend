@@ -1,9 +1,9 @@
 import json
 from uuid import UUID
 
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, fields, auto_field
+from marshmallow_sqlalchemy import auto_field, fields, SQLAlchemyAutoSchema
 
-from kokon.orm import AccommodationUnit, Host, Guest, Language, User
+from kokon.orm import AccommodationUnit, Guest, Host, Language, User
 
 
 def camelcase(s):

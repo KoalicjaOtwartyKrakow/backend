@@ -5,7 +5,7 @@ import sentry_sdk
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import insert
 
-from kokon import orm
+from kokon.orm import User
 from kokon.serializers import UserSchema
 
 
@@ -35,13 +35,13 @@ def upsert_user_from_jwt(db, jwt_header_encoded):
         )
 
         upsert_stmt = (
-            insert(orm.User)
+            insert(User)
             .values(user_dict)
-            .on_conflict_do_update(index_elements=[orm.User.google_sub], set_=user_dict)
+            .on_conflict_do_update(index_elements=[User.google_sub], set_=user_dict)
         )
         session.execute(upsert_stmt)
 
-        select_stmt = sa.select(orm.User).where(orm.User.google_sub == payload["sub"])
+        select_stmt = sa.select(User).where(User.google_sub == payload["sub"])
         user = session.execute(select_stmt).scalar()
 
         session.expunge_all()

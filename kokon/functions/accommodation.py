@@ -5,12 +5,12 @@ import marshmallow
 from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
 
-from kokon.utils.functions import Request, JSONResponse
 from kokon.orm import AccommodationUnit
 from kokon.serializers import (
     AccommodationUnitSchemaFull,
     AccommodationUnitSchema,
 )
+from kokon.utils.functions import JSONResponse, Request
 
 
 def handle_add_accommodation(request: Request):
