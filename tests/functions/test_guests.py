@@ -3,9 +3,13 @@ from unittest.mock import Mock
 import sqlalchemy as sa
 from sqlalchemy_continuum.utils import version_class
 
-from functions.guest import handle_add_guest, handle_update_guest, handle_delete_guest
-from utils.db import DB
-from utils.orm import Guest
+from kokon.functions.guest import (
+    handle_add_guest,
+    handle_update_guest,
+    handle_delete_guest,
+)
+from kokon.utils.db import DB
+from kokon.orm import Guest
 
 
 class UserMock:

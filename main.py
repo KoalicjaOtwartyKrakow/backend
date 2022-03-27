@@ -4,13 +4,10 @@
 import functions_framework
 import sentry_sdk
 
-from functions import accommodation
-from functions import host
-from functions import guest
-from functions import user
+from kokon.functions import accommodation, guest, host, user
 
-from utils import settings
-from utils.functions import function_wrapper
+from kokon import settings
+from kokon.utils.functions import function_wrapper
 
 
 # See https://github.com/getsentry/sentry-python/issues/1081
@@ -133,3 +130,9 @@ def get_host_by_id(request):
 def get_all_users(request):
     """HTTP Cloud Function for getting all users."""
     return user.handle_get_all_users(request)
+
+
+if __name__ == "__main__":
+    from kokon.commands import cli
+
+    cli()

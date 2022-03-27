@@ -10,7 +10,7 @@ Dev environment:
 5. `docker-compose up --no-start && docker-compose start` (install [Docker Desktop](https://www.docker.com/products/docker-desktop/))
 6. `export IS_LOCAL_DB=True`
 7. `alembic upgrade head`
-8. `PYTHONPATH=. python utils/data-generator/main.py --teryt-path=<path to teryt> --count=5 --db`
+8. `python main.py seed --teryt-path=<path to teryt> --count=5 --db` (see `kokon/commands/seed/README.md`)
 
 Regarding branching:
 - try to make sure you work on issues on seperate branches (e.g. feature/get-guests)
@@ -56,6 +56,8 @@ X-Endpoint-API-UserInfo: eyJnaXZlbl9uYW1lIjogIkpvaG4iLCAiZmFtaWx5X25hbWUiOiAiRG9
 ```
 
 For more info see: https://cloud.google.com/endpoints/docs/openapi/migrate-to-esp-v2#receiving_auth_results_in_your_api
+
+You can debug functions using tests, see `tests/functions` for examples.
 
 ### Generating SQL from orm
 

@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
-from functions.accommodation import handle_add_accommodation
-from utils.db import DB
+from kokon.functions.accommodation import handle_add_accommodation
+from kokon.utils.db import DB
 
 
 def test_add_accommodation(db):

@@ -10,8 +10,8 @@ from alembic import context
 
 
 sys.path.append(os.getcwd())
-from utils import settings
-from utils.orm import Base
+from kokon import settings
+from kokon.orm import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 from marshmallow.exceptions import ValidationError
 
-from utils.serializers import GuestSchema
+from kokon.serializers import GuestSchema
 
 
 def test_claimed_at_dump_only():

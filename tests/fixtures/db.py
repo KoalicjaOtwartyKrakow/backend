@@ -2,7 +2,7 @@ import os.path
 
 from pytest import fixture
 
-from utils.db import DB
+from kokon.utils.db import DB
 
 
 def _setup_db():
