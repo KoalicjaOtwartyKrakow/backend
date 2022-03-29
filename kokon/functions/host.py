@@ -15,22 +15,16 @@ def handle_get_all_hosts(request: Request):
         try:
             status_parameter = enums.VerificationStatus(status_parameter)
         except ValueError:
-            print(
-                f"Could not understand status={status_parameter}. Filtering disabled."
-            )
             return flask.Response(
                 response=f"Received invalid status: {status_parameter}", status=400
             )
 
-    stmt = select(Host)
-    if status_parameter:
-        print(f"Filtering by status={status_parameter}")
-        stmt = stmt.where(Host.status == status_parameter)
+    with request.db.acquire() as session:
+        stmt = session.query(Host)
+        if status_parameter:
+            stmt = stmt.where(Host.status == status_parameter)
 
-    with request.db.acquire() as s:
-        result = s.execute(stmt)
-        host_schema = HostSchema()
-        response = [host_schema.dump(g) for g in result.scalars()]
+        response = HostSchema().dump(stmt.all(), many=True)
 
     return JSONResponse(response, status=200)
 
