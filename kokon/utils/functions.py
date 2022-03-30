@@ -10,6 +10,7 @@ from kokon.orm import User
 from kokon.serializers import UUIDEncoder
 from .auth import upsert_user_from_jwt
 from .db import DB
+from .errors import AppError
 
 
 class Request(FlaskRequest):
@@ -35,16 +36,15 @@ def function_wrapper(func):
             # https://cloud.google.com/endpoints/docs/openapi/migrate-to-esp-v2#receiving_auth_results_in_your_api
             jwt_header_encoded = request.headers.get("X-Endpoint-API-UserInfo", "")
             db = DB()
-            user = upsert_user_from_jwt(db, jwt_header_encoded)
-            if user is None:
-                return JSONResponse({"message": "Not authenticated."}, status=403)
 
-            request.user = user
+            request.user = upsert_user_from_jwt(db, jwt_header_encoded)
             request.db = db
 
             return func(request)
         except ValidationError as e:
             return JSONResponse({"validationErrors": e.messages}, status=422)
+        except AppError as e:
+            return JSONResponse({"message": e.message}, status=e.status)
         except Exception as e:
             sentry_sdk.capture_exception(e)
             sentry_sdk.flush()
