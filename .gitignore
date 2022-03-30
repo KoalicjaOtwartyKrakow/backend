@@ -1,6 +1,9 @@
 # IDEs
 .idea/
 .vscode/
+.vs/
+
+*.tsv
 
 dockerfiles/Database/
 
