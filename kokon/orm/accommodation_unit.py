@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP
 from sqlalchemy.orm import relationship
 
 from .base import Base
-from .enums import VerificationStatus, Voivodeship
+from .enums import VerificationStatus, WorkflowStatus, Voivodeship
 
 
 class AccommodationUnit(Base):
@@ -37,12 +37,19 @@ class AccommodationUnit(Base):
     easy_ambulance_access = sa.Column("easy_ambulance_access", sa.Boolean)
     vacancies_free = sa.Column("vacancies_free", sa.Integer)
     staff_comments = sa.Column("staff_comments", sa.Text)
-    status = sa.Column(
-        "status",
+    verification_status = sa.Column(
+        "verification_status",
         sa.Enum(VerificationStatus),
         server_default=VerificationStatus.CREATED,
         nullable=False,
     )
+    workflow_status = sa.Column(
+        "workflow_status",
+        sa.Enum(WorkflowStatus),
+        server_default=WorkflowStatus.NEEDS_VERIFICATION,
+        nullable=False,
+    )
+    for_how_long = sa.Column("for_how_long", sa.String(255))
     system_comments = sa.Column("system_comments", sa.Text, nullable=True)
     created_at = sa.Column(
         "created_at",
