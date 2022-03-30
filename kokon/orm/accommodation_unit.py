@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP
 from sqlalchemy.orm import relationship
 
 from .base import Base
-from .enums import VerificationStatus, WorkflowStatus, Voivodeship
+from .enums import VerificationStatus, Voivodeship, WorkflowStatus
 
 
 class AccommodationUnit(Base):

@@ -14,4 +14,4 @@ def test_add_accommodation(db):
         "addressLine": "Address 1",
     }
     response = handle_add_accommodation(request)
-    assert response.json["status"] == "CREATED"
+    assert response.json["verificationStatus"] == "CREATED"
