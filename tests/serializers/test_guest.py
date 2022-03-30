@@ -27,3 +27,33 @@ def test_claimed_at_dump_only():
         assert e.messages == {"claimedAt": ["Unknown field."]}
     else:
         raise AssertionError("Exception not raised!")
+
+
+def test_load():
+    payload = {
+        "childrenAges": [4, 10],
+        "desiredDestination": "",
+        "documentNumber": "vjktty",
+        "email": "hkqparb@o2.pl",
+        "financeStatus": "cghkgi",
+        "foodAllergies": "",
+        "fullName": "Monika Barbara Jasińska",
+        "glutenFreeDiet": False,
+        "howLongToStay": "3 w",
+        "isAgent": False,
+        "lactoseFreeDiet": False,
+        "meatFreeDiet": False,
+        "peopleInGroup": 15,
+        "adultFemaleCount": 5,
+        "adultMaleCount": 0,
+        "petsDescription": "cfukr7iby8o",
+        "havePets": False,
+        "phoneNumber": "543854896",
+        "priorityDate": "2022-03-20",
+        "priorityStatus": "ACCOMMODATION_FOUND",
+        "specialNeeds": "",
+        "verificationStatus": "CREATED",
+        "accommodationUnitId": None,
+    }
+
+    GuestSchema().load(payload, session=MagicMock())
