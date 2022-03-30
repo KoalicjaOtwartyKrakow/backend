@@ -78,7 +78,7 @@ middle_name_male_weights = []
 
 def seed_first_name_generator(datasets):
     first_names = datasets["first_names"]
-    with open(first_names[male_first_names_id], newline="") as cf:
+    with open(first_names[male_first_names_id], encoding='utf-8', newline="") as cf:
         male_first_names = csv.reader(cf)
         next(male_first_names, None)
         for row in male_first_names:
@@ -86,7 +86,7 @@ def seed_first_name_generator(datasets):
             first_name_male_weights.append(int(row[2]))
         report.verbose(f"Imported {len(first_name_male_weights)} male first names.")
 
-    with open(first_names[male_middle_names_id], newline="") as cf:
+    with open(first_names[male_middle_names_id], encoding='utf-8', newline="") as cf:
         male_middle_names = csv.reader(cf)
         next(male_middle_names)
         for row in male_middle_names:
@@ -94,7 +94,7 @@ def seed_first_name_generator(datasets):
             middle_name_male_weights.append(int(row[2]))
         report.verbose(f"Imported {len(middle_name_male_weights)} male middle names.")
 
-    with open(first_names[female_first_names_id], newline="") as cf:
+    with open(first_names[female_first_names_id], encoding='utf-8', newline="") as cf:
         female_first_names = csv.reader(cf)
         next(female_first_names, None)
         for row in female_first_names:
@@ -102,7 +102,7 @@ def seed_first_name_generator(datasets):
             first_name_female_weights.append(int(row[2]))
         report.verbose(f"Imported {len(first_name_female_weights)} female first names.")
 
-    with open(first_names[female_middle_names_id], newline="") as cf:
+    with open(first_names[female_middle_names_id], encoding='utf-8', newline="") as cf:
         female_middle_names = csv.reader(cf)
         next(female_middle_names)
         for row in female_middle_names:
@@ -121,7 +121,7 @@ last_name_male_weights = []
 
 def seed_last_name_generator(datasets):
     last_names = datasets["last_names"]
-    with open(last_names[male_last_names_id], newline="") as cf:
+    with open(last_names[male_last_names_id], encoding='utf-8', newline="") as cf:
         male_last_names = csv.reader(cf)
         next(male_last_names, None)
         for row in male_last_names:
@@ -129,7 +129,7 @@ def seed_last_name_generator(datasets):
             last_name_male_weights.append(int(row[1]))
         report.verbose(f"Imported {len(last_name_male_weights)} male last names.")
 
-    with open(last_names[female_last_names_id], newline="") as cf:
+    with open(last_names[female_last_names_id], encoding='utf-8', newline="") as cf:
         female_last_names = csv.reader(cf)
         next(female_last_names, None)
         for row in female_last_names:
@@ -177,7 +177,7 @@ ulice_weights = []
 
 def seed_address_generator(datasets):
     teryt = datasets["teryt"]
-    with open(teryt["terc"], newline="") as cf:
+    with open(teryt["terc"], encoding='utf-8', newline="") as cf:
         terc_reader = csv.reader(cf, delimiter=";")
         next(terc_reader, None)
         for row in terc_reader:
@@ -202,7 +202,7 @@ def seed_address_generator(datasets):
                 gminy_dict[key] = data
         report.verbose(f"Read {len(gminy)} counties.")
 
-    with open(teryt["simc"], newline="") as cf:
+    with open(teryt["simc"], encoding='utf-8', newline="") as cf:
         simc_reader = csv.reader(cf, delimiter=";")
         next(simc_reader, None)
         for row in simc_reader:
@@ -224,7 +224,7 @@ def seed_address_generator(datasets):
             miejscowosci_dict[key] = data
         report.verbose(f"Read {len(miejscowosci)} cities.")
 
-    with open(teryt["ulic"], newline="") as cf:
+    with open(teryt["ulic"], encoding='utf-8', newline="") as cf:
         ulic_reader = csv.reader(cf, delimiter=";")
         next(ulic_reader, None)
         for row in ulic_reader:
