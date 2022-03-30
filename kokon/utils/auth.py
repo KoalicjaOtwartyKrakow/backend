@@ -5,8 +5,10 @@ import sentry_sdk
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import insert
 
+from kokon import settings
 from kokon.orm import User
 from kokon.serializers import UserSchema
+from kokon.utils.errors import AppError
 
 
 def upsert_user_from_jwt(db, jwt_header_encoded):
@@ -17,7 +19,15 @@ def upsert_user_from_jwt(db, jwt_header_encoded):
         # hit the backend. Let's log to sentry.
         sentry_sdk.capture_exception(e)
         sentry_sdk.flush()
-        return None
+        raise AppError(message="Unauthorized.", status=401)
+
+    assert "@" in payload["email"]
+    authorized_emails = [i.strip() for i in settings.AUTHORIZED_EMAILS.split(",")]
+    if not (
+        payload["email"] in authorized_emails
+        or f"*@{payload['email'].split('@')[-1]}" in authorized_emails
+    ):
+        raise AppError(message="Unauthorized.", status=401)
 
     with db.acquire() as session:
         user_dict = {
