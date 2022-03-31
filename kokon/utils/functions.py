@@ -23,7 +23,12 @@ class Request(FlaskRequest):
 class JSONResponse(Response):
     def __init__(self, response, status=200, **kwargs):
         if not isinstance(response, str):
-            response = json.dumps(response, cls=UUIDEncoder)
+            # The json returned here is always returned as the only part of the
+            # response, with mimetype set to json. There is no raw interpolation
+            # with js happening, so setting ensure_ascii is safe, no risk of XSS.
+            #
+            # For more context see https://v8.dev/features/subsume-json
+            response = json.dumps(response, cls=UUIDEncoder, ensure_ascii=False)
         super(JSONResponse, self).__init__(
             response=response, status=status, mimetype="application/json", **kwargs
         )
