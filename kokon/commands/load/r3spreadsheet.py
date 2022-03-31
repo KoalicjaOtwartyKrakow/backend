@@ -569,7 +569,6 @@ def merge_ludzi_recepcja(ludzi, recepcja):
         phone_numbers_dict[x["phone_number"]] = x
         full_name_dict[x["full_name"]] = x
 
-    duplicate_ludzi = {}
     for i, x in enumerate(merged):
         key = x["full_name"]
         r = full_name_dict.get(key, None)
