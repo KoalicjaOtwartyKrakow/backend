@@ -42,6 +42,7 @@ class HostSchema(CamelCaseSchema):
         model = Host
         include_fk = True
         load_instance = True
+        exclude = ("accommodation_units",)
 
     languages_spoken = fields.Nested("LanguageSchema", many=True)
 
@@ -51,7 +52,7 @@ class GuestSchema(CamelCaseSchema):
         model = Guest
         include_fk = True
         load_instance = True
-        exclude = ("updated_by_id",)
+        exclude = ("updated_by_id", "accommodation_unit")
 
     priority_date = DateTime(format="%Y-%m-%d")
     created_at = auto_field(dump_only=True)
@@ -65,6 +66,7 @@ class GuestSchemaFull(CamelCaseSchema):
         include_relationships = True
         include_fk = True
         load_instance = True
+        exclude = ("updated_by_id",)
 
     accommodation_unit = fields.Nested("AccommodationUnitSchema")
 
@@ -74,6 +76,7 @@ class AccommodationUnitSchema(CamelCaseSchema):
         model = AccommodationUnit
         include_fk = True
         load_instance = True
+        exclude = ("host", "guests")
 
 
 class AccommodationUnitSchemaFull(CamelCaseSchema):
@@ -82,6 +85,7 @@ class AccommodationUnitSchemaFull(CamelCaseSchema):
         include_relationships = True
         include_fk = True
         load_instance = True
+        exclude = ("guests",)
 
     host = fields.Nested("HostSchema")
 
