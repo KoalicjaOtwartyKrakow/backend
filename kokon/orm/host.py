@@ -42,9 +42,15 @@ class Host(Base):
     full_name = sa.Column("full_name", sa.String(256), nullable=False)
     email = sa.Column("email", sa.String(100), nullable=False)
     phone_number = sa.Column("phone_number", sa.String(20), nullable=False)
-    call_after = sa.Column("call_after", sa.String(64))
-    call_before = sa.Column("call_before", sa.String(64))
-    comments = sa.Column("comments", sa.Text)
+    call_after = sa.Column(
+        "call_after", sa.String(64), server_default=sa.text(""), nullable=False
+    )
+    call_before = sa.Column(
+        "call_before", sa.String(64), server_default=sa.text(""), nullable=False
+    )
+    comments = sa.Column(
+        "comments", sa.Text, server_default=sa.text(""), nullable=False
+    )
     languages_spoken = relationship("Language", secondary=host_languages)
     status = sa.Column(
         "status",
@@ -65,7 +71,9 @@ class Host(Base):
         server_default=sa.func.now(),
         onupdate=sa.func.now(),
     )
-    system_comments = sa.Column("system_comments", sa.Text)
+    system_comments = sa.Column(
+        "system_comments", sa.Text, server_default=sa.text(""), nullable=False
+    )
 
     accommodation_units = relationship("AccommodationUnit", back_populates="host")
 

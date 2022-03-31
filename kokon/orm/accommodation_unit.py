@@ -24,9 +24,7 @@ class AccommodationUnit(Base):
         nullable=False,
         index=True,
     )
-    city = sa.Column(
-        "city", sa.String(250)
-    )  # This should ideally be NOT NULL, but spreadsheet has very unstructured data
+    city = sa.Column("city", sa.String(250), server_default=sa.text(""), nullable=False)
     zip = sa.Column("zip", sa.String(10), nullable=False)
     voivodeship = sa.Column("voivodeship", sa.Enum(Voivodeship))
     address_line = sa.Column("address_line", sa.String(512), nullable=False)
@@ -36,10 +34,14 @@ class AccommodationUnit(Base):
     disabled_people_friendly = sa.Column("disabled_people_friendly", sa.Boolean)
     lgbt_friendly = sa.Column("lgbt_friendly", sa.Boolean)
     parking_place_available = sa.Column("parking_place_available", sa.Boolean)
-    owner_comments = sa.Column("owner_comments", sa.Text)
+    owner_comments = sa.Column(
+        "owner_comments", sa.Text, server_default=sa.text(""), nullable=False
+    )
     easy_ambulance_access = sa.Column("easy_ambulance_access", sa.Boolean)
     vacancies_free = sa.Column("vacancies_free", sa.Integer)
-    staff_comments = sa.Column("staff_comments", sa.Text)
+    staff_comments = sa.Column(
+        "staff_comments", sa.Text, server_default=sa.text(""), nullable=False
+    )
     verification_status = sa.Column(
         "verification_status",
         sa.Enum(VerificationStatus),
@@ -52,8 +54,12 @@ class AccommodationUnit(Base):
         server_default=WorkflowStatus.NEEDS_VERIFICATION,
         nullable=False,
     )
-    for_how_long = sa.Column("for_how_long", sa.String(255))
-    system_comments = sa.Column("system_comments", sa.Text, nullable=True)
+    for_how_long = sa.Column(
+        "for_how_long", sa.String(255), server_default=sa.text(""), nullable=False
+    )
+    system_comments = sa.Column(
+        "system_comments", sa.Text, server_default=sa.text(""), nullable=False
+    )
     created_at = sa.Column(
         "created_at",
         TIMESTAMP(timezone=True),
