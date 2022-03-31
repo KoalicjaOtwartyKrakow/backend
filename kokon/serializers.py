@@ -59,11 +59,32 @@ class GuestSchema(CamelCaseSchema):
     claimed_at = auto_field(dump_only=True)
 
 
+class GuestSchemaFull(CamelCaseSchema):
+    class Meta:
+        model = Guest
+        include_relationships = True
+        include_fk = True
+        load_instance = True
+
+    accommodation_unit = fields.Nested("AccommodationUnitSchema")
+
+
 class AccommodationUnitSchema(CamelCaseSchema):
     class Meta:
         model = AccommodationUnit
         include_fk = True
         load_instance = True
+
+
+class AccommodationUnitSchemaFull(CamelCaseSchema):
+    class Meta:
+        model = AccommodationUnit
+        include_relationships = True
+        include_fk = True
+        load_instance = True
+
+    host = fields.Nested("HostSchema")
+    guests = fields.Nested("GuestSchema", many=True)
 
 
 class UserSchema(CamelCaseSchema):

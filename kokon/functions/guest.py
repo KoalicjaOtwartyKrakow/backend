@@ -3,36 +3,37 @@ import flask
 from sqlalchemy import exc, select
 
 from kokon.orm import Guest
-from kokon.serializers import GuestSchema
+from kokon.serializers import GuestSchema, GuestSchemaFull
 from kokon.utils.functions import Request, JSONResponse
 
 
 def handle_get_all_guests(request: Request):
     with request.db.acquire() as session:
         result = session.query(Guest).all()
-        response = GuestSchema().dump(result, many=True)
+        response = GuestSchemaFull().dump(result, many=True)
 
     return JSONResponse(response, status=200)
 
 
 def handle_add_guest(request: Request):
-    schema = GuestSchema()
+    guest_schema = GuestSchema()
+    guest_schema_full = GuestSchemaFull()
 
     data = request.get_json()
 
     with request.db.acquire() as session:
-        guest = schema.load(data, session=session)
+        guest = guest_schema.load(data, session=session)
         guest.updated_by_id = request.user.guid
         session.add(guest)
         session.commit()
         session.refresh(guest)
-        response = schema.dump(guest)
+        response = guest_schema_full.dump(guest)
 
     return JSONResponse(response, status=201)
 
 
 def handle_get_guest_by_id(request: Request):
-    schema = GuestSchema()
+    guest_schema_full = GuestSchemaFull()
 
     try:
         guest_id = request.args["guestId"]
@@ -48,7 +49,7 @@ def handle_get_guest_by_id(request: Request):
             if guest is None:
                 return flask.Response("Not found", status=404)
 
-            response = schema.dump(guest)
+            response = guest_schema_full.dump(guest)
     except exc.ProgrammingError as e:
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(
@@ -86,7 +87,8 @@ def handle_delete_guest(request: Request):
 
 
 def handle_update_guest(request: Request):
-    schema = GuestSchema()
+    guest_schema = GuestSchema()
+    guest_schema_full = GuestSchemaFull()
 
     try:
         guest_id = request.args["guestId"]
@@ -104,12 +106,12 @@ def handle_update_guest(request: Request):
             if guest is None:
                 return flask.Response("Not found", status=404)
 
-            guest = schema.load(data, session=session, instance=guest)
+            guest = guest_schema.load(data, session=session, instance=guest)
             guest.updated_by_id = request.user.guid
 
             session.commit()
             session.refresh(guest)
-            response = schema.dump(guest)
+            response = guest_schema_full.dump(guest)
     except exc.ProgrammingError as e:
         if "invalid input syntax for type uuid" in str(e):
             return flask.Response(
