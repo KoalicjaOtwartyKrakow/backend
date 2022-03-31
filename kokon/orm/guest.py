@@ -118,6 +118,7 @@ class Guest(Base):
     accommodation_unit_id = sa.Column(
         "accommodation_unit_id",
         sa.ForeignKey("accommodation_units.guid", name="fk_accommodation_unit_id"),
+        index=True,
     )
     accommodation_unit = relationship("AccommodationUnit", back_populates="guests")
 

@@ -17,7 +17,7 @@ host_languages = sa.Table(
     "host_languages",
     Base.metadata,
     sa.Column("language_code", sa.ForeignKey("languages.code2", name="fk_language")),
-    sa.Column("host_id", sa.ForeignKey("hosts.guid", name="fk_host")),
+    sa.Column("host_id", sa.ForeignKey("hosts.guid", name="fk_host"), index=True),
     sa.Column(
         "guid",
         DB_UUID(as_uuid=True),
