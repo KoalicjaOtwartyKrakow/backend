@@ -1,20 +1,22 @@
-import requests
-from pyrnalist import report
 import os
-import sys
 import pathlib
-from appdata import AppDataPaths
+import sys
 from zipfile import ZipFile
+
+import requests
+from appdata import AppDataPaths
+from pyrnalist import report
+
 
 DATA_GOV_PL_BASE_URL = "https://api.dane.gov.pl/1.4/datasets/{}?lang=pl"
 
 
 def download_data_gov_pl_dataset(temp_path, resource, resources_id):
     cache_files = {}
-    for id in resources_id:
-        file_name = os.path.join(temp_path.app_data_path, f"{id}.csv")
+    for i in resources_id:
+        file_name = os.path.join(temp_path.app_data_path, f"{i}.csv")
         if os.path.exists(file_name):
-            cache_files[id] = file_name
+            cache_files[i] = file_name
     if len(cache_files.keys()) == len(resources_id):
         return cache_files
 
@@ -42,8 +44,8 @@ def download_data_gov_pl_dataset(temp_path, resource, resources_id):
         size = csv["size"]
         url = csv["url"]
         steps = int(size / chunk_size)
-        id = csv["id"]
-        file_name = os.path.join(temp_path.app_data_path, f"{id}.csv")
+        row_id = csv["id"]
+        file_name = os.path.join(temp_path.app_data_path, f"{row_id}.csv")
         if not os.path.exists(file_name):
             tick = report.progress(steps)
             report.verbose(f"{file_name} not found, downloading...")
@@ -58,8 +60,8 @@ def download_data_gov_pl_dataset(temp_path, resource, resources_id):
                         f.write(data)
                         tick()
             report.verbose(f"Downloaded url={url}")
-        report.verbose(f"Using id={id} file={file_name}")
-        files[int(id)] = file_name
+        report.verbose(f"Using id={row_id} file={file_name}")
+        files[int(row_id)] = file_name
     return files
 
 

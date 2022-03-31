@@ -33,31 +33,31 @@ def generate_phone_number():
     return f"+48 {number}" if random.randint(0, 100) < 20 else number
 
 
-def generate_n_numbers(N):
-    return ''.join([random.choice(string.digits) for x in range(0, N)])
+def generate_n_numbers(n):
+    return "".join([random.choice(string.digits) for x in range(n)])
 
 
-def generate_n_letters(N):
-    return ''.join([random.choice(string.ascii_letters) for x in range(0, N)])
+def generate_n_letters(n):
+    return "".join([random.choice(string.ascii_letters) for x in range(n)])
 
 
 def generate_document_number():
-    t = random.choice(['uaid', 'uaoldpassport', 'dunno1'])
-    if t == 'uaid':
+    t = random.choice(["uaid", "uaoldpassport", "dunno1"])
+    if t == "uaid":
         # 13 digits
         return generate_n_numbers(13)
-    elif t == 'uaoldpassport':
+    elif t == "uaoldpassport":
         # 2 latin letters + 6 digits
-        return ''.join([generate_n_letters(2), generate_n_numbers(6)])
+        return "".join([generate_n_letters(2), generate_n_numbers(6)])
     else:
         front = generate_n_numbers(5)
         parts = [
             generate_n_numbers(2),
             generate_n_numbers(3),
             generate_n_numbers(1),
-            generate_n_numbers(3)
+            generate_n_numbers(3),
         ]
-        return '/'.join([front, '-'.join(parts)])
+        return "/".join([front, "-".join(parts)])
 
 
 email_domains = [
@@ -105,7 +105,7 @@ middle_name_male_weights = []
 
 def seed_first_name_generator(datasets):
     first_names = datasets["first_names"]
-    with open(first_names[male_first_names_id], encoding='utf-8', newline="") as cf:
+    with open(first_names[male_first_names_id], encoding="utf-8", newline="") as cf:
         male_first_names = csv.reader(cf)
         next(male_first_names, None)
         for row in male_first_names:
@@ -113,7 +113,7 @@ def seed_first_name_generator(datasets):
             first_name_male_weights.append(int(row[2]))
         report.verbose(f"Imported {len(first_name_male_weights)} male first names.")
 
-    with open(first_names[male_middle_names_id], encoding='utf-8', newline="") as cf:
+    with open(first_names[male_middle_names_id], encoding="utf-8", newline="") as cf:
         male_middle_names = csv.reader(cf)
         next(male_middle_names)
         for row in male_middle_names:
@@ -121,7 +121,7 @@ def seed_first_name_generator(datasets):
             middle_name_male_weights.append(int(row[2]))
         report.verbose(f"Imported {len(middle_name_male_weights)} male middle names.")
 
-    with open(first_names[female_first_names_id], encoding='utf-8', newline="") as cf:
+    with open(first_names[female_first_names_id], encoding="utf-8", newline="") as cf:
         female_first_names = csv.reader(cf)
         next(female_first_names, None)
         for row in female_first_names:
@@ -129,7 +129,7 @@ def seed_first_name_generator(datasets):
             first_name_female_weights.append(int(row[2]))
         report.verbose(f"Imported {len(first_name_female_weights)} female first names.")
 
-    with open(first_names[female_middle_names_id], encoding='utf-8', newline="") as cf:
+    with open(first_names[female_middle_names_id], encoding="utf-8", newline="") as cf:
         female_middle_names = csv.reader(cf)
         next(female_middle_names)
         for row in female_middle_names:
@@ -148,7 +148,7 @@ last_name_male_weights = []
 
 def seed_last_name_generator(datasets):
     last_names = datasets["last_names"]
-    with open(last_names[male_last_names_id], encoding='utf-8', newline="") as cf:
+    with open(last_names[male_last_names_id], encoding="utf-8", newline="") as cf:
         male_last_names = csv.reader(cf)
         next(male_last_names, None)
         for row in male_last_names:
@@ -156,7 +156,7 @@ def seed_last_name_generator(datasets):
             last_name_male_weights.append(int(row[1]))
         report.verbose(f"Imported {len(last_name_male_weights)} male last names.")
 
-    with open(last_names[female_last_names_id], encoding='utf-8', newline="") as cf:
+    with open(last_names[female_last_names_id], encoding="utf-8", newline="") as cf:
         female_last_names = csv.reader(cf)
         next(female_last_names, None)
         for row in female_last_names:
@@ -204,7 +204,7 @@ ulice_weights = []
 
 def seed_address_generator(datasets):
     teryt = datasets["teryt"]
-    with open(teryt["terc"], encoding='utf-8', newline="") as cf:
+    with open(teryt["terc"], encoding="utf-8", newline="") as cf:
         terc_reader = csv.reader(cf, delimiter=";")
         next(terc_reader, None)
         for row in terc_reader:
@@ -229,7 +229,7 @@ def seed_address_generator(datasets):
                 gminy_dict[key] = data
         report.verbose(f"Read {len(gminy)} counties.")
 
-    with open(teryt["simc"], encoding='utf-8', newline="") as cf:
+    with open(teryt["simc"], encoding="utf-8", newline="") as cf:
         simc_reader = csv.reader(cf, delimiter=";")
         next(simc_reader, None)
         for row in simc_reader:
@@ -251,7 +251,7 @@ def seed_address_generator(datasets):
             miejscowosci_dict[key] = data
         report.verbose(f"Read {len(miejscowosci)} cities.")
 
-    with open(teryt["ulic"], encoding='utf-8', newline="") as cf:
+    with open(teryt["ulic"], encoding="utf-8", newline="") as cf:
         ulic_reader = csv.reader(cf, delimiter=";")
         next(ulic_reader, None)
         for row in ulic_reader:
@@ -441,7 +441,7 @@ def generate_guest(all_accommodation_units):
     special_needs = ""
     how_long_to_stay = random.choice(STAYS)
     priority_status = random.choice(PRIORITY_STATUS)
-    document_number =  generate_document_number()
+    document_number = generate_document_number()
 
     accommodation_unit_id = random.choice(
         [None, random.choice(all_accommodation_units)["guid"]]

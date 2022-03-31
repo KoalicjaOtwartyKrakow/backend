@@ -1,6 +1,7 @@
 import click
 
-from .seed.main import (seed_cmd, load_cmd)
+from .seed.main import seed_cmd
+from .load.main import load_cmd
 
 
 @click.group()
