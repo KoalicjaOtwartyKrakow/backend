@@ -2,11 +2,11 @@ import os.path
 
 from pytest import fixture
 
-from utils.db import acquire_db_session
+from kokon.utils.db import DB
 
 
 def _setup_db():
-    with acquire_db_session() as session:
+    with DB().acquire() as session:
         assert session.bind.url.database.endswith("test")
 
         sql_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "db.sql")
