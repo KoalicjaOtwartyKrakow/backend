@@ -72,7 +72,13 @@ class GuestSchemaFull(CamelCaseSchema):
         include_relationships = True
         include_fk = True
         load_instance = True
-        exclude = ("updated_by_id", "updated_by", "claimed_by_id", "versions")
+        exclude = (
+            "updated_by_id",
+            "updated_by",
+            "claimed_by_id",
+            "versions",
+            "accommodation_unit_id",
+        )
 
     accommodation_unit = fields.Nested("AccommodationUnitSchema")
 
