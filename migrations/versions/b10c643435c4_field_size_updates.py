@@ -1,4 +1,4 @@
-"""fiels_size_updates
+"""field_size_updates
 
 Revision ID: b10c643435c4
 Revises: 558b6e23830c
@@ -34,7 +34,7 @@ def upgrade():
         "phone_number",
         existing_type=sa.VARCHAR(length=20),
         type_=sa.String(length=250),
-        existing_nullable=False,
+        existing_nullable=True,
     )
     op.alter_column(
         "accommodation_units",
@@ -64,7 +64,6 @@ def upgrade():
         type_=sa.String(length=250),
         existing_nullable=False,
     )
-
 
     op.execute(
         sa.text(
@@ -99,7 +98,7 @@ def downgrade():
         "phone_number",
         existing_type=sa.VARCHAR(length=250),
         type_=sa.String(length=20),
-        existing_nullable=False,
+        existing_nullable=True,
     )
     op.alter_column(
         "accommodation_units",
