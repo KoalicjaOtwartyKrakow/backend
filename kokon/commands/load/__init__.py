@@ -3,12 +3,12 @@ from pyrnalist import report
 
 from kokon.utils.db import DB
 from ..seed.generators import generate_accommodation_unit, generate_guest, generate_host
-from ..seed.main import load_dataset, to_sql
+from ..seed import load_dataset, to_sql
 from .r3spreadsheet import (
     import_ludzi,
-    merge_ludzi_recepcja,
     import_mieszkania,
     import_recepcja,
+    merge_ludzi_recepcja,
 )
 
 
