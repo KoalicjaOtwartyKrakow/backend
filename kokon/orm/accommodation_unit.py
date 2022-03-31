@@ -22,7 +22,7 @@ class AccommodationUnit(Base):
         "host_id", sa.ForeignKey("hosts.guid", name="fk_host"), nullable=False
     )
     city = sa.Column(
-        "city", sa.String(50)
+        "city", sa.String(250)
     )  # This should ideally be NOT NULL, but spreadsheet has very unstructured data
     zip = sa.Column("zip", sa.String(10), nullable=False)
     voivodeship = sa.Column("voivodeship", sa.Enum(Voivodeship))

@@ -19,7 +19,7 @@ class Guest(Base):
         primary_key=True,
     )
     full_name = sa.Column("full_name", sa.String(255), nullable=False)
-    email = sa.Column("email", sa.String(255), nullable=False)
+    email = sa.Column("email", sa.String(255), nullable=True)
     phone_number = sa.Column("phone_number", sa.String(20), nullable=False)
     is_agent = sa.Column(
         "is_agent", sa.Boolean, server_default=sa.sql.expression.false(), nullable=False
