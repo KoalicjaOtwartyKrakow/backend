@@ -33,6 +33,33 @@ def generate_phone_number():
     return f"+48 {number}" if random.randint(0, 100) < 20 else number
 
 
+def generate_n_numbers(N):
+    return ''.join([random.choice(string.digits) for x in range(0, N)])
+
+
+def generate_n_letters(N):
+    return ''.join([random.choice(string.ascii_letters) for x in range(0, N)])
+
+
+def generate_document_number():
+    t = random.choice(['uaid', 'uaoldpassport', 'dunno1'])
+    if t == 'uaid':
+        # 13 digits
+        return generate_n_numbers(13)
+    elif t == 'uaoldpassport':
+        # 2 latin letters + 6 digits
+        return ''.join([generate_n_letters(2), generate_n_numbers(6)])
+    else:
+        front = generate_n_numbers(5)
+        parts = [
+            generate_n_numbers(2),
+            generate_n_numbers(3),
+            generate_n_numbers(1),
+            generate_n_numbers(3)
+        ]
+        return '/'.join([front, '-'.join(parts)])
+
+
 email_domains = [
     "hotmail.com",
     "gmail.com",
@@ -414,6 +441,7 @@ def generate_guest(all_accommodation_units):
     special_needs = ""
     how_long_to_stay = random.choice(STAYS)
     priority_status = random.choice(PRIORITY_STATUS)
+    document_number =  generate_document_number()
 
     accommodation_unit_id = random.choice(
         [None, random.choice(all_accommodation_units)["guid"]]
@@ -432,6 +460,7 @@ def generate_guest(all_accommodation_units):
         "special_needs": special_needs,
         "how_long_to_stay": how_long_to_stay,
         "priority_status": priority_status,
+        "document_number": document_number,
         "accommodation_unit_id": accommodation_unit_id,
         "updated_by_id": "28ab1bf2-f735-4603-b7f0-7938ba2ab059",
     }
