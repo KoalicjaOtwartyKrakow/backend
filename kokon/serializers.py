@@ -1,6 +1,7 @@
 import json
 from uuid import UUID
 
+from marshmallow.fields import DateTime
 from marshmallow_sqlalchemy import auto_field, fields, SQLAlchemyAutoSchema
 
 from kokon.orm import AccommodationUnit, Guest, Host, Language, User
@@ -52,6 +53,7 @@ class GuestSchema(CamelCaseSchema):
         load_instance = True
         exclude = ("updated_by_id",)
 
+    priority_date = DateTime(format="%Y-%m-%d")
     created_at = auto_field(dump_only=True)
     updated_at = auto_field(dump_only=True)
     claimed_at = auto_field(dump_only=True)

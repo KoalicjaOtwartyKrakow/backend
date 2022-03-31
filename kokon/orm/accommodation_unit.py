@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID as DB_UUID, TIMESTAMP
 from sqlalchemy.orm import relationship
 
 from .base import Base
-from .enums import VerificationStatus, Voivodeship
+from .enums import VerificationStatus, Voivodeship, WorkflowStatus
 
 
 class AccommodationUnit(Base):
@@ -22,7 +22,7 @@ class AccommodationUnit(Base):
         "host_id", sa.ForeignKey("hosts.guid", name="fk_host"), nullable=False
     )
     city = sa.Column(
-        "city", sa.String(50)
+        "city", sa.String(250)
     )  # This should ideally be NOT NULL, but spreadsheet has very unstructured data
     zip = sa.Column("zip", sa.String(10), nullable=False)
     voivodeship = sa.Column("voivodeship", sa.Enum(Voivodeship))
@@ -37,12 +37,19 @@ class AccommodationUnit(Base):
     easy_ambulance_access = sa.Column("easy_ambulance_access", sa.Boolean)
     vacancies_free = sa.Column("vacancies_free", sa.Integer)
     staff_comments = sa.Column("staff_comments", sa.Text)
-    status = sa.Column(
-        "status",
+    verification_status = sa.Column(
+        "verification_status",
         sa.Enum(VerificationStatus),
         server_default=VerificationStatus.CREATED,
         nullable=False,
     )
+    workflow_status = sa.Column(
+        "workflow_status",
+        sa.Enum(WorkflowStatus),
+        server_default=WorkflowStatus.NEEDS_VERIFICATION,
+        nullable=False,
+    )
+    for_how_long = sa.Column("for_how_long", sa.String(255))
     system_comments = sa.Column("system_comments", sa.Text, nullable=True)
     created_at = sa.Column(
         "created_at",

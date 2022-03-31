@@ -3,7 +3,7 @@ import enum
 
 # https://stackoverflow.com/a/51976841
 class VerificationStatus(str, enum.Enum):
-    """Class representing status enum in database."""
+    """Class representing verification status enum in database."""
 
     CREATED = "CREATED"
     VERIFIED = "VERIFIED"
@@ -11,6 +11,15 @@ class VerificationStatus(str, enum.Enum):
 
     def __str__(self):
         return self.value
+
+
+class WorkflowStatus(str, enum.Enum):
+    """Class representing workflow status enum in database."""
+
+    AVAILABLE = "AVAILABLE"
+    NEEDS_VERIFICATION = "NEEDS_VERIFICATION"
+    WITHDRAWN = "WITHDRAWN"
+    DONE = "DONE"
 
 
 # https://stackoverflow.com/a/51976841
