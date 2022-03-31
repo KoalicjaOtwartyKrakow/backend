@@ -15,10 +15,10 @@ from .generators import (
 
 
 def to_pgsql_value(v):
-    if isinstance(v, list):
-        return "'{" + ", ".join([to_pgsql_value(x) for x in v]) + "}'"
-    elif isinstance(v, str):
+    if isinstance(v, str):
         return f"$SomeTag${v}$SomeTag$"
+    elif isinstance(v, list):
+        return "'{" + ", ".join([to_pgsql_value(x) for x in v]) + "}'"
     elif isinstance(v, bool):
         return "true" if v else "false"
     elif v is None:

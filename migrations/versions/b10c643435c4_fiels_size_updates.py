@@ -22,6 +22,13 @@ def upgrade():
     op.alter_column(
         "guests", "email", existing_type=sa.VARCHAR(length=255), nullable=True
     )
+    op.alter_column(
+        "guests",
+        "phone_number",
+        existing_type=sa.VARCHAR(length=20),
+        type_=sa.String(length=250),
+        existing_nullable=False,
+    )
 
     op.alter_column(
         "accommodation_units",
@@ -37,6 +44,21 @@ def upgrade():
         type_=sa.String(length=250),
         existing_nullable=True,
     )
+    op.alter_column(
+        "hosts",
+        "email",
+        existing_type=sa.VARCHAR(length=100),
+        type_=sa.String(length=250),
+        existing_nullable=False,
+    )
+    op.alter_column(
+        "hosts",
+        "phone_number",
+        existing_type=sa.VARCHAR(length=20),
+        type_=sa.String(length=250),
+        existing_nullable=False,
+    )
+
 
     op.execute(
         sa.text(
@@ -59,6 +81,13 @@ def downgrade():
     op.alter_column(
         "guests", "email", existing_type=sa.VARCHAR(length=255), nullable=False
     )
+    op.alter_column(
+        "guests",
+        "phone_number",
+        existing_type=sa.VARCHAR(length=250),
+        type_=sa.String(length=20),
+        existing_nullable=False,
+    )
 
     op.alter_column(
         "accommodation_units",
@@ -73,5 +102,19 @@ def downgrade():
         existing_type=sa.VARCHAR(length=250),
         type_=sa.String(length=50),
         existing_nullable=True,
+    )
+    op.alter_column(
+        "hosts",
+        "email",
+        existing_type=sa.VARCHAR(length=250),
+        type_=sa.String(length=100),
+        existing_nullable=False,
+    )
+    op.alter_column(
+        "hosts",
+        "phone_number",
+        existing_type=sa.VARCHAR(length=250),
+        type_=sa.String(length=20),
+        existing_nullable=False,
     )
     # ### end Alembic commands ###

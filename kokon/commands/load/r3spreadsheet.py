@@ -312,7 +312,7 @@ def import_ludzi():
             # Column N Uwagi(Czy są kobieta w ciazy, inwalidy (jaka grupa?) Czy sa potrzebny leki, przelewanie krwi dializ etd?
             # Czy są jakies alergie? contents SHALL be placed in guests.special_needs
             column_n = row[13]
-            special_needs = column_n
+            special_needs = re.sub(r":([a-zA-Z0-9]+)", r" \1", column_n, 0, re.MULTILINE)
 
             # Column O Finanse contents SHALL be placed in guests.finance_status
             column_o = row[14]
@@ -325,7 +325,7 @@ def import_ludzi():
             how_long_to_stay = get_how_long_can_stay(column_p, validation_notes)
 
             # Column Q Uwagi contents SHALL be placed in guests.staff_comments
-            staff_comments = row[16]
+            staff_comments = re.sub(r":([a-zA-Z0-9]+)", r" \1", row[16], 0, re.MULTILINE)
 
             data = {
                 "full_name": full_name,
@@ -345,7 +345,7 @@ def import_ludzi():
                 "desired_destination": None,
                 "staff_comments": staff_comments,
                 "created_at": created_at,
-                "system_comments": validation_notes,
+                "system_comments": re.sub(r":([a-zA-Z0-9]+)", r" \1", "\\n".join(validation_notes), 0, re.MULTILINE),
                 "priority_status": status,
                 "updated_by_id": "28ab1bf2-f735-4603-b7f0-7938ba2ab059",  # default system user
                 "__old_guest_id": __old_guest_id,
@@ -532,7 +532,7 @@ def import_recepcja():
             # Column W Notatki i komentarze dotyczące zwierząt domowych, zakwaterowania, stanu zdrowia, edukacji itd (opcjonalnie) | Нотатки і коментарі відносно
             # домашніх тварин, житла, стану здоров"я, освіти та інше contents SHALL be appended to guests.staff_comments
             column_w = row[22]
-            staff_comments = column_w
+            staff_comments = re.sub(r":([a-zA-Z0-9]+)", r" \1", column_w, 0, re.MULTILINE)
 
             data = {
                 "full_name": full_name,
@@ -551,9 +551,10 @@ def import_recepcja():
                 "priority_date": priority_date,
                 "special_needs": None,
                 "created_at": created_at,
-                "system_comments": validation_notes,
+                "system_comments": re.sub(r":([a-zA-Z0-9]+)", r" \1", "\\n".join(validation_notes), 0, re.MULTILINE),
                 "staff_comments": staff_comments,
                 "priority_status": None,
+                "updated_by_id": "28ab1bf2-f735-4603-b7f0-7938ba2ab059",  # default system user
                 "__old_guest_id": None,
             }
             if full_name != " " and full_name != "":
@@ -582,9 +583,9 @@ def merge_ludzi_recepcja(ludzi, recepcja):
             r["finance_status"] = finance_status
             x["desired_destination"] = r["desired_destination"]
             x["priority_status"] = r["priority_status"]
-            for vn in r["system_comments"]:
-                x["system_comments"].append(vn)
-            r["system_comments"] = x["system_comments"]
+            system_comments = "\\n".join([ x["system_comments"],  r["system_comments"]])
+            x["system_comments"] = system_comments
+            r["system_comments"] = system_comments
             x["created_at"] = r["created_at"]
             notes = "\\n".join([x["staff_comments"], r["staff_comments"]])
             x["staff_comments"] = notes
@@ -598,11 +599,8 @@ def merge_ludzi_recepcja(ludzi, recepcja):
                     v = merge_issues[k]
                     row = f"{k} - {v[0]} vs. {v[1]}"
                     merge_issues_arr.append(row)
-            merge_issues_str = "\\n".join(merge_issues_arr)
-            x["system_comments"].append(
-                f"Could not merge following data:\\n{merge_issues_str}"
-            )
-            x["system_comments"] = "\\n".join(x["system_comments"])
+            merge_str = "\\n".join(merge_issues_arr)
+            x["system_comments"] = "\\n".join([x["system_comments"], merge_str])
             merged[i] = x
             full_name_dict.pop(key, None)
     [merged.append(x) for x in full_name_dict.values()]
