@@ -3,6 +3,7 @@ from math import floor
 
 import click
 from pyrnalist import report
+from sqlalchemy import text
 
 from kokon.utils.db import DB
 from .generators import (
@@ -76,11 +77,11 @@ def seed_cmd(count, teryt_path, sql, db):
 
     if db:
         with DB().acquire() as session:
-            session.execute(hosts_sql)
-            session.execute(host_languages_sql)
-            session.execute(accommodations_sql)
-            session.execute(guests_sql)
-            session.execute(teammembers_sql)
+            session.execute(text(hosts_sql))
+            session.execute(text(host_languages_sql))
+            session.execute(text(accommodations_sql))
+            session.execute(text(guests_sql))
+            session.execute(text(teammembers_sql))
 
     if sql:
         print(hosts_sql)
