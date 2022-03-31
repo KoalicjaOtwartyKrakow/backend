@@ -31,7 +31,7 @@ def handle_get_all_accommodations(request: Request):
     with request.db.acquire() as session:
         result = (
             session.query(AccommodationUnit)
-            .order_by(AccommodationUnit.vacancies_free.desc())
+            # .order_by(AccommodationUnit.vacancies_free.desc())
             .options(
                 joinedload(AccommodationUnit.host).subqueryload(Host.languages_spoken)
             )
