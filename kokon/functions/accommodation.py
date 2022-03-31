@@ -4,6 +4,7 @@ import marshmallow
 
 from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.orm import joinedload
 
 from kokon.orm import AccommodationUnit
 from kokon.serializers import AccommodationUnitSchema, AccommodationUnitSchemaFull
@@ -31,6 +32,9 @@ def handle_get_all_accommodations(request: Request):
         result = (
             session.query(AccommodationUnit)
             .order_by(AccommodationUnit.vacancies_free.desc())
+            .options(
+                joinedload(AccommodationUnit.host), joinedload(AccommodationUnit.guests)
+            )
             .all()
         )
         response = AccommodationUnitSchemaFull().dump(result, many=True)

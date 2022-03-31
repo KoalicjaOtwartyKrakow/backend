@@ -1,8 +1,9 @@
 """Module containing function handlers for host requests."""
 import flask
 import marshmallow
-from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import select, delete
+from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.orm import joinedload
 
 from kokon.orm import Host, enums
 from kokon.serializers import HostSchema
@@ -23,6 +24,7 @@ def handle_get_all_hosts(request: Request):
         stmt = session.query(Host)
         if status_parameter:
             stmt = stmt.where(Host.status == status_parameter)
+        stmt = stmt.options(joinedload(Host.languages_spoken))
 
         response = HostSchema().dump(stmt.all(), many=True)
 

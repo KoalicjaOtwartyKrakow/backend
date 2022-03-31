@@ -33,3 +33,5 @@ def test_get_all_accommodations(db):
     data = response.json
     assert len(data) == 1
     assert data[0]["voivodeship"] == "LUBELSKIE"
+    assert data[0]["host"]["status"] == "CREATED"
+    assert len(data[0]["guests"]) == 1
