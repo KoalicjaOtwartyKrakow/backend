@@ -19,7 +19,10 @@ class AccommodationUnit(Base):
         primary_key=True,
     )
     host_id = sa.Column(
-        "host_id", sa.ForeignKey("hosts.guid", name="fk_host"), nullable=False
+        "host_id",
+        sa.ForeignKey("hosts.guid", name="fk_host"),
+        nullable=False,
+        index=True,
     )
     city = sa.Column(
         "city", sa.String(250)
