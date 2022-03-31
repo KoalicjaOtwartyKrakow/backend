@@ -35,8 +35,7 @@ def handle_get_all_accommodations(request: Request):
             .options(
                 joinedload(AccommodationUnit.host).subqueryload(Host.languages_spoken)
             )
-            .limit(200)
-            .all()
+            .limit(1000)
         )
         response = AccommodationUnitSchemaFull().dump(result, many=True)
 
