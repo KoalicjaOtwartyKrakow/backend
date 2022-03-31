@@ -12,12 +12,15 @@ class VerificationStatus(str, enum.Enum):
     def __str__(self):
         return self.value
 
+
 class WorkflowStatus(str, enum.Enum):
     """Class representing workflow status enum in database."""
+
     AVAILABLE = "AVAILABLE"
     NEEDS_VERIFICATION = "NEEDS_VERIFICATION"
     WITHDRAWN = "WITHDRAWN"
     DONE = "DONE"
+
 
 # https://stackoverflow.com/a/51976841
 class GuestPriorityStatus(str, enum.Enum):
