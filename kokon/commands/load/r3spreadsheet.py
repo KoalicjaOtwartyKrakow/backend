@@ -7,7 +7,7 @@ from pyrnalist import report
 
 
 LUDZI_HEADERS = (
-    "",
+    ",,",
     "Miejsce zamieszkania gdzie wysłaliśmy ludzi",
     "DATA ",
     "STATUS",
@@ -60,7 +60,7 @@ RECEPCJA_HEADERS = (
     "",
 )
 MIESZKANIA_HEADERS = (
-    "",
+    "   ",
     "NASZE UWAGI",
     "Na jak długo?",
     "KIM jest juz zajety? (ID czlowieka) ",
@@ -86,7 +86,7 @@ MIESZKANIA_HEADERS = (
     "Wyrażam zgodę na przetwarzanie moich danych osobowych przez Stowarzyszenie Laboratorium Działań dla Pokoju w celu organizacji pomocy osobom uchodźczym z Ukrainy.",
     "",
     "",
-    "Last modified: Sun Mar 27 2022 13:17:41 GMT+0200 (czas środkowoeuropejski letni)",
+    "Last modified: Wed Mar 30 2022 19:50:52 GMT+0200 (czas środkowoeuropejski letni)",
 )
 CHILDREN_AGES_LAT_REGEXP = r"\s?lat"
 
@@ -214,6 +214,12 @@ def get_priority_status(value):
         return None
 
 
+def compare_headers(expected, actual):
+    for (i, (e, a)) in enumerate(zip(expected, actual)):
+        if e != a:
+            report.error(f"  - [{i}] expected=({e}) actual=({a})")
+
+
 def import_ludzi():
     ludzi = []
     with open(
@@ -224,9 +230,7 @@ def import_ludzi():
         headers_match = all(i for i in [i == j for i, j in zip(headers, LUDZI_HEADERS)])
         if not headers_match:
             report.error("Headers do not match with Ludzi tab format")
-            for (expected, actual) in zip(LUDZI_HEADERS, headers):
-                if expected != actual:
-                    report.error(f"  - expected={expected}; actual={actual}")
+            compare_headers(LUDZI_HEADERS, headers)
             return []
 
         for row in cr:
@@ -331,7 +335,7 @@ def import_ludzi():
                 "full_name": full_name,
                 "phone_number": phone_number,
                 "is_agent": False,
-                "document_number": None,
+                "document_number": "",
                 "people_in_group": people_in_group,
                 "adult_male_count": adult_male_count,
                 "adult_female_count": adult_female_count,
@@ -342,12 +346,13 @@ def import_ludzi():
                 "priority_date": priority_date,
                 "finance_status": finance_status,
                 "how_long_to_stay": how_long_to_stay,
-                "desired_destination": None,
+                "desired_destination": "",
                 "staff_comments": staff_comments,
                 "created_at": created_at,
                 "system_comments": re.sub(r":([a-zA-Z0-9]+)", r" \1", "\\n".join(validation_notes), 0, re.MULTILINE),
                 "priority_status": status,
                 "updated_by_id": "28ab1bf2-f735-4603-b7f0-7938ba2ab059",  # default system user
+                "accommodation_unit_id": None,
                 "__old_guest_id": __old_guest_id,
             }
             if full_name != " " and full_name != "":
@@ -369,9 +374,7 @@ def import_recepcja():
         )
         if not headers_match:
             report.error("Headers do not match with UPD Data tab format")
-            for (expected, actual) in zip(RECEPCJA_HEADERS, headers):
-                if expected != actual:
-                    report.error(f"  - expected={expected}; actual={actual}")
+            compare_headers(RECEPCJA_HEADERS, headers)
             return []
 
         for row in cr:
@@ -549,12 +552,13 @@ def import_recepcja():
                 "how_long_to_stay": how_long_to_stay,
                 "desired_destination": preferred_location,
                 "priority_date": priority_date,
-                "special_needs": None,
+                "special_needs": "",
                 "created_at": created_at,
                 "system_comments": re.sub(r":([a-zA-Z0-9]+)", r" \1", "\\n".join(validation_notes), 0, re.MULTILINE),
                 "staff_comments": staff_comments,
-                "priority_status": None,
+                "priority_status": "UPDATED",
                 "updated_by_id": "28ab1bf2-f735-4603-b7f0-7938ba2ab059",  # default system user
+                "accommodation_unit_id": None,
                 "__old_guest_id": None,
             }
             if full_name != " " and full_name != "":
@@ -611,8 +615,8 @@ STAY_REGEX = r"(\d+)\s*(d|w|m|y)"
 
 
 def get_how_long_to_stay(value):
-    match = re.match(STAY_REGEX, value) if value else None
-    return f"{match.group(1)}{match.group(2)}" if match else None
+    match = re.match(STAY_REGEX, value) if value else ""
+    return f"{match.group(1)}{match.group(2)}" if match else ""
 
 
 def get_workflow_status(value, workflow_status):
@@ -628,6 +632,16 @@ def get_workflow_status(value, workflow_status):
         return "AVAILABLE" if workflow_status else "NEEDS_VERIFICATION"
     else:
         return workflow_status
+
+
+def find_guest_by_id(value, all_guests):
+    old_guest_id = str(value).strip()
+    if old_guest_id:
+        for g in all_guests:
+            old_id = g.get("__old_guest_id", "").strip()
+            if old_id == old_guest_id:
+                return g
+    return None
 
 
 def import_mieszkania(all_guests):
@@ -646,9 +660,7 @@ def import_mieszkania(all_guests):
         )
         if not headers_match:
             report.error("Headers do not match with Mieszkania tab format")
-            for (expected, actual) in zip(MIESZKANIA_HEADERS, headers):
-                if expected != actual:
-                    report.error(f"  - expected={expected}; actual={actual}")
+            compare_headers(MIESZKANIA_HEADERS, headers)
             return []
 
         for row in cr:
@@ -679,12 +691,9 @@ def import_mieszkania(all_guests):
             # of a Guest with matching Column A value.
             column_d = row[3]
             try:
-                old_guest_id = int(column_d)
-                if old_guest_id:
-                    for g in all_guests:
-                        old_id = g.get("__old_guest_id", None)
-                        if old_id == old_guest_id:
-                            g["accommodation_unit_id"] = accommodation_unit_guid
+                g = find_guest_by_id(column_d, all_guests)
+                if g:
+                    g["accommodation_unit_id"] = accommodation_unit_guid
             except Exception:
                 unit_validation_notes.append(
                     f"KIM jest juz zajety? (ID czlowieka): {column_d}"
@@ -785,6 +794,7 @@ def import_mieszkania(all_guests):
                 "comments": host_comments,
                 "created_at": created_at,
                 "system_comments": "\\n".join(host_validation_notes),
+                "comments": host_comments
             }
             hosts.append(host_data)
 
@@ -797,6 +807,8 @@ def import_mieszkania(all_guests):
                 "owner_comments": owner_comments,
                 "system_comments": "\\n".join(unit_validation_notes),
                 "host_id": host_guid,
+                "workflow_status": workflow_status,
+                "for_how_long": how_long_to_stay,
             }
             units.append(unit_data)
     return hosts, units, languages
