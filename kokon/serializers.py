@@ -84,7 +84,6 @@ class AccommodationUnitSchemaFull(CamelCaseSchema):
         load_instance = True
 
     host = fields.Nested("HostSchema")
-    guests = fields.Nested("GuestSchema", many=True)
 
 
 class UserSchema(CamelCaseSchema):

@@ -32,9 +32,7 @@ def handle_get_all_accommodations(request: Request):
         result = (
             session.query(AccommodationUnit)
             .order_by(AccommodationUnit.vacancies_free.desc())
-            .options(
-                joinedload(AccommodationUnit.host), joinedload(AccommodationUnit.guests)
-            )
+            .options(joinedload(AccommodationUnit.host))
             .all()
         )
         response = AccommodationUnitSchemaFull().dump(result, many=True)
