@@ -19,12 +19,16 @@ class Guest(Base):
         primary_key=True,
     )
     full_name = sa.Column("full_name", sa.String(255), nullable=False)
-    email = sa.Column("email", sa.String(255), nullable=True)
+    email = sa.Column(
+        "email", sa.String(255), server_default=sa.text(""), nullable=False
+    )
     phone_number = sa.Column("phone_number", sa.String(20), nullable=False)
     is_agent = sa.Column(
         "is_agent", sa.Boolean, server_default=sa.sql.expression.false(), nullable=False
     )
-    document_number = sa.Column("document_number", sa.String(255))
+    document_number = sa.Column(
+        "document_number", sa.String(255), server_default=sa.text(""), nullable=False
+    )
     people_in_group = sa.Column(
         "people_in_group", sa.Integer, server_default=sa.text("1"), nullable=False
     )
@@ -41,9 +45,15 @@ class Guest(Base):
         server_default=sa.sql.expression.false(),
         nullable=False,
     )
-    pets_description = sa.Column("pets_description", sa.String(255))
-    special_needs = sa.Column("special_needs", sa.Text)
-    food_allergies = sa.Column("food_allergies", sa.Text)
+    pets_description = sa.Column(
+        "pets_description", sa.String(255), server_default=sa.text(""), nullable=False
+    )
+    special_needs = sa.Column(
+        "special_needs", sa.Text, server_default=sa.text(""), nullable=False
+    )
+    food_allergies = sa.Column(
+        "food_allergies", sa.Text, server_default=sa.text(""), nullable=False
+    )
     meat_free_diet = sa.Column(
         "meat_free_diet",
         sa.Boolean,
@@ -62,23 +72,36 @@ class Guest(Base):
         server_default=sa.sql.expression.false(),
         nullable=False,
     )
-    finance_status = sa.Column("finance_status", sa.String(255))
-    how_long_to_stay = sa.Column("how_long_to_stay", sa.String(255))
-    desired_destination = sa.Column("desired_destination", sa.String(255))
+    finance_status = sa.Column(
+        "finance_status", sa.String(255), server_default=sa.text(""), nullable=False
+    )
+    how_long_to_stay = sa.Column(
+        "how_long_to_stay", sa.String(255), server_default=sa.text(""), nullable=False
+    )
+    desired_destination = sa.Column(
+        "desired_destination",
+        sa.String(255),
+        server_default=sa.text(""),
+        nullable=False,
+    )
     priority_status = sa.Column(
         "priority_status", sa.Enum(GuestPriorityStatus), default=None
     )
     priority_date = sa.Column(
         "priority_date", TIMESTAMP(timezone=True), server_default=sa.func.now()
     )
-    staff_comments = sa.Column("staff_comments", sa.Text)
+    staff_comments = sa.Column(
+        "staff_comments", sa.Text, server_default=sa.text(""), nullable=False
+    )
     verification_status = sa.Column(
         "verification_status",
         sa.Enum(VerificationStatus),
         nullable=False,
         server_default=VerificationStatus.CREATED,
     )
-    system_comments = sa.Column("system_comments", sa.Text, nullable=True)
+    system_comments = sa.Column(
+        "system_comments", sa.Text, server_default=sa.text(""), nullable=False
+    )
     created_at = sa.Column(
         "created_at",
         TIMESTAMP(timezone=True),
