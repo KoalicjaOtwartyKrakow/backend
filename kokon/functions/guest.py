@@ -12,7 +12,7 @@ def handle_get_all_guests(request: Request):
     with request.db.acquire() as session:
         result = (
             session.query(Guest)
-            .options(joinedload(Guest.accommodation_unit))
+            .options(joinedload(Guest.accommodation_unit), joinedload(Guest.claimed_by))
             .limit(200)
         )
         response = GuestSchemaFull().dump(result, many=True)
