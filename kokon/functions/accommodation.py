@@ -4,12 +4,10 @@ import marshmallow
 
 from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.orm import joinedload
 
 from kokon.orm import AccommodationUnit
-from kokon.serializers import (
-    AccommodationUnitSchemaFull,
-    AccommodationUnitSchema,
-)
+from kokon.serializers import AccommodationUnitSchema, AccommodationUnitSchemaFull
 from kokon.utils.functions import JSONResponse, Request
 
 
@@ -31,12 +29,15 @@ def handle_add_accommodation(request: Request):
 
 def handle_get_all_accommodations(request: Request):
     with request.db.acquire() as session:
-        stmt = select(AccommodationUnit).order_by(
-            AccommodationUnit.vacancies_free.desc()
+        result = (
+            session.query(AccommodationUnit)
+            .order_by(AccommodationUnit.vacancies_free.desc())
+            .options(
+                joinedload(AccommodationUnit.host), joinedload(AccommodationUnit.guests)
+            )
+            .all()
         )
-        result = session.execute(stmt)
-        schema_full = AccommodationUnitSchemaFull()
-        response = [schema_full.dump(a) for a in result.scalars()]
+        response = AccommodationUnitSchemaFull().dump(result, many=True)
 
     return JSONResponse(response, status=200)
 

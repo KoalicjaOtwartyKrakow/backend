@@ -1,6 +1,7 @@
 """Module containing function handlers for guest requests."""
 import flask
 from sqlalchemy import exc, select
+from sqlalchemy.orm import joinedload
 
 from kokon.orm import Guest
 from kokon.serializers import GuestSchema, GuestSchemaFull
@@ -9,10 +10,10 @@ from kokon.utils.functions import Request, JSONResponse
 
 def handle_get_all_guests(request: Request):
     with request.db.acquire() as session:
-        stmt = select(Guest)
-        result = session.execute(stmt)
-        guest_schema_full = GuestSchemaFull()
-        response = [guest_schema_full.dump(g) for g in result.scalars()]
+        result = (
+            session.query(Guest).options(joinedload(Guest.accommodation_unit)).all()
+        )
+        response = GuestSchemaFull().dump(result, many=True)
 
     return JSONResponse(response, status=200)
 

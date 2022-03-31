@@ -5,19 +5,30 @@ from sqlalchemy_continuum.utils import version_class
 
 from kokon.functions.guest import (
     handle_add_guest,
-    handle_update_guest,
     handle_delete_guest,
+    handle_get_all_guests,
+    handle_update_guest,
 )
 from kokon.utils.db import DB
 from kokon.orm import Guest
 
-
-class UserMock:
-    def __init__(self, guid):
-        self.guid = guid
+from tests.helpers import UserMock
 
 
-def test_created_edit_delete_guest(db):
+def test_get_all_guests(db):
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+
+    response = handle_get_all_guests(request)
+
+    assert response.status_code == 200
+    data = response.json
+    assert len(data) == 1
+    assert data[0]["email"] == "gsssltitzwwg@gmail.com"
+
+
+def test_create_edit_delete_guest_versions(db):
     request = Mock()
     request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
