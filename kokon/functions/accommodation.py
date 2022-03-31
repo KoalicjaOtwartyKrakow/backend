@@ -6,7 +6,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import joinedload
 
-from kokon.orm import AccommodationUnit
+from kokon.orm import AccommodationUnit, Host
 from kokon.serializers import AccommodationUnitSchema, AccommodationUnitSchemaFull
 from kokon.utils.functions import JSONResponse, Request
 
@@ -32,7 +32,9 @@ def handle_get_all_accommodations(request: Request):
         result = (
             session.query(AccommodationUnit)
             .order_by(AccommodationUnit.vacancies_free.desc())
-            .options(joinedload(AccommodationUnit.host))
+            .options(
+                joinedload(AccommodationUnit.host).subqueryload(Host.languages_spoken)
+            )
             .all()
         )
         response = AccommodationUnitSchemaFull().dump(result, many=True)
