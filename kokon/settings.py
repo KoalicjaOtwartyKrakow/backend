@@ -28,4 +28,4 @@ DB_QUERY = (
 SENTRY_DSN = get_secret_var("sentry_dsn")
 SENTRY_TRACES_SAMPLE_RATE = get_secret_var("sentry_traces_sample_rate", 0)
 
-AUTHORIZED_EMAILS = get_secret_var("authorized_emails", "")
+AUTHORIZED_EMAILS = get_secret_var("authorized_emails", "*@example.com,*@example.com")
