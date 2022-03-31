@@ -29,7 +29,13 @@ def upgrade():
         type_=sa.String(length=250),
         existing_nullable=False,
     )
-
+    op.alter_column(
+        "guests_version",
+        "phone_number",
+        existing_type=sa.VARCHAR(length=20),
+        type_=sa.String(length=250),
+        existing_nullable=False,
+    )
     op.alter_column(
         "accommodation_units",
         "city",
@@ -88,7 +94,13 @@ def downgrade():
         type_=sa.String(length=20),
         existing_nullable=False,
     )
-
+    op.alter_column(
+        "guests_version",
+        "phone_number",
+        existing_type=sa.VARCHAR(length=250),
+        type_=sa.String(length=20),
+        existing_nullable=False,
+    )
     op.alter_column(
         "accommodation_units",
         "city",
