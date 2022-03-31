@@ -346,6 +346,7 @@ def import_ludzi():
                 "created_at": created_at,
                 "system_comments": validation_notes,
                 "priority_status": status,
+                "updated_by_id": "28ab1bf2-f735-4603-b7f0-7938ba2ab059",  # default system user
                 "__old_guest_id": __old_guest_id,
             }
             if full_name != " " and full_name != "":
