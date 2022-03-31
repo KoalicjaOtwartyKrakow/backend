@@ -11,7 +11,10 @@ from kokon.utils.functions import Request, JSONResponse
 def handle_get_all_guests(request: Request):
     with request.db.acquire() as session:
         result = (
-            session.query(Guest).options(joinedload(Guest.accommodation_unit)).limit(1000).all()
+            session.query(Guest)
+            .options(joinedload(Guest.accommodation_unit))
+            .limit(200)
+            .all()
         )
         response = GuestSchemaFull().dump(result, many=True)
 
