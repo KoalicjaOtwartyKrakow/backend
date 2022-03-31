@@ -602,6 +602,7 @@ def merge_ludzi_recepcja(ludzi, recepcja):
             x["system_comments"].append(
                 f"Could not merge following data:\\n{merge_issues_str}"
             )
+            x["system_comments"] = "\\n".join(x["system_comments"])
             merged[i] = x
             full_name_dict.pop(key, None)
     [merged.append(x) for x in full_name_dict.values()]

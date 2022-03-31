@@ -3,6 +3,9 @@
 .vscode/
 .vs/
 
+/*.sql
+/*.tsv
+
 dockerfiles/Database/
 
 # Byte-compiled / optimized / DLL files
