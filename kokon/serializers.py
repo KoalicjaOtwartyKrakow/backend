@@ -93,7 +93,7 @@ class AccommodationUnitSchemaFull(CamelCaseSchema):
         include_relationships = True
         include_fk = True
         load_instance = True
-        exclude = ("guests", "versions")
+        exclude = ("versions",)
 
     host = fields.Nested("HostSchema")
 

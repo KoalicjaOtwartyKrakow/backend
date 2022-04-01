@@ -34,4 +34,4 @@ def test_get_all_accommodations(db):
     assert len(data) == 1
     assert data[0]["voivodeship"] == "LUBELSKIE"
     assert data[0]["host"]["status"] == "CREATED"
-    assert "guests" not in data[0]
+    assert len(data[0]["guests"]) == 1
