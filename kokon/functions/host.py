@@ -3,10 +3,9 @@ import flask
 import marshmallow
 from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
-from sqlalchemy.orm import joinedload
 
 from kokon.orm import Host, enums
-from kokon.serializers import HostSchema
+from kokon.serializers import HostSchema, HostSchemaFull
 from kokon.utils.functions import Request, JSONResponse
 
 
@@ -24,7 +23,6 @@ def handle_get_all_hosts(request: Request):
         stmt = session.query(Host)
         if status_parameter:
             stmt = stmt.where(Host.status == status_parameter)
-        stmt = stmt.options(joinedload(Host.languages_spoken))
 
         response = HostSchema().dump(stmt.all(), many=True)
 
@@ -32,22 +30,22 @@ def handle_get_all_hosts(request: Request):
 
 
 def handle_add_host(request: Request):
-    host_schema = HostSchema()
+    host_schema_full = HostSchemaFull()
 
     data = request.get_json()
 
     with request.db.acquire() as session:
-        host = host_schema.load(data, session=session)
+        host = host_schema_full.load(data, session=session)
         session.add(host)
         session.commit()
         session.refresh(host)
-        response = host_schema.dump(host)
+        response = host_schema_full.dump(host)
 
     return JSONResponse(response, status=201)
 
 
 def handle_get_host_by_id(request: Request):
-    host_schema = HostSchema()
+    host_schema_full = HostSchemaFull()
 
     try:
         host_id = request.args["hostId"]
@@ -63,7 +61,7 @@ def handle_get_host_by_id(request: Request):
             if host is None:
                 return flask.Response("Not found", status=404)
 
-            response = host_schema.dump(host)
+            response = host_schema_full.dump(host)
     except ProgrammingError as e:
         # TODO: raise a validation error here, handle in utils/functions.
         if "invalid input syntax for type uuid" in str(e):
@@ -76,7 +74,7 @@ def handle_get_host_by_id(request: Request):
 
 
 def handle_update_host(request: Request):
-    host_schema = HostSchema()
+    host_schema_full = HostSchemaFull()
 
     try:
         host_id = request.args["hostId"]
@@ -95,7 +93,7 @@ def handle_update_host(request: Request):
                 return flask.Response("Not found", status=404)
 
             try:
-                host = host_schema.load(data, session=session, instance=host)
+                host = host_schema_full.load(data, session=session, instance=host)
             except marshmallow.ValidationError as e:
                 return flask.Response(
                     {"validationErrors": e.messages},
@@ -106,7 +104,7 @@ def handle_update_host(request: Request):
             session.add(host)
             session.commit()
             session.refresh(host)
-            response = host_schema.dump(host)
+            response = host_schema_full.dump(host)
         except ProgrammingError as e:
             if "invalid input syntax for type uuid" in str(e):
                 return flask.Response(
