@@ -53,11 +53,10 @@ class GuestSchema(CamelCaseSchema):
         include_fk = True
         load_instance = True
         exclude = (
-            "updated_by_id",
             "updated_by",
-            "claimed_by_id",
             "accommodation_unit",
             "versions",
+            "updated_by_id",
         )
 
     priority_date = DateTime(format="%Y-%m-%d")
@@ -73,11 +72,8 @@ class GuestSchemaFull(CamelCaseSchema):
         include_fk = True
         load_instance = True
         exclude = (
-            "updated_by_id",
-            "updated_by",
-            "claimed_by_id",
             "versions",
-            "accommodation_unit_id",
+            "updated_by_id",
         )
 
     accommodation_unit = fields.Nested("AccommodationUnitSchema")
@@ -97,7 +93,7 @@ class AccommodationUnitSchemaFull(CamelCaseSchema):
         include_relationships = True
         include_fk = True
         load_instance = True
-        exclude = ("guests", "versions", "host_id")
+        exclude = ("guests", "versions")
 
     host = fields.Nested("HostSchema")
 
