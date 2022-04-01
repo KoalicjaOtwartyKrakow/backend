@@ -37,7 +37,17 @@ class LanguageSchema(CamelCaseSchema):
         load_instance = True
 
 
+# TODO(mlazowik): Re-add languages spoken after pagination + filtering + sorting and
+#  the move back to in-app list views.
 class HostSchema(CamelCaseSchema):
+    class Meta:
+        model = Host
+        include_fk = True
+        load_instance = True
+        exclude = ("accommodation_units", "languages_spoken")
+
+
+class HostSchemaFull(CamelCaseSchema):
     class Meta:
         model = Host
         include_fk = True
