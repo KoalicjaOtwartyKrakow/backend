@@ -96,6 +96,7 @@ class AccommodationUnitSchemaFull(CamelCaseSchema):
         exclude = ("versions",)
 
     host = fields.Nested("HostSchema")
+    guests = fields.Nested("GuestSchema", many=True)
 
 
 class UserSchema(CamelCaseSchema):
