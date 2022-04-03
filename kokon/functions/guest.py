@@ -6,16 +6,15 @@ from sqlalchemy.orm import joinedload
 from kokon.orm import Guest
 from kokon.serializers import GuestSchema, GuestSchemaFull
 from kokon.utils.functions import Request, JSONResponse
+from kokon.utils.pagination import paginate
 
 
 def handle_get_all_guests(request: Request):
     with request.db.acquire() as session:
-        result = (
-            session.query(Guest)
-            .options(joinedload(Guest.accommodation_unit), joinedload(Guest.claimed_by))
-            .all()
+        stmt = session.query(Guest).options(
+            joinedload(Guest.accommodation_unit), joinedload(Guest.claimed_by)
         )
-        response = GuestSchemaFull().dump(result, many=True)
+        response = paginate(stmt, request=request, schema=GuestSchemaFull)
 
     return JSONResponse(response, status=200)
 

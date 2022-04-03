@@ -15,6 +15,6 @@ def test_get_all_hosts(db):
     response = handle_get_all_hosts(request)
 
     assert response.status_code == 200
-    data = response.json
-    assert len(data) == 2
-    assert "email" in data[0]
+    items = response.json["items"]
+    assert len(items) == 2
+    assert "email" in items[0]

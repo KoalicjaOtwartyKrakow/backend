@@ -26,12 +26,14 @@ def test_get_all_accommodations(db):
     request = Mock()
     request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {}
 
     response = handle_get_all_accommodations(request)
 
     assert response.status_code == 200
     data = response.json
-    assert len(data) == 1
-    assert data[0]["voivodeship"] == "LUBELSKIE"
-    assert data[0]["host"]["status"] == "CREATED"
-    assert len(data[0]["guests"]) == 1
+    assert data["total"] == 1
+    items = data["items"]
+    assert items[0]["voivodeship"] == "LUBELSKIE"
+    assert items[0]["host"]["status"] == "CREATED"
+    assert len(items[0]["guests"]) == 1

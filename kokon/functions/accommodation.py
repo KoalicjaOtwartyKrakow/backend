@@ -9,6 +9,7 @@ from sqlalchemy.orm import joinedload
 from kokon.orm import AccommodationUnit, Host
 from kokon.serializers import AccommodationUnitSchema, AccommodationUnitSchemaFull
 from kokon.utils.functions import JSONResponse, Request
+from kokon.utils.pagination import paginate
 
 
 def handle_add_accommodation(request: Request):
@@ -29,15 +30,15 @@ def handle_add_accommodation(request: Request):
 
 def handle_get_all_accommodations(request: Request):
     with request.db.acquire() as session:
-        result = (
+        stmt = (
             session.query(AccommodationUnit)
             .order_by(AccommodationUnit.vacancies_free.desc())
             .options(
                 joinedload(AccommodationUnit.host).subqueryload(Host.languages_spoken)
             )
-            .all()
         )
-        response = AccommodationUnitSchemaFull().dump(result, many=True)
+
+        response = paginate(stmt, request=request, schema=AccommodationUnitSchemaFull)
 
     return JSONResponse(response, status=200)
 
