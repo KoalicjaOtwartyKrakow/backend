@@ -10,7 +10,7 @@ def test_get_all_users(db):
     request = Mock()
     request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
-    request.args = {}
+    request.args = {"limit": 10}
 
     response = handle_get_all_users(request)
 

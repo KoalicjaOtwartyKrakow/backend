@@ -21,3 +21,11 @@ def test_paginate(db):
         result["items"] = [i["email"] for i in result["items"]]
 
         assert result == {"items": ["john.doe@example.com"], "total": 2}
+
+        # TODO(nanvel): for backward compatibility, return later
+        request = Mock(args={})
+        result = paginate(stmt, request=request, schema=UserSchema)
+        assert [i["email"] for i in result] == [
+            "jane.doe@example.com",
+            "john.doe@example.com",
+        ]
