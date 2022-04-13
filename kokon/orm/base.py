@@ -8,4 +8,4 @@ __all__ = ("Base",)
 Base = declarative_base()
 
 
-make_versioned(user_cls=None)
+make_versioned(user_cls=None, options={"native_versioning": True})
