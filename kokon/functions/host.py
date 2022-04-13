@@ -7,6 +7,7 @@ from sqlalchemy.exc import ProgrammingError
 from kokon.orm import Host, enums
 from kokon.serializers import HostSchema, HostSchemaFull
 from kokon.utils.functions import Request, JSONResponse
+from kokon.utils.pagination import paginate
 
 
 def handle_get_all_hosts(request: Request):
@@ -24,7 +25,7 @@ def handle_get_all_hosts(request: Request):
         if status_parameter:
             stmt = stmt.where(Host.status == status_parameter)
 
-        response = HostSchema().dump(stmt.all(), many=True)
+        response = paginate(stmt, request=request, schema=HostSchema)
 
     return JSONResponse(response, status=200)
 

@@ -10,9 +10,10 @@ def test_get_all_users(db):
     request = Mock()
     request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {"limit": 10}
 
     response = handle_get_all_users(request)
 
     assert response.status_code == 200
-    data = response.json
-    assert "email" in data[0]
+    items = response.json["items"]
+    assert "email" in items[0]

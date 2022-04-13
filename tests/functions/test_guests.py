@@ -19,13 +19,13 @@ def test_get_all_guests(db):
     request = Mock()
     request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {"limit": 10}
 
     response = handle_get_all_guests(request)
 
     assert response.status_code == 200
-    data = response.json
-    assert len(data) == 1
-    assert data[0]["email"] == "gsssltitzwwg@gmail.com"
+    items = response.json["items"]
+    assert items[0]["email"] == "gsssltitzwwg@gmail.com"
 
 
 def test_create_edit_delete_guest_versions(db):

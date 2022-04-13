@@ -1,8 +1,11 @@
 import json
 from uuid import UUID
 
-from marshmallow.fields import DateTime
+from marshmallow import Schema
+from marshmallow.fields import DateTime, Integer
+from marshmallow.validate import Range
 from marshmallow_sqlalchemy import auto_field, fields, SQLAlchemyAutoSchema
+
 
 from kokon.orm import AccommodationUnit, Guest, Host, Language, User
 
@@ -28,6 +31,11 @@ class CamelCaseSchema(SQLAlchemyAutoSchema):
             return
 
         field_obj.data_key = camelcase(field_obj.data_key or field_name)
+
+
+class PaginationParamsSchema(Schema):
+    offset = Integer(validate=Range(min=0), required=False, missing=0)
+    limit = Integer(validate=Range(min=1, max=1000), required=False, missing=50)
 
 
 class LanguageSchema(CamelCaseSchema):
