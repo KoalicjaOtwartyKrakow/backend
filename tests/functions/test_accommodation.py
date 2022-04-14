@@ -13,19 +13,6 @@ from kokon.utils.db import DB
 from tests.helpers import UserMock
 
 
-def test_add_accommodation(db):
-    request = Mock()
-    request.db = DB()
-    request.get_json.return_value = {
-        "vacanciesTotal": 1,
-        "zip": "12345",
-        "hostId": "dc6d05bb-9bd6-4e9d-a8e9-8b88d29adee5",
-        "addressLine": "Address 1",
-    }
-    response = handle_add_accommodation(request)
-    assert response.json["verificationStatus"] == "CREATED"
-
-
 def test_get_all_accommodations(db):
     request = Mock()
     request.db = DB()
@@ -55,6 +42,7 @@ def test_create_read_update_delete_accommodation(db):
     response = handle_add_accommodation(request)
     assert response.status_code == 201
     assert response.json["zip"] == "12345"
+    assert response.json["verificationStatus"] == "CREATED"
     accommodation_guid = response.json["guid"]
 
     request.args = {"accommodationId": accommodation_guid}
