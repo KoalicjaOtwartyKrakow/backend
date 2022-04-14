@@ -1,3 +1,4 @@
+import http
 from unittest.mock import Mock
 
 import sqlalchemy as sa
@@ -7,6 +8,7 @@ from kokon.functions.guest import (
     handle_add_guest,
     handle_delete_guest,
     handle_get_all_guests,
+    handle_get_guest_by_id,
     handle_update_guest,
 )
 from kokon.utils.db import DB
@@ -56,6 +58,10 @@ def test_create_edit_delete_guest_versions(db):
     response = handle_update_guest(request)
     assert response.status_code == 200
 
+    response = handle_get_guest_by_id(request)
+    assert response.status_code == 200
+    assert response.json["fullName"] == "Marta Andrzejak"
+
     request.get_json.return_value = {}
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     response = handle_delete_guest(request)
@@ -74,3 +80,51 @@ def test_create_edit_delete_guest_versions(db):
             "782962fc-dc11-4a33-8f08-b7da532dd40d",
             "782962fc-dc11-4a33-8f08-b7da532dd40d",
         ]
+
+
+def test_get_edit_delete_guest_missing_guest_id_parameter():
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {}
+
+    response = handle_get_guest_by_id(request)
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    response = handle_update_guest(request)
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    response = handle_delete_guest(request)
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+
+def test_get_edit_delete_guest_invalid_guest_id_parameter():
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {"guestId": "invalidUUID"}
+
+    response = handle_get_guest_by_id(request)
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    response = handle_update_guest(request)
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+    response = handle_delete_guest(request)
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+
+def test_get_edit_delete_guest_not_found_guest():
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {"guestId": "882962fc-dc11-4a33-8f08-b7da532dd40d"}
+
+    response = handle_get_guest_by_id(request)
+    assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+    response = handle_update_guest(request)
+    assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+    response = handle_delete_guest(request)
+    assert response.status_code == http.HTTPStatus.NOT_FOUND

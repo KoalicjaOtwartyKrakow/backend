@@ -118,30 +118,30 @@ def handle_update_host(request: Request):
 
 def handle_delete_host(request: Request):
     try:
-        id = request.args.get("hostId")
+        host_id = request.args["hostId"]
     except KeyError:
         return flask.Response("No host id supplied!", status=400)
-    if id is None:
-        return flask.Response(response="Received no hostId", status=400)
 
     with request.db.acquire() as session:
         try:
             stmt = (
                 delete(Host)
-                .where(Host.guid == id)
+                .where(Host.guid == host_id)
                 .execution_options(synchronize_session="fetch")
             )
             res = session.execute(stmt)
             if res.rowcount == 0:
                 return flask.Response(
-                    response=f"Host with id = {id} not found", status=404
+                    response=f"Host with id = {host_id} not found", status=404
                 )
             session.commit()
-            return flask.Response(response=f"Host with id = {id} deleted", status=204)
+            return flask.Response(
+                response=f"Host with id = {host_id} deleted", status=204
+            )
 
         except ProgrammingError as e:
             if "invalid input syntax for type uuid" in str(e):
                 return flask.Response(
-                    f"Invaild id format, uuid expected, got {id}", status=400
+                    f"Invaild id format, uuid expected, got {host_id}", status=400
                 )
             raise e
