@@ -28,6 +28,15 @@ Migrations using [alembic](https://alembic.sqlalchemy.org/en/latest/):
 - new migration: `alembic revision --autogenerate -m <migration_name>` (then edit generated migration if required)
 - after migration added - ensure in dev that downgrade works properly
 
+If you add/remove fields in guests or accommodation_units (they use continuum), add sync triggers to migration:
+```python
+from sqlalchemy_continuum.dialects.postgresql import sync_trigger
+
+conn = op.get_bind()
+sync_trigger(conn, "guests_version")
+sync_trigger(conn, "accommodation_units_version")
+```
+
 ## Testing
 
 ```bash

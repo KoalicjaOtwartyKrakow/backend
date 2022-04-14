@@ -1,8 +1,8 @@
 """triggers
 
-Revision ID: a755c3aa3ae3
-Revises: b0a67ca7e616
-Create Date: 2022-04-13 22:21:01.911150
+Revision ID: 1668bb143660
+Revises: 18145559121e
+Create Date: 2022-04-14 22:40:19.042558
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ from sqlalchemy_continuum.dialects.postgresql import sync_trigger, drop_trigger
 
 
 # revision identifiers, used by Alembic.
-revision = "a755c3aa3ae3"
-down_revision = "b0a67ca7e616"
+revision = "1668bb143660"
+down_revision = "18145559121e"
 branch_labels = None
 depends_on = None
 
