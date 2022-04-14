@@ -18,9 +18,6 @@ def test_guests_claimed_at(db):
             have_pets=False,
             how_long_to_stay="1w",
             updated_by_id="782962fc-dc11-4a33-8f08-b7da532dd40d",
-            document_number="",
-            pets_description="",
-            special_needs="",
         )
         session.add(guest)
         session.commit()
@@ -62,15 +59,6 @@ def test_versioning(db):
             phone_number="499-330-497",
             children_ages=[1, 10],
             updated_by_id="782962fc-dc11-4a33-8f08-b7da532dd40d",
-            document_number="",
-            pets_description="",
-            special_needs="",
-            food_allergies="",
-            finance_status="",
-            how_long_to_stay="",
-            desired_destination="",
-            staff_comments="",
-            system_comments="",
         )
         session.add(guest)
         session.commit()
@@ -86,12 +74,6 @@ def test_versioning(db):
             vacancies_total=5,
             vacancies_free=5,
             host_id="2078dad6-5dc9-4e5a-8ee0-d69c44f460e2",
-            food_allergies="",
-            finance_status="",
-            how_long_to_stay="",
-            desired_destination="",
-            staff_comments="",
-            system_comments="",
         )
 
         guest.accommodation_unit = accommodation_unit
