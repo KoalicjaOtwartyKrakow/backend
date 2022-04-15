@@ -72,7 +72,10 @@ def handle_delete_guest(request: Request):
 
     try:
         with request.db.acquire() as session:
-            guest = session.query(Guest).filter(Guest.guid == guest_id).one()
+            guest = session.query(Guest).filter(Guest.guid == guest_id).one_or_none()
+
+            if not guest:
+                return flask.Response("Not found", status=404)
 
             # record last editor
             guest.updated_by_id = request.user.guid

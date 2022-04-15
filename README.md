@@ -47,6 +47,10 @@ pytest tests
 
 If you need database filled with data - use `db` fixture, just add `db` argument to your test function.
 
+### Coverage report
+
+You can take a look at a coverage report in `htmlcov/index.html` file inside root directory.
+
 ## Debugging
 
 You can run Google Cloud Function by running:
