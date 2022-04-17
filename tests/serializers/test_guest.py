@@ -58,8 +58,10 @@ def test_accommodation_unit_id():
 
     try:
         GuestSchema().load(payload, session=MagicMock())
-    except ValidationError:
-        pass
+    except ValidationError as e:
+        assert e.messages == {
+            "accommodation_unit_id": ["Accommodation unit is required."]
+        }
     else:
         raise AssertionError("Exception not raised.")
 
