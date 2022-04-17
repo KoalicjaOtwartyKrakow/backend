@@ -30,7 +30,7 @@ Migrations using [alembic](https://alembic.sqlalchemy.org/en/latest/):
 
 If you add/remove fields in guests or accommodation_units (they use continuum), add sync triggers to migration:
 ```python
-from sqlalchemy_continuum.dialects.postgresql import sync_trigger
+from kokon.utils.auditing import sync_trigger
 
 conn = op.get_bind()
 sync_trigger(conn, "guests_version")

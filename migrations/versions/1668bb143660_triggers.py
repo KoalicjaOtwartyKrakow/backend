@@ -6,7 +6,8 @@ Create Date: 2022-04-14 22:40:19.042558
 
 """
 from alembic import op
-from sqlalchemy_continuum.dialects.postgresql import sync_trigger, drop_trigger
+
+from kokon.utils.auditing import sync_trigger, drop_trigger
 
 
 # revision identifiers, used by Alembic.
