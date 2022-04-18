@@ -29,7 +29,7 @@ def test_claimed_at_dump_only():
         raise AssertionError("Exception not raised!")
 
 
-def test_load():
+def test_accommodation_unit_id():
     payload = {
         "childrenAges": [4, 10],
         "desiredDestination": "",
@@ -54,6 +54,43 @@ def test_load():
         "specialNeeds": "",
         "verificationStatus": "CREATED",
         "accommodationUnitId": None,
+    }
+
+    try:
+        GuestSchema().load(payload, session=MagicMock())
+    except ValidationError as e:
+        assert e.messages == {
+            "accommodation_unit_id": ["Accommodation unit is required."]
+        }
+    else:
+        raise AssertionError("Exception not raised.")
+
+
+def test_load():
+    payload = {
+        "childrenAges": [4, 10],
+        "desiredDestination": "",
+        "documentNumber": "vjktty",
+        "email": "hkqparb@o2.pl",
+        "financeStatus": "cghkgi",
+        "foodAllergies": "",
+        "fullName": "Monika Barbara Jasińska",
+        "glutenFreeDiet": False,
+        "howLongToStay": "3 w",
+        "isAgent": False,
+        "lactoseFreeDiet": False,
+        "meatFreeDiet": False,
+        "peopleInGroup": 15,
+        "adultFemaleCount": 5,
+        "adultMaleCount": 0,
+        "petsDescription": "cfukr7iby8o",
+        "havePets": False,
+        "phoneNumber": "543854896",
+        "priorityDate": "2022-03-20",
+        "priorityStatus": "ACCOMMODATION_FOUND",
+        "specialNeeds": "",
+        "verificationStatus": "CREATED",
+        "accommodationUnitId": "008c0243-0060-4d11-9775-0258ddac7620",
     }
 
     GuestSchema().load(payload, session=MagicMock())

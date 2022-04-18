@@ -1,13 +1,13 @@
 import json
 from uuid import UUID
 
-from marshmallow import Schema
+from marshmallow import Schema, validates_schema, ValidationError
 from marshmallow.fields import DateTime, Integer
 from marshmallow.validate import Range
 from marshmallow_sqlalchemy import auto_field, fields, SQLAlchemyAutoSchema
 
-
 from kokon.orm import AccommodationUnit, Guest, Host, Language, User
+from kokon.orm.enums import GuestPriorityStatus
 
 
 def camelcase(s):
@@ -81,6 +81,17 @@ class GuestSchema(CamelCaseSchema):
     created_at = auto_field(dump_only=True)
     updated_at = auto_field(dump_only=True)
     claimed_at = auto_field(dump_only=True)
+
+    @validates_schema(pass_many=False)
+    def validate_accommodation_unit_id(self, data, **kwargs):
+        if (
+            data.get("accommodation_unit_id") is None
+            and data.get("priority_status", "") == GuestPriorityStatus.ACCOMMODATION_FOUND
+        ):
+            raise ValidationError(
+                message="Accommodation unit is required.",
+                field_name="accommodation_unit_id",
+            )
 
 
 class GuestSchemaFull(CamelCaseSchema):
