@@ -7,6 +7,8 @@ def sync_trigger(conn, table_name):
     A copy of sqlalchemy_continuum.dialects.postgresql.sync_trigger.
     Added use_property_mod_tracking=False
     because version model does not have mod fields.
+
+    We can remove this after https://github.com/kvesteri/sqlalchemy-continuum/pull/273 released.
     """
     meta = sa.MetaData()
     version_table = sa.Table(table_name, meta, autoload=True, autoload_with=conn)
