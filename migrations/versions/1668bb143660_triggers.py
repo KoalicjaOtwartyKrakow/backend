@@ -26,26 +26,26 @@ def upgrade():
 
     op.execute(
         """
-    CREATE OR REPLACE FUNCTION transaction_temp_table_generator()
-    RETURNS TRIGGER AS $$
-    BEGIN
-        CREATE TEMP TABLE IF NOT EXISTS
-            temporary_transaction (id BIGINT, PRIMARY KEY(id))
-        ON COMMIT DELETE ROWS;
-        INSERT INTO temporary_transaction (id) VALUES (NEW.id);
-        RETURN NEW;
-    END;
-    $$
-    LANGUAGE plpgsql
-    """
+        CREATE OR REPLACE FUNCTION transaction_temp_table_generator()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            CREATE TEMP TABLE IF NOT EXISTS
+                temporary_transaction (id BIGINT, PRIMARY KEY(id))
+            ON COMMIT DELETE ROWS;
+            INSERT INTO temporary_transaction (id) VALUES (NEW.id);
+            RETURN NEW;
+        END;
+        $$
+        LANGUAGE plpgsql
+        """
     )
 
     op.execute(
         """
-    CREATE TRIGGER transaction_trigger
-    AFTER INSERT ON transaction
-    FOR EACH ROW EXECUTE PROCEDURE transaction_temp_table_generator()
-    """
+        CREATE TRIGGER transaction_trigger
+        AFTER INSERT ON transaction
+        FOR EACH ROW EXECUTE PROCEDURE transaction_temp_table_generator()
+        """
     )
 
     sync_trigger(conn, "guests_version")
