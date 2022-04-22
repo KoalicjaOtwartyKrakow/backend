@@ -1,7 +1,7 @@
 """Module containing function handlers for host requests."""
 import flask
 import marshmallow
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, or_
 from sqlalchemy.exc import ProgrammingError
 
 from kokon.orm import Host, enums
@@ -12,6 +12,7 @@ from kokon.utils.pagination import paginate
 
 def handle_get_all_hosts(request: Request):
     status_parameter = request.args.get("status", None)
+    query_parameter = request.args.get("query", None)
     if status_parameter:
         try:
             status_parameter = enums.VerificationStatus(status_parameter)
@@ -24,6 +25,15 @@ def handle_get_all_hosts(request: Request):
         stmt = session.query(Host)
         if status_parameter:
             stmt = stmt.where(Host.status == status_parameter)
+
+        if query_parameter:
+            query_parameter = f"%{query_parameter}%"
+            stmt = stmt.where(
+                or_(
+                    Host.full_name.ilike(query_parameter),
+                    Host.phone_number.ilike(query_parameter),
+                )
+            )
 
         response = paginate(stmt, request=request, schema=HostSchema)
 
