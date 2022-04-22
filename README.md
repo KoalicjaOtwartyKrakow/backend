@@ -9,7 +9,7 @@ Dev environment:
 4. `pre-commit install`
 5. `docker-compose up --no-start && docker-compose start` (install [Docker Desktop](https://www.docker.com/products/docker-desktop/))
 6. `export IS_LOCAL_DB=True`
-7. `alembic upgrade head`
+7. `db_app_user=app db_app_pass=secret alembic upgrade head`
 8. `python main.py seed --teryt-path=<path to teryt> --count=5 --db` (see `kokon/commands/seed/README.md`)
 
 Regarding branching:

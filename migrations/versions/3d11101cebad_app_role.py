@@ -24,11 +24,11 @@ def upgrade():
     if "test" in conn.engine.url.database:
         return
 
-    user_name = os.getenv("pg_user_name", None)
-    user_password = os.getenv("pg_user_password", None)
+    user_name = os.getenv("db_app_user", None)
+    user_password = os.getenv("db_app_pass", None)
 
-    if not user_name:
-        return
+    if not (user_name and user_password):
+        raise AssertionError("db_app_user or db_app_pass env variables are missing.")
 
     op.execute(f"CREATE USER {user_name} WITH PASSWORD '{user_password}';")
     op.execute(
@@ -65,9 +65,9 @@ def downgrade():
     if "test" in conn.engine.url.database:
         return
 
-    user_name = os.getenv("pg_user_name", None)
+    user_name = os.getenv("db_app_user", None)
     if not user_name:
-        return
+        raise AssertionError("db_app_user variables are missing.")
 
     op.execute(f"DROP OWNED BY {user_name};")
     op.execute(f"DROP USER {user_name};")
