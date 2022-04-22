@@ -24,8 +24,8 @@ def upgrade():
     if "test" in conn.engine.url.database:
         return
 
-    user_name = os.getenv("pg_user_name", None)
-    user_password = os.getenv("pg_user_password", None)
+    user_name = os.getenv("db_app_user", None)
+    user_password = os.getenv("db_app_pass", None)
 
     if not user_name:
         return
