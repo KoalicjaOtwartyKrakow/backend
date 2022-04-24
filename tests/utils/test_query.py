@@ -1,5 +1,8 @@
 from unittest.mock import Mock
 
+import pytest
+from marshmallow import ValidationError
+
 from kokon.orm import AccommodationUnit, User
 from kokon.serializers import UserSchema
 from kokon.utils.query import filter_stmt, paginate, sort_stmt
@@ -40,6 +43,10 @@ def test_filter_stmt(db):
         result = filter_stmt(stmt, request=request, model=AccommodationUnit).all()
         assert len(result) == 0
 
+        with pytest.raises(ValidationError):
+            request = Mock(args={"verificationStatus": "UNKNOWN"})
+            filter_stmt(stmt, request=request, model=AccommodationUnit).all()
+
         # string
         request = Mock(args={"city": "Lublin"})
         result = filter_stmt(stmt, request=request, model=AccommodationUnit).all()
@@ -71,10 +78,18 @@ def test_filter_stmt(db):
         result = filter_stmt(stmt, request=request, model=AccommodationUnit).all()
         assert len(result) == 1
 
+        with pytest.raises(ValidationError):
+            request = Mock(args={"vacanciesFree": "one"})
+            filter_stmt(stmt, request=request, model=AccommodationUnit).all()
+
         # dates
         request = Mock(args={"createdAtGt": "1999-01-01"})
         result = filter_stmt(stmt, request=request, model=AccommodationUnit).all()
         assert len(result) == 1
+
+        with pytest.raises(ValidationError):
+            request = Mock(args={"createdAtGt": "WRONG-01-01"})
+            filter_stmt(stmt, request=request, model=AccommodationUnit).all()
 
 
 def test_sort_stmt(db):
@@ -87,3 +102,7 @@ def test_sort_stmt(db):
         request = Mock(args={"sort": "-email"})
         result = sort_stmt(stmt, request=request, model=User).first()
         assert result.email == "john.doe@example.com"
+
+        with pytest.raises(ValidationError):
+            request = Mock(args={"sort": "unknown"})
+            sort_stmt(stmt, request=request, model=User).first()

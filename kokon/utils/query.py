@@ -79,9 +79,10 @@ def filter_stmt(
             continue
 
         if column_type_name == "Enum":
-            enums = getattr(model, column).type.enums
-            if column_val not in enums:
-                raise ValidationError(f"Must be one of {enums}.", column=column_cc)
+            if column_val not in column_type.enums:
+                raise ValidationError(
+                    f"Must be one of {column_type.enums}.", column=column_cc
+                )
 
         if column_type_name == "TIMESTAMP":
             for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M"):
