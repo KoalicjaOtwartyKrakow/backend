@@ -30,6 +30,25 @@ def test_get_all_guests(db):
     assert items[0]["email"] == "gsssltitzwwg@gmail.com"
 
 
+def test_guest_filters(db):
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {"limit": 10, "priorityStatus": "DOES_NOT_RESPOND"}
+
+    response = handle_get_all_guests(request)
+
+    assert response.status_code == 200
+    assert response.json["total"] == 0
+
+    request.args = {"limit": 10, "priorityStatus": "EN_ROUTE_PL"}
+
+    response = handle_get_all_guests(request)
+
+    assert response.status_code == 200
+    assert response.json["total"] == 1
+
+
 def test_create_edit_delete_guest_versions(db):
     request = Mock()
     request.db = DB()

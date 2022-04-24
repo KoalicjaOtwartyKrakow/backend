@@ -4,26 +4,18 @@ import marshmallow
 from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
 
-from kokon.orm import Host, enums
+from kokon.orm import Host
 from kokon.serializers import HostSchema, HostSchemaFull
 from kokon.utils.functions import Request, JSONResponse
-from kokon.utils.pagination import paginate
+from kokon.utils.query import filter_stmt, paginate, sort_stmt
 
 
 def handle_get_all_hosts(request: Request):
-    status_parameter = request.args.get("status", None)
-    if status_parameter:
-        try:
-            status_parameter = enums.VerificationStatus(status_parameter)
-        except ValueError:
-            return flask.Response(
-                response=f"Received invalid status: {status_parameter}", status=400
-            )
-
     with request.db.acquire() as session:
         stmt = session.query(Host)
-        if status_parameter:
-            stmt = stmt.where(Host.status == status_parameter)
+
+        stmt = filter_stmt(stmt=stmt, request=request, model=Host)
+        stmt = sort_stmt(stmt=stmt, request=request, model=Host)
 
         response = paginate(stmt, request=request, schema=HostSchema)
 
