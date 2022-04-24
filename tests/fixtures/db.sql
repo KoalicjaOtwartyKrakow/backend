@@ -1,3 +1,5 @@
+TRUNCATE languages RESTART IDENTITY CASCADE;
+
 TRUNCATE hosts RESTART IDENTITY CASCADE;
 
 INSERT INTO hosts("full_name", "phone_number", "email", "call_after", "call_before", "comments", "guid")

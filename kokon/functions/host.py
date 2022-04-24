@@ -4,7 +4,7 @@ import marshmallow
 from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
 
-from kokon.orm import Host
+from kokon.orm import Host, Language
 from kokon.serializers import HostSchema, HostSchemaFull
 from kokon.utils.functions import Request, JSONResponse
 from kokon.utils.query import filter_stmt, paginate, sort_stmt
@@ -13,6 +13,12 @@ from kokon.utils.query import filter_stmt, paginate, sort_stmt
 def handle_get_all_hosts(request: Request):
     with request.db.acquire() as session:
         stmt = session.query(Host)
+
+        language_spoken = request.args.get("languageSpoken", None)
+        if language_spoken:
+            stmt = stmt.filter(
+                Host.languages_spoken.any(Language.code2 == language_spoken)
+            )
 
         stmt = filter_stmt(stmt=stmt, request=request, model=Host)
         stmt = sort_stmt(stmt=stmt, request=request, model=Host)
