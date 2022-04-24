@@ -128,3 +128,50 @@ def test_get_edit_delete_guest_not_found_guest():
 
     response = handle_delete_guest(request)
     assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+    # "guid",
+    # "createdAt",
+    # "updatedAt",
+    # "guests",
+    # "apartments",
+    # "host",
+    # "accommodationUnit",
+
+
+def test_edit_guest_with_immutable_fields_ignores_them(db):
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+
+    request.get_json.return_value = {
+        "fullName": "Marta Andrzejak",
+        "email": "auz-oxloij-dxfv@yahoo.com",
+        "phoneNumber": "499-330-497",
+        "childrenAges": [1, 10],
+        "accommodationUnitId": "008c0243-0060-4d11-9775-0258ddac7620",
+    }
+
+    response_add = handle_add_guest(request)
+    assert response_add.status_code == http.HTTPStatus.CREATED
+    guest_guid = response_add.json["guid"]
+
+    request.args = {"guestId": guest_guid}
+    request.get_json.return_value = {
+        "fullName": "Marta Andrzejak",
+        "email": "auz-oxloij-dxfv@yahoo.com",
+        "phoneNumber": "499-330-497",
+        "childrenAges": [1, 10],
+        "accommodationUnitId": "008c0243-0060-4d11-9775-0258ddac7620",
+        # fields supposed to be immutable
+        "createdAt": "2022-04-24 10:52:42.283345",
+    }
+
+    response_update = handle_update_guest(request)
+
+    assert response_update.status_code == http.HTTPStatus.OK
+    assert all(
+        [
+            response_add.json[field] == response_update.json[field]
+            for field in ("fullName", "createdAt")
+        ]
+    )

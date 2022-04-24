@@ -2,7 +2,10 @@ import os.path
 
 from pytest import fixture
 
+from kokon.orm import Guest
+from kokon.serializers import GuestSchemaFull
 from kokon.utils.db import DB
+import sqlalchemy as sa
 
 
 def _setup_db():

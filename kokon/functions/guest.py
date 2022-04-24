@@ -93,6 +93,7 @@ def handle_delete_guest(request: Request):
     return flask.Response(response=f"Guest with id = {guest_id} deleted", status=204)
 
 
+# TODO-BACKEND-92
 def handle_update_guest(request: Request):
     guest_schema = GuestSchema()
     guest_schema_full = GuestSchemaFull()
