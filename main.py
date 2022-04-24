@@ -22,37 +22,9 @@ sentry_sdk.init(  # pylint: disable=abstract-class-instantiated # noqa: E0110
 
 @functions_framework.http
 @function_wrapper
-def add_accommodation(request):
-    """HTTP Cloud Function for posting new accommodation units."""
-    return accommodation.handle_add_accommodation(request)
-
-
-@functions_framework.http
-@function_wrapper
-def get_all_accommodations(request):
-    """HTTP Cloud Function for getting all available accommodation units."""
-    return accommodation.handle_get_all_accommodations(request)
-
-
-@functions_framework.http
-@function_wrapper
-def delete_accommodation(request):
-    """HTTP Cloud Function for deleting an accommodation unit."""
-    return accommodation.handle_delete_accommodation(request)
-
-
-@functions_framework.http
-@function_wrapper
-def get_accommodation_by_id(request):
-    """HTTP Cloud Function for getting an accommodation unit."""
-    return accommodation.handle_get_accommodation_by_id(request)
-
-
-@functions_framework.http
-@function_wrapper
-def update_accommodation(request):
-    """HTTP Cloud function for updating an accommodation unit."""
-    return accommodation.handle_update_accommodation(request)
+def accommodation_function(request):
+    """HTTP Cloud Function for handling accommodations objects."""
+    return accommodation.accommodation_function(request)
 
 
 @functions_framework.http

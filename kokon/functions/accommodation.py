@@ -12,6 +12,20 @@ from kokon.utils.functions import JSONResponse, Request
 from kokon.utils.pagination import paginate
 
 
+def accommodation_function(request: Request):
+    if request.method == "GET":
+        if "accommodationId" in request.args:
+            return handle_get_accommodation_by_id(request)
+        else:
+            return handle_get_all_accommodations(request)
+    elif request.method == "PUT":
+        return handle_add_accommodation(request)
+    elif request.method == "DELETE":
+        return handle_delete_accommodation(request)
+    elif request.method == "POST":
+        return handle_update_accommodation(request)
+
+
 def handle_add_accommodation(request: Request):
     schema = AccommodationUnitSchema()
     schema_full = AccommodationUnitSchemaFull()
