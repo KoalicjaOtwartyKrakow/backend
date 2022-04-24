@@ -10,6 +10,22 @@ from kokon.utils.functions import Request, JSONResponse
 from kokon.utils.pagination import paginate
 
 
+def host_function(request: Request):
+    if request.method == "GET":
+        if "hostId" in request.args:
+            return handle_get_host_by_id(request)
+        else:
+            return handle_get_all_hosts(request)
+    elif request.method == "PUT":
+        return handle_add_host(request)
+    elif request.method == "DELETE":
+        return handle_delete_host(request)
+    elif request.method == "POST":
+        return handle_update_host(request)
+    else:
+        return flask.Response("Wrong method", status=405)
+
+
 def handle_get_all_hosts(request: Request):
     status_parameter = request.args.get("status", None)
     if status_parameter:

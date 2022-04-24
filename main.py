@@ -29,72 +29,16 @@ def accommodation_function(request):
 
 @functions_framework.http
 @function_wrapper
-def get_all_guests(request):
-    """HTTP Cloud Function for getting all guests."""
-    return guest.handle_get_all_guests(request)
+def guest_function(request):
+    """HTTP Cloud Function for handling guest objects."""
+    return guest.guest_function(request)
 
 
 @functions_framework.http
 @function_wrapper
-def add_guest(request):
-    """HTTP Cloud Function for posting new guests."""
-    return guest.handle_add_guest(request)
-
-
-@functions_framework.http
-@function_wrapper
-def get_guest_by_id(request):
-    """HTTP Cloud Function for getting selected guests."""
-    return guest.handle_get_guest_by_id(request)
-
-
-@functions_framework.http
-@function_wrapper
-def delete_guest(request):
-    """HTTP Cloud Function for deleting selected guests."""
-    return guest.handle_delete_guest(request)
-
-
-@functions_framework.http
-@function_wrapper
-def update_guest(request):
-    """HTTP Cloud Function for updating selected guests."""
-    return guest.handle_update_guest(request)
-
-
-@functions_framework.http
-@function_wrapper
-def get_all_hosts(request):
-    """HTTP Cloud Function for getting all hosts."""
-    return host.handle_get_all_hosts(request)
-
-
-@functions_framework.http
-@function_wrapper
-def delete_host(request):
-    """HTTP Cloud Function for deleting a host with a given id."""
-    return host.handle_delete_host(request)
-
-
-@functions_framework.http
-@function_wrapper
-def update_host(request):
-    """HTTP Cloud Function for updating a host."""
-    return host.handle_update_host(request)
-
-
-@functions_framework.http
-@function_wrapper
-def add_host(request):
-    """HTTP Cloud Function for posting a new host."""
-    return host.handle_add_host(request)
-
-
-@functions_framework.http
-@function_wrapper
-def get_host_by_id(request):
-    """HTTP Cloud Function for getting a host with a given id."""
-    return host.handle_get_host_by_id(request)
+def host_function(request):
+    """HTTP Cloud Function for handling host objects."""
+    return host.host_function(request)
 
 
 @functions_framework.http
