@@ -70,8 +70,19 @@ def downgrade():
         user_name = os.getenv("db_app_user", None)
 
     if not user_name:
-        raise AssertionError("db_app_user variables are missing.")
+        raise AssertionError("db_app_user variable is missing.")
 
-    op.execute(f"DROP OWNED BY {user_name};")
-    op.execute(f"DROP USER {user_name};")
+    op.execute(
+        f"""
+        DO
+        $$
+        BEGIN
+            IF EXISTS (SELECT FROM pg_roles WHERE rolname = '{user_name}') THEN
+                DROP OWNED BY {user_name};
+                DROP USER {user_name};
+            END IF;
+        END
+        $$;
+        """
+    )
     # ### end Alembic commands ###
