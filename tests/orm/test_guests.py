@@ -26,6 +26,8 @@ def test_guests_claimed_at(db):
         claimed_at = guest.claimed_at
         assert claimed_at is not None
 
+        # session.execute("TRUNCATE accommodation_units_version RESTART IDENTITY;")
+
         guest.claimed_by_id = "782962fc-dc11-4a33-8f08-b7da532dd40d"
         session.commit()
         session.refresh(guest)

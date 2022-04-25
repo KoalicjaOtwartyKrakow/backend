@@ -9,7 +9,7 @@ Dev environment:
 4. `pre-commit install`
 5. `docker-compose up --no-start && docker-compose start` (install [Docker Desktop](https://www.docker.com/products/docker-desktop/))
 6. `export IS_LOCAL_DB=True`
-7. `db_app_user=app db_app_pass=secret alembic upgrade head`
+7. `db_user=postgres db_pass=postgres db_app_user=app db_app_pass=secret alembic upgrade head`
 8. `python main.py seed --teryt-path=<path to teryt> --count=5 --db` (see `kokon/commands/seed/README.md`)
 
 Regarding branching:
@@ -23,15 +23,15 @@ Regarding branching:
 - to generate `requirements.txt`: `pipenv lock -r > requirements.txt`
 
 Migrations using [alembic](https://alembic.sqlalchemy.org/en/latest/):
-- upgrade: `alembic upgrade head`
-- downgrade: `alembic downgrade -1`
-- new migration: `alembic revision --autogenerate -m <migration_name>` (then edit generated migration if required)
+- upgrade: `db_user=postgres db_pass=postgres db_app_user=app db_app_pass=secret alembic upgrade head`
+- downgrade: `db_user=postgres db_pass=postgres db_app_user=app db_app_pass=secret alembic downgrade -1`
+- new migration: `db_user=postgres db_pass=postgres db_app_user=app db_app_pass=secret alembic revision --autogenerate -m <migration_name>` (then edit generated migration if required)
 - after migration added - ensure in dev that downgrade works properly
 
 ## Testing
 
 ```bash
-IS_LOCAL_DB=True db_name=kokon_test alembic upgrade head
+IS_LOCAL_DB=True db_user=postgres db_pass=postgres db_app_user=app_test db_app_pass=secret db_name=kokon_test alembic upgrade head
 
 pytest tests
 ```
