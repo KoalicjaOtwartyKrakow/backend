@@ -11,10 +11,10 @@ from kokon.functions.guest import (
     handle_get_guest_by_id,
     handle_update_guest,
 )
-from kokon.utils.db import DB
 from kokon.orm import Guest
+from kokon.utils.db import DB
 
-from tests.helpers import UserMock
+from tests.helpers import UserMock, admin_session
 
 
 def test_get_all_guests(db):
@@ -28,6 +28,25 @@ def test_get_all_guests(db):
     assert response.status_code == 200
     items = response.json["items"]
     assert items[0]["email"] == "gsssltitzwwg@gmail.com"
+
+
+def test_guest_filters(db):
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {"limit": 10, "priorityStatus": "DOES_NOT_RESPOND"}
+
+    response = handle_get_all_guests(request)
+
+    assert response.status_code == 200
+    assert response.json["total"] == 0
+
+    request.args = {"limit": 10, "priorityStatus": "EN_ROUTE_PL"}
+
+    response = handle_get_all_guests(request)
+
+    assert response.status_code == 200
+    assert response.json["total"] == 1
 
 
 def test_create_edit_delete_guest_versions(db):
@@ -67,7 +86,7 @@ def test_create_edit_delete_guest_versions(db):
     response = handle_delete_guest(request)
     assert response.status_code == 204
 
-    with DB().acquire() as session:
+    with admin_session() as session:
         version_cls = version_class(Guest)
         versions = session.execute(
             sa.select(version_cls)

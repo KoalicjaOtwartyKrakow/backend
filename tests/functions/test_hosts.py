@@ -8,6 +8,7 @@ from kokon.functions.host import (
     handle_get_host_by_id,
     handle_update_host,
 )
+from kokon.orm import Host, Language
 from kokon.utils.db import DB
 
 from tests.helpers import UserMock
@@ -25,6 +26,60 @@ def test_get_all_hosts(db):
     items = response.json["items"]
     assert len(items) == 2
     assert "email" in items[0]
+
+
+def test_filter_by_language(db):
+    with DB().acquire() as session:
+        host = (
+            session.query(Host)
+            .where(Host.guid == "dc6d05bb-9bd6-4e9d-a8e9-8b88d29adee5")
+            .one()
+        )
+        host.languages_spoken.append(Language(name="English", code2="EN", code3="Eng"))
+        host.languages_spoken.append(
+            Language(name="Ukrainian", code2="UK", code3="Ukr")
+        )
+        session.commit()
+
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {"limit": 10, "languageSpoken": "EN"}
+
+    response = handle_get_all_hosts(request)
+
+    assert response.status_code == 200
+    assert response.json["total"] == 1
+
+
+def test_get_all_hosts_with_query_by_fullname(db):
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {"query": "królik", "limit": 10}
+
+    response = handle_get_all_hosts(request)
+
+    assert response.status_code == 200
+    items = response.json["items"]
+    assert len(items) == 1
+    assert "fullName" in items[0]
+    assert items[0]["fullName"] == "Edmund Królikowski"
+
+
+def test_get_all_hosts_with_query_by_phone(db):
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {"query": "143", "limit": 10}
+
+    response = handle_get_all_hosts(request)
+
+    assert response.status_code == 200
+    items = response.json["items"]
+    assert len(items) == 1
+    assert "phoneNumber" in items[0]
+    assert items[0]["phoneNumber"] == "443 143 258"
 
 
 def test_create_read_update_delete_host(db):
