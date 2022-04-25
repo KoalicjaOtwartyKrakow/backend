@@ -3,6 +3,8 @@ from sqlalchemy_continuum.utils import count_versions
 from kokon.utils.db import DB
 from kokon.orm import AccommodationUnit, Guest
 
+from tests.helpers import admin_session
+
 
 def test_guests_claimed_at(db):
     with DB().acquire() as session:
@@ -51,7 +53,7 @@ def test_guests_claimed_at(db):
 
 
 def test_versioning(db):
-    with DB().acquire() as session:
+    with admin_session() as session:
         guest = Guest(
             guid="5e42beb8-00a8-4577-8d2b-8ae29257a424",
             full_name="Marta Andrzejak",

@@ -4,7 +4,7 @@ import os
 IS_LOCAL_DB = os.getenv("IS_LOCAL_DB", "False").lower() == "true"
 
 
-DB_USER = os.getenv("db_user", default="postgres")
+DB_USER = os.getenv("db_user", default="app_user")
 DB_PASS = os.getenv("db_pass", default="postgres")
 DB_NAME = os.getenv("db_name", default="kokon_dev")
 DB_SOCKET_DIR = os.getenv("db_socket_dir")

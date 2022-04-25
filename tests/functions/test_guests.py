@@ -11,10 +11,10 @@ from kokon.functions.guest import (
     handle_get_guest_by_id,
     handle_update_guest,
 )
-from kokon.utils.db import DB
 from kokon.orm import Guest
+from kokon.utils.db import DB
 
-from tests.helpers import UserMock
+from tests.helpers import UserMock, admin_session
 
 
 def test_get_all_guests(db):
@@ -86,7 +86,7 @@ def test_create_edit_delete_guest_versions(db):
     response = handle_delete_guest(request)
     assert response.status_code == 204
 
-    with DB().acquire() as session:
+    with admin_session() as session:
         version_cls = version_class(Guest)
         versions = session.execute(
             sa.select(version_cls)
