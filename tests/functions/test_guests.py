@@ -14,12 +14,12 @@ from kokon.functions.guest import (
 from kokon.orm import Guest
 from kokon.utils.db import DB
 
-from tests.helpers import AppDB, UserMock
+from tests.helpers import UserMock, admin_session
 
 
 def test_get_all_guests(db):
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"limit": 10}
 
@@ -32,7 +32,7 @@ def test_get_all_guests(db):
 
 def test_guest_filters(db):
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"limit": 10, "priorityStatus": "DOES_NOT_RESPOND"}
 
@@ -51,7 +51,7 @@ def test_guest_filters(db):
 
 def test_create_edit_delete_guest_versions(db):
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.get_json.return_value = {
         "fullName": "Marta Andrzejak",
@@ -86,7 +86,7 @@ def test_create_edit_delete_guest_versions(db):
     response = handle_delete_guest(request)
     assert response.status_code == 204
 
-    with DB().acquire() as session:
+    with admin_session() as session:
         version_cls = version_class(Guest)
         versions = session.execute(
             sa.select(version_cls)
@@ -103,7 +103,7 @@ def test_create_edit_delete_guest_versions(db):
 
 def test_get_edit_delete_guest_missing_guest_id_parameter():
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {}
 
@@ -119,7 +119,7 @@ def test_get_edit_delete_guest_missing_guest_id_parameter():
 
 def test_get_edit_delete_guest_invalid_guest_id_parameter():
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"guestId": "invalidUUID"}
 
@@ -135,7 +135,7 @@ def test_get_edit_delete_guest_invalid_guest_id_parameter():
 
 def test_get_edit_delete_guest_not_found_guest():
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"guestId": "882962fc-dc11-4a33-8f08-b7da532dd40d"}
 

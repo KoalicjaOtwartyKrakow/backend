@@ -4,16 +4,17 @@ from sqlalchemy_continuum.utils import count_versions
 
 from kokon.orm import Guest
 from kokon.utils.db import DB
-from ..helpers import AppDB
+
+from tests.helpers import admin_session
 
 
 def test_app_user():
-    with DB().acquire() as session:
+    with admin_session() as session:
         session.execute("TRUNCATE guests_version RESTART IDENTITY;")
         session.execute("TRUNCATE guests RESTART IDENTITY;")
         session.execute("TRUNCATE transaction RESTART IDENTITY;")
 
-    with AppDB().acquire() as session:
+    with DB().acquire() as session:
         # creates a guest without error and version as well
         guid = "74b86069-c837-4431-a7ee-3a4aedda978b"
 
@@ -44,7 +45,7 @@ def test_app_user():
         with pytest.raises(ProgrammingError):
             _ = guest.versions[0]
 
-    with DB().acquire() as session:
+    with admin_session() as session:
         guest = session.query(Guest).where(Guest.guid == guid).one()
         assert count_versions(guest) == 2
         assert str(guest.versions[0].guid) == guid

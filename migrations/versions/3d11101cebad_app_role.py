@@ -23,7 +23,7 @@ def upgrade():
     # don't create the role for test db
     if "test" in conn.engine.url.database:
         user_name = "test_user"
-        user_password = "test_pass"
+        user_password = "postgres"
     else:
         user_name = os.getenv("db_app_user", None)
         user_password = os.getenv("db_app_pass", None)

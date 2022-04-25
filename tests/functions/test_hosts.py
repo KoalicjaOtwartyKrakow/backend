@@ -9,13 +9,14 @@ from kokon.functions.host import (
     handle_update_host,
 )
 from kokon.orm import Host, Language
+from kokon.utils.db import DB
 
-from tests.helpers import AppDB, UserMock
+from tests.helpers import UserMock
 
 
 def test_get_all_hosts(db):
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"status": "CREATED", "limit": 10}
 
@@ -28,7 +29,7 @@ def test_get_all_hosts(db):
 
 
 def test_filter_by_language(db):
-    with AppDB().acquire() as session:
+    with DB().acquire() as session:
         host = (
             session.query(Host)
             .where(Host.guid == "dc6d05bb-9bd6-4e9d-a8e9-8b88d29adee5")
@@ -41,7 +42,7 @@ def test_filter_by_language(db):
         session.commit()
 
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"limit": 10, "languageSpoken": "EN"}
 
@@ -53,7 +54,7 @@ def test_filter_by_language(db):
 
 def test_get_all_hosts_with_query_by_fullname(db):
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"query": "królik", "limit": 10}
 
@@ -68,7 +69,7 @@ def test_get_all_hosts_with_query_by_fullname(db):
 
 def test_get_all_hosts_with_query_by_phone(db):
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"query": "143", "limit": 10}
 
@@ -83,7 +84,7 @@ def test_get_all_hosts_with_query_by_phone(db):
 
 def test_create_read_update_delete_host(db):
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.get_json.return_value = {
         "fullName": "Marta Andrzejak",
@@ -115,7 +116,7 @@ def test_create_read_update_delete_host(db):
 
 def test_get_edit_delete_host_missing_host_id_parameter():
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {}
 
@@ -131,7 +132,7 @@ def test_get_edit_delete_host_missing_host_id_parameter():
 
 def test_get_edit_delete_host_invalid_host_id_parameter():
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"hostId": "invalidUUID"}
 
@@ -147,7 +148,7 @@ def test_get_edit_delete_host_invalid_host_id_parameter():
 
 def test_get_edit_delete_host_not_found_host():
     request = Mock()
-    request.db = AppDB()
+    request.db = DB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"hostId": "882962fc-dc11-4a33-8f08-b7da532dd40d"}
 
