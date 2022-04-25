@@ -22,7 +22,7 @@ def guest_function(request: Request):
     elif request.method == "POST":
         return handle_update_guest(request)
     else:
-        return flask.Response("Wrong method", status=405)
+        return JSONResponse({"message": "Invalid method"}, status=405)
 
 
 def handle_get_all_guests(request: Request):
