@@ -8,14 +8,13 @@ from kokon.functions.accommodation import (
     handle_get_all_accommodations,
     handle_update_accommodation,
 )
-from kokon.utils.db import DB
 
-from tests.helpers import UserMock
+from tests.helpers import AppDB, UserMock
 
 
 def test_get_all_accommodations(db):
     request = Mock()
-    request.db = DB()
+    request.db = AppDB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"limit": 10}
 
@@ -32,7 +31,7 @@ def test_get_all_accommodations(db):
 
 def test_create_read_update_delete_accommodation(db):
     request = Mock()
-    request.db = DB()
+    request.db = AppDB()
     request.get_json.return_value = {
         "vacanciesTotal": 1,
         "zip": "12345",
@@ -66,7 +65,7 @@ def test_create_read_update_delete_accommodation(db):
 
 def test_get_edit_delete_accommodation_missing_accommodation_id_parameter():
     request = Mock()
-    request.db = DB()
+    request.db = AppDB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {}
 
@@ -82,7 +81,7 @@ def test_get_edit_delete_accommodation_missing_accommodation_id_parameter():
 
 def test_get_edit_delete_accommodation_invalid_accommodation_id_parameter():
     request = Mock()
-    request.db = DB()
+    request.db = AppDB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"accommodationId": "invalidUUID"}
 
@@ -98,7 +97,7 @@ def test_get_edit_delete_accommodation_invalid_accommodation_id_parameter():
 
 def test_get_edit_delete_accommodation_not_found_accommodation():
     request = Mock()
-    request.db = DB()
+    request.db = AppDB()
     request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
     request.args = {"accommodationId": "882962fc-dc11-4a33-8f08-b7da532dd40d"}
 
