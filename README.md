@@ -9,7 +9,7 @@ Dev environment:
 4. `pre-commit install`
 5. `docker-compose up --no-start && docker-compose start` (install [Docker Desktop](https://www.docker.com/products/docker-desktop/))
 6. `export IS_LOCAL_DB=True`
-7. `db_user=postgres db_app_user=app_user alembic upgrade head`
+7. `db_user=postgres db_app_user=app_user db_app_pass=postgress alembic upgrade head`
 8. `python main.py seed --teryt-path=<path to teryt> --count=5 --db` (see `kokon/commands/seed/README.md`)
 
 Regarding branching:
