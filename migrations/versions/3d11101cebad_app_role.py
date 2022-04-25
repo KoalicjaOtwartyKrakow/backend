@@ -50,9 +50,9 @@ def upgrade():
         GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO {user_name};
         -- reduce permissions for _version tables
         REVOKE ALL ON accommodation_units_version FROM {user_name};
-        GRANT INSERT ON TABLE accommodation_units_version TO {user_name};
+        GRANT INSERT, UPDATE(end_transaction_id), SELECT(guid, transaction_id) ON TABLE accommodation_units_version TO {user_name};
         REVOKE ALL ON guests_version FROM {user_name};
-        GRANT INSERT ON TABLE guests_version TO {user_name};
+        GRANT INSERT, UPDATE(end_transaction_id), SELECT(guid, transaction_id) ON TABLE guests_version TO {user_name};
         GRANT EXECUTE ON FUNCTION update_claimed_at() TO {user_name};
         -- default roles assigned to new objects in future
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO {user_name};

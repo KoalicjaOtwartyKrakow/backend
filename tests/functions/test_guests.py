@@ -12,6 +12,7 @@ from kokon.functions.guest import (
     handle_update_guest,
 )
 from kokon.orm import Guest
+from kokon.utils.db import DB
 
 from tests.helpers import AppDB, UserMock
 
@@ -85,7 +86,7 @@ def test_create_edit_delete_guest_versions(db):
     response = handle_delete_guest(request)
     assert response.status_code == 204
 
-    with AppDB().acquire() as session:
+    with DB().acquire() as session:
         version_cls = version_class(Guest)
         versions = session.execute(
             sa.select(version_cls)
