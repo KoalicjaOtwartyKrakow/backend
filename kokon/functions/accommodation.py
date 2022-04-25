@@ -9,7 +9,7 @@ from sqlalchemy.orm import joinedload
 from kokon.orm import AccommodationUnit, Host
 from kokon.serializers import AccommodationUnitSchema, AccommodationUnitSchemaFull
 from kokon.utils.functions import JSONResponse, Request
-from kokon.utils.pagination import paginate
+from kokon.utils.query import filter_stmt, paginate, sort_stmt
 
 
 def handle_add_accommodation(request: Request):
@@ -37,6 +37,9 @@ def handle_get_all_accommodations(request: Request):
                 joinedload(AccommodationUnit.host).subqueryload(Host.languages_spoken)
             )
         )
+
+        stmt = filter_stmt(stmt, request=request, model=AccommodationUnit)
+        stmt = sort_stmt(stmt, request=request, model=AccommodationUnit)
 
         response = paginate(stmt, request=request, schema=AccommodationUnitSchemaFull)
 

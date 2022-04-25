@@ -1,7 +1,7 @@
 from kokon.orm import User
 from kokon.serializers import UserSchema
 from kokon.utils.functions import JSONResponse
-from kokon.utils.pagination import paginate
+from kokon.utils.query import paginate
 
 
 def handle_get_all_users(request):
