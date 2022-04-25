@@ -1,7 +1,7 @@
 """Module containing function handlers for host requests."""
 import flask
 import marshmallow
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, or_
 from sqlalchemy.exc import ProgrammingError
 
 from kokon.orm import Host, Language
@@ -11,13 +11,24 @@ from kokon.utils.query import filter_stmt, paginate, sort_stmt
 
 
 def handle_get_all_hosts(request: Request):
+    query_parameter = request.args.get("query", None)
+    language_spoken = request.args.get("languageSpoken", None)
+
     with request.db.acquire() as session:
         stmt = session.query(Host)
 
-        language_spoken = request.args.get("languageSpoken", None)
         if language_spoken:
             stmt = stmt.filter(
                 Host.languages_spoken.any(Language.code2 == language_spoken)
+            )
+
+        if query_parameter:
+            query_parameter = f"%{query_parameter}%"
+            stmt = stmt.where(
+                or_(
+                    Host.full_name.ilike(query_parameter),
+                    Host.phone_number.ilike(query_parameter),
+                )
             )
 
         stmt = filter_stmt(stmt=stmt, request=request, model=Host)

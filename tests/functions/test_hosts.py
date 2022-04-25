@@ -52,6 +52,36 @@ def test_filter_by_language(db):
     assert response.json["total"] == 1
 
 
+def test_get_all_hosts_with_query_by_fullname(db):
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {"query": "królik", "limit": 10}
+
+    response = handle_get_all_hosts(request)
+
+    assert response.status_code == 200
+    items = response.json["items"]
+    assert len(items) == 1
+    assert "fullName" in items[0]
+    assert items[0]["fullName"] == "Edmund Królikowski"
+
+
+def test_get_all_hosts_with_query_by_phone(db):
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.args = {"query": "143", "limit": 10}
+
+    response = handle_get_all_hosts(request)
+
+    assert response.status_code == 200
+    items = response.json["items"]
+    assert len(items) == 1
+    assert "phoneNumber" in items[0]
+    assert items[0]["phoneNumber"] == "443 143 258"
+
+
 def test_create_read_update_delete_host(db):
     request = Mock()
     request.db = DB()
