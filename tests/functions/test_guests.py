@@ -150,10 +150,10 @@ def test_edit_guest_with_immutable_fields_ignores_them(db):
     # immutable fields present in full serializer
     immutable_fields = {
         "guid": "182962fc-dc11-4a33-8f08-b7da532dd40d",
-        "createdAt": "2022-04-24 10:52:42.283345",
+        "createdAt": "2020-04-24 10:52:42.283345",
         # "updatedAt" is skipped on purpose, because it will always differ (it is imposed by SQL engine)
         "updatedBy": "182962fc-dc11-4a33-8f08-b7da532dd40d",
-        "claimedAt": "2022-04-24 10:52:42.283345",
+        "claimedAt": "2020-04-24 10:52:42.283345",
         "accommodationUnit": "i will be ignored",
     }
 

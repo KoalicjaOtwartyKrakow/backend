@@ -47,6 +47,9 @@ class LanguageSchema(CamelCaseSchema):
 
 # TODO(mlazowik): Re-add languages spoken after pagination + filtering + sorting and
 #  the move back to in-app list views.
+# ----------------------------------------------------------------------------------
+# TODO(jrylko): Use this schema when loading host input data.
+#  Then, add immutable fields to exclude list, similarly as it is done in GuestSchema
 class HostSchema(CamelCaseSchema):
     class Meta:
         model = Host
@@ -70,6 +73,11 @@ class GuestSchema(CamelCaseSchema):
         model = Guest
         include_fk = True
         load_instance = True
+        # we use combination of unknown="EXCLUDE" + exclude list, so for example:
+        # if user were to include field "accommodation_unit" in their request
+        # this serializer will make it unknown because of exclude list
+        # and then not throw an error, which would be a default behavior
+        # if we didn't use unknown = "EXCLUDE"
         unknown = "EXCLUDE"
         exclude = (
             "guid",
@@ -116,7 +124,11 @@ class AccommodationUnitSchema(CamelCaseSchema):
         model = AccommodationUnit
         include_fk = True
         load_instance = True
-        exclude = ("host", "guests", "versions")
+        exclude = ("guid", "host", "guests", "versions")
+        unknown = "EXCLUDE"
+
+    created_at = auto_field(dump_only=True)
+    updated_at = auto_field(dump_only=True)
 
 
 class AccommodationUnitSchemaFull(CamelCaseSchema):

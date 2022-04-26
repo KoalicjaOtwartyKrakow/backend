@@ -15,7 +15,8 @@ repos:
         args:
           [
               "--max-line-length=88",
-              "--ignore=E203, W503", # https://github.com/psf/black/issues/315
+              "--extend-ignore=E203", # https://github.com/psf/black/issues/315
+              # Q: Why extend-ignore instead of ignore? A: https://stackoverflow.com/a/68172142
           ]
 -   repo: https://github.com/PyCQA/bandit
     rev: 1.7.3

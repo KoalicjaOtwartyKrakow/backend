@@ -1,6 +1,8 @@
 import http
 from unittest.mock import Mock
 
+import pytest
+
 from kokon.functions.host import (
     handle_add_host,
     handle_delete_host,
@@ -105,3 +107,55 @@ def test_get_edit_delete_host_not_found_host():
 
     response = handle_delete_host(request)
     assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.xfail(
+    reason="we need to use HostSchema (instead of HostSchemaFull)"
+    " for loading data, to exclude immutable fields"
+)
+def test_edit_host_with_immutable_fields_ignores_them(db):
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+
+    request.get_json.return_value = {
+        "fullName": "Marta Andrzejak",
+        "email": "auz-oxloij-dxfv@yahoo.com",
+        "phoneNumber": "499-330-497",
+    }
+
+    response_add = handle_add_host(request)
+    assert response_add.status_code == http.HTTPStatus.CREATED
+    host_guid = response_add.json["guid"]
+
+    request.args = {"hostId": host_guid}
+
+    # immutable fields present in full serializer
+    immutable_fields = {
+        "guid": "182962fc-dc11-4a33-8f08-b7da532dd40d",
+        "createdAt": "2022-04-24 10:52:42.283345",
+        # "updatedAt" is skipped on purpose, because it will always differ (it is imposed by SQL engine)
+        "accommodationUnits": "i will be ignored",
+    }
+
+    request.get_json.return_value = {
+        "fullName": "Marta Andrzejak",
+        "email": "auz-oxloij-dxfv@yahoo.com",
+        "phoneNumber": "499-330-497",
+        # fields supposed to be immutable, so expected behavior is to ignore them on update
+        **immutable_fields,
+    }
+    response_update = handle_update_host(request)
+
+    assert response_update.status_code == http.HTTPStatus.OK
+
+    # since we ignored immutable fields,
+    # we expect that all fields we provided in an update request
+    # are exactly the same in both create and update responses
+    assert all(
+        [
+            response_add.json[field] == response_update.json[field]
+            # we don't check internal immutable fields, as they are not present in response JSON
+            for field in immutable_fields.keys()
+        ]
+    )
