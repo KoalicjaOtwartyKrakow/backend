@@ -19,10 +19,11 @@ class HostVerificationSession(Base):
         sa.ForeignKey("hosts.guid", name="fk_host_verification_sessions_host_id"),
         nullable=False,
     )
-    host = relationship("Host", back_populates="verifications", foreign_keys=[host_id])
     conversation_id = sa.Column("conversation_id", sa.Integer, nullable=False)
     first_name = sa.Column("first_name", sa.String(100), nullable=True)
     last_name = sa.Column("last_name", sa.String(100), nullable=True)
+
+    host = relationship("Host", back_populates="verifications", foreign_keys=[host_id])
 
     def __repr__(self):
         return f"HostVerificationSession: {self.__dict__}"
