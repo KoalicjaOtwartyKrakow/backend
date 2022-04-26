@@ -102,7 +102,6 @@ def handle_get_accommodation_by_id(request: Request):
     return JSONResponse(response, status=200)
 
 
-# TODO-BACKEND-92
 def handle_update_accommodation(request: Request):
     schema = AccommodationUnitSchema()
     schema_full = AccommodationUnitSchemaFull()
