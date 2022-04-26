@@ -72,6 +72,7 @@ class GuestSchema(CamelCaseSchema):
         load_instance = True
         unknown = "EXCLUDE"
         exclude = (
+            "guid",
             "updated_by",
             "accommodation_unit",
             "versions",
