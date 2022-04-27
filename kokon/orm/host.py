@@ -76,6 +76,7 @@ class Host(Base):
     )
 
     accommodation_units = relationship("AccommodationUnit", back_populates="host")
+    verifications = relationship("HostVerificationSession", back_populates="host")
 
     def __repr__(self):
         return f"Host: {self.__dict__}"
