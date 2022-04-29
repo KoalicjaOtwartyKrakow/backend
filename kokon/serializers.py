@@ -47,6 +47,9 @@ class LanguageSchema(CamelCaseSchema):
 
 # TODO(mlazowik): Re-add languages spoken after pagination + filtering + sorting and
 #  the move back to in-app list views.
+# ----------------------------------------------------------------------------------
+# TODO(jrylko): Use this schema when loading host input data.
+#  Then, add immutable fields to exclude list, similarly as it is done in GuestSchema
 class HostSchema(CamelCaseSchema):
     class Meta:
         model = Host
@@ -64,13 +67,29 @@ class HostSchemaFull(CamelCaseSchema):
 
     languages_spoken = fields.Nested("LanguageSchema", many=True)
 
+    @validates_schema(pass_many=False)
+    def validate_language(self, data, **kwargs):
+        for language in data.get("languages_spoken", []):
+            if (code := language.code2) not in ["en", "pl", "ru", "uk"]:
+                raise ValidationError(
+                    message=f"Invalid language code: {code}.",
+                    field_name="languages_spoken",
+                )
+
 
 class GuestSchema(CamelCaseSchema):
     class Meta:
         model = Guest
         include_fk = True
         load_instance = True
+        # we use combination of unknown="EXCLUDE" + exclude list, so for example:
+        # if user were to include field "accommodation_unit" in their request
+        # this serializer will make it unknown because of exclude list
+        # and then not throw an error, which would be a default behavior
+        # if we didn't use unknown = "EXCLUDE"
+        unknown = "EXCLUDE"
         exclude = (
+            "guid",
             "updated_by",
             "accommodation_unit",
             "versions",
@@ -86,7 +105,8 @@ class GuestSchema(CamelCaseSchema):
     def validate_accommodation_unit_id(self, data, **kwargs):
         if (
             data.get("accommodation_unit_id") is None
-            and data.get("priority_status", "") == GuestPriorityStatus.ACCOMMODATION_FOUND
+            and data.get("priority_status", "")
+            == GuestPriorityStatus.ACCOMMODATION_FOUND
         ):
             raise ValidationError(
                 message="Accommodation unit is required.",
@@ -113,7 +133,11 @@ class AccommodationUnitSchema(CamelCaseSchema):
         model = AccommodationUnit
         include_fk = True
         load_instance = True
-        exclude = ("host", "guests", "versions")
+        exclude = ("guid", "host", "guests", "versions")
+        unknown = "EXCLUDE"
+
+    created_at = auto_field(dump_only=True)
+    updated_at = auto_field(dump_only=True)
 
 
 class AccommodationUnitSchemaFull(CamelCaseSchema):
