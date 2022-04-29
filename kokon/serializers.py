@@ -67,6 +67,15 @@ class HostSchemaFull(CamelCaseSchema):
 
     languages_spoken = fields.Nested("LanguageSchema", many=True)
 
+    @validates_schema(pass_many=False)
+    def validate_language(self, data, **kwargs):
+        for language in data.get("languages_spoken", []):
+            if (code := language.code2) not in ["en", "pl", "ru", "uk"]:
+                raise ValidationError(
+                    message=f"Invalid language code: {code}.",
+                    field_name="languages_spoken",
+                )
+
 
 class GuestSchema(CamelCaseSchema):
     class Meta:

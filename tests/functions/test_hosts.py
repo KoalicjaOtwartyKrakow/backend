@@ -37,10 +37,14 @@ def test_create_read_update_delete_host(db):
         "fullName": "Marta Andrzejak",
         "email": "auz-oxloij-dxfv@yahoo.com",
         "phoneNumber": "499-330-497",
+        "languagesSpoken": [{"code2": "en"}],
     }
     response = handle_add_host(request)
     assert response.status_code == 201
     assert response.json["phoneNumber"] == "499-330-497"
+    assert response.json["languagesSpoken"] == [
+        {"name": "English", "code2": "en", "code3": "eng"}
+    ]
     host_guid = response.json["guid"]
 
     request.args = {"hostId": host_guid}
@@ -159,3 +163,17 @@ def test_edit_host_with_immutable_fields_ignores_them(db):
             for field in immutable_fields.keys()
         ]
     )
+
+
+def test_create_host_with_invalid_language(db):
+    request = Mock()
+    request.db = DB()
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.get_json.return_value = {
+        "fullName": "Marta Andrzejak",
+        "email": "auz-oxloij-dxfv@yahoo.com",
+        "phoneNumber": "499-330-497",
+        "languagesSpoken": [{"code2": "xy"}],
+    }
+    response = handle_add_host(request)
+    assert response.status_code == http.HTTPStatus.UNPROCESSABLE_ENTITY
