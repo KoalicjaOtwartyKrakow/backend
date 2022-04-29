@@ -16,11 +16,11 @@ def host_function(request: Request):
             return handle_get_host_by_id(request)
         else:
             return handle_get_all_hosts(request)
-    elif request.method == "PUT":
+    elif request.method == "POST":
         return handle_add_host(request)
     elif request.method == "DELETE":
         return handle_delete_host(request)
-    elif request.method == "POST":
+    elif request.method == "PUT":
         return handle_update_host(request)
     else:
         return JSONResponse({"message": "Invalid method"}, status=405)

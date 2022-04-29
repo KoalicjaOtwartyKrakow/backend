@@ -18,11 +18,11 @@ def accommodation_function(request: Request):
             return handle_get_accommodation_by_id(request)
         else:
             return handle_get_all_accommodations(request)
-    elif request.method == "PUT":
+    elif request.method == "POST":
         return handle_add_accommodation(request)
     elif request.method == "DELETE":
         return handle_delete_accommodation(request)
-    elif request.method == "POST":
+    elif request.method == "PUT":
         return handle_update_accommodation(request)
     else:
         return JSONResponse({"message": "Invalid method"}, status=405)
