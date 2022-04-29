@@ -9,6 +9,22 @@ from kokon.utils.functions import Request, JSONResponse
 from kokon.utils.query import filter_stmt, paginate, sort_stmt
 
 
+def guest_function(request: Request):
+    if request.method == "GET":
+        if "guestId" in request.args:
+            return handle_get_guest_by_id(request)
+        else:
+            return handle_get_all_guests(request)
+    elif request.method == "PUT":
+        return handle_add_guest(request)
+    elif request.method == "DELETE":
+        return handle_delete_guest(request)
+    elif request.method == "POST":
+        return handle_update_guest(request)
+    else:
+        return JSONResponse({"message": "Invalid method"}, status=405)
+
+
 def handle_get_all_guests(request: Request):
     with request.db.acquire() as session:
         stmt = session.query(Guest).options(
