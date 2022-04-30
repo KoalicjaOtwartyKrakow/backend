@@ -2,12 +2,16 @@
 import flask
 import marshmallow
 
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, func
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import joinedload
 
-from kokon.orm import AccommodationUnit, Host
-from kokon.serializers import AccommodationUnitSchema, AccommodationUnitSchemaFull
+from kokon.orm import AccommodationUnit, Host, HostVerificationSession
+from kokon.serializers import (
+    AccommodationUnitSchema,
+    AccommodationUnitSchemaFull,
+    SelfCreateAccommodationUnitSchema,
+)
 from kokon.utils.functions import JSONResponse, Request
 from kokon.utils.query import filter_stmt, paginate, sort_stmt
 
@@ -24,6 +28,13 @@ def accommodation_function(request: Request):
         return handle_delete_accommodation(request)
     elif request.method == "PUT":
         return handle_update_accommodation(request)
+    else:
+        return JSONResponse({"message": "Invalid method"}, status=405)
+
+
+def public_accommodation_function(request: Request):
+    if request.method == "POST":
+        return handle_public_add_accommodation(request)
     else:
         return JSONResponse({"message": "Invalid method"}, status=405)
 
@@ -165,3 +176,47 @@ def handle_update_accommodation(request: Request):
         raise e
 
     return JSONResponse(response, status=200)
+
+
+def handle_public_add_accommodation(request: Request):
+    try:
+        conversation_id = request.args["conversationId"]
+    except KeyError:
+        return flask.Response("No conversation id supplied!", status=400)
+
+    schema = SelfCreateAccommodationUnitSchema(many=True)
+    schema_full = AccommodationUnitSchemaFull(many=True)
+
+    data = request.get_json(silent=True)
+
+    with request.db.acquire() as session:
+        stmt = select(HostVerificationSession).where(
+            HostVerificationSession.conversation_id == conversation_id
+        )
+        result = session.execute(stmt)
+        host_verification_session = result.scalar()
+        if host_verification_session is None:
+            return flask.Response("Not found conversation", status=404)
+        counter = session.execute(
+            select(AccommodationUnit)
+            .where(AccommodationUnit.host_id == host_verification_session.host_id)
+            .with_only_columns([func.count()])
+        ).scalar()
+        if counter:
+            return JSONResponse("Already exists accommodation", status=409)
+        if type(data) != list:
+            data = [data]
+        for obj in data:
+            obj["hostId"] = host_verification_session.host_id
+        try:
+            accommodations = schema.load(data, session=session)
+        except marshmallow.ValidationError as e:
+            return JSONResponse(
+                {"validationErrors": e.messages},
+                status=422,
+            )
+        session.add_all(accommodations)
+        session.commit()
+        response = schema_full.dump(accommodations)
+
+    return JSONResponse(response, status=201)

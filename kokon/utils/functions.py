@@ -56,3 +56,20 @@ def function_wrapper(func):
             raise e
 
     return wrapper
+
+
+def public_function_wrapper(func):
+    @functools.wraps(func)
+    def wrapper(request: FlaskRequest):
+        try:
+            db = DB()
+            request.db = db
+            return func(request)
+        except AppError as e:
+            return JSONResponse({"message": e.message}, status=e.status)
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            sentry_sdk.flush()
+            raise e
+
+    return wrapper
