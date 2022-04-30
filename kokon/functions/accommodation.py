@@ -190,11 +190,11 @@ def handle_public_add_accommodation(request: Request):
     data = request.get_json(silent=True)
 
     with request.db.acquire() as session:
-        stmt = select(HostVerificationSession).where(
-            HostVerificationSession.conversation_id == conversation_id
-        )
-        result = session.execute(stmt)
-        host_verification_session = result.scalar()
+        host_verification_session = session.execute(
+            select(HostVerificationSession).where(
+                HostVerificationSession.conversation_id == conversation_id
+            )
+        ).scalar()
         if host_verification_session is None:
             return flask.Response("Not found conversation", status=404)
         counter = session.execute(
@@ -204,7 +204,7 @@ def handle_public_add_accommodation(request: Request):
         ).scalar()
         if counter:
             return JSONResponse("Already exists accommodation", status=409)
-        if type(data) != list:
+        if isinstance(data, dict):
             data = [data]
         for obj in data:
             obj["hostId"] = host_verification_session.host_id
