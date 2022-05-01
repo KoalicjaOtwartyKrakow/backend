@@ -64,7 +64,10 @@ def public_function_wrapper(func):
         try:
             db = DB()
             request.db = db
-            return func(request)
+            result = func(request)
+            return result
+        except ValidationError as e:
+            return JSONResponse({"validationErrors": e.messages}, status=422)
         except AppError as e:
             return JSONResponse({"message": e.message}, status=e.status)
         except Exception as e:

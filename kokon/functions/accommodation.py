@@ -2,7 +2,7 @@
 import flask
 import marshmallow
 
-from sqlalchemy import select, delete, func
+from sqlalchemy import select, delete
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import joinedload
 
@@ -197,26 +197,21 @@ def handle_public_add_accommodation(request: Request):
         ).scalar()
         if host_verification_session is None:
             return flask.Response("Not found conversation", status=404)
-        counter = session.execute(
-            select(AccommodationUnit)
+        count = (
+            session.query(AccommodationUnit)
             .where(AccommodationUnit.host_id == host_verification_session.host_id)
-            .with_only_columns([func.count()])
-        ).scalar()
-        if counter:
+            .count()
+        )
+        if count:
             return JSONResponse("Already exists accommodation", status=409)
         if isinstance(data, dict):
             data = [data]
         for obj in data:
             obj["hostId"] = host_verification_session.host_id
-        try:
-            accommodations = schema.load(data, session=session)
-        except marshmallow.ValidationError as e:
-            return JSONResponse(
-                {"validationErrors": e.messages},
-                status=422,
-            )
+
+        accommodations = schema.load(data, session=session)
         session.add_all(accommodations)
         session.commit()
         response = schema_full.dump(accommodations)
 
-    return JSONResponse(response, status=201)
+    return JSONResponse({"items": response}, status=201)
