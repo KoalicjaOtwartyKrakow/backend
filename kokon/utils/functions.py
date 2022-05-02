@@ -34,45 +34,40 @@ class JSONResponse(Response):
         )
 
 
-def function_wrapper(func):
-    @functools.wraps(func)
-    def wrapper(request: FlaskRequest):
-        try:
-            # https://cloud.google.com/endpoints/docs/openapi/migrate-to-esp-v2#receiving_auth_results_in_your_api
-            jwt_header_encoded = request.headers.get("X-Endpoint-API-UserInfo", "")
-            db = DB()
+def function_wrapper(fn=None, public=False):
+    def _decorate(func):
+        @functools.wraps(func)
+        def wrapper(request: FlaskRequest):
+            try:
+                db = DB()
 
-            request.user = upsert_user_from_jwt(db, jwt_header_encoded)
-            request.db = db
+                if not public:
+                    # https://cloud.google.com/endpoints/docs/openapi/migrate-to-esp-v2#receiving_auth_results_in_your_api
+                    jwt_header_encoded = request.headers.get(
+                        "X-Endpoint-API-UserInfo", ""
+                    )
+                    request.user = upsert_user_from_jwt(db, jwt_header_encoded)
+                request.db = db
 
-            return func(request)
-        except ValidationError as e:
-            return JSONResponse({"validationErrors": e.messages}, status=422)
-        except AppError as e:
-            return JSONResponse({"message": e.message}, status=e.status)
-        except Exception as e:
-            sentry_sdk.capture_exception(e)
-            sentry_sdk.flush()
-            raise e
+                return func(request)
+            except ValidationError as e:
+                return JSONResponse({"validationErrors": e.messages}, status=422)
+            except AppError as e:
+                return JSONResponse({"message": e.message}, status=e.status)
+            except Exception as e:
+                sentry_sdk.capture_exception(e)
+                sentry_sdk.flush()
+                raise e
 
-    return wrapper
+        return wrapper
 
+    if fn:
+        # case when this decorator is used without calling it, e.g:
+        # @function_wrapper
+        # def accommodation_function(request):
+        return _decorate(fn)
 
-def public_function_wrapper(func):
-    @functools.wraps(func)
-    def wrapper(request: FlaskRequest):
-        try:
-            db = DB()
-            request.db = db
-            result = func(request)
-            return result
-        except ValidationError as e:
-            return JSONResponse({"validationErrors": e.messages}, status=422)
-        except AppError as e:
-            return JSONResponse({"message": e.message}, status=e.status)
-        except Exception as e:
-            sentry_sdk.capture_exception(e)
-            sentry_sdk.flush()
-            raise e
-
-    return wrapper
+    # case when this decorator is used with parameters, e.g:
+    # @function_wrapper(public=True)
+    # def public_accommodation_function(request):
+    return _decorate

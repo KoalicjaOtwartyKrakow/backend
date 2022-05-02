@@ -10,7 +10,7 @@ from kokon.functions.accommodation import (
     handle_public_add_accommodation,
 )
 from kokon.utils.db import DB
-from kokon.utils.functions import public_function_wrapper
+from kokon.utils.functions import function_wrapper
 
 from tests.helpers import UserMock
 
@@ -217,5 +217,5 @@ def test_self_create_accommodations_missing_parameters(db):
         {"vacanciesTotal": 1, "zip": "12345"},
     ]
     # public function wrapper used as it is responsible for handling Marshmallow validation errors
-    response = public_function_wrapper(handle_public_add_accommodation)(request)
+    response = function_wrapper(handle_public_add_accommodation, public=True)(request)
     assert response.status_code == http.HTTPStatus.UNPROCESSABLE_ENTITY
