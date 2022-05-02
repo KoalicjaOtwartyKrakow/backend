@@ -1,11 +1,18 @@
 """Module containing function handlers for host requests."""
+import pprint
+
 import flask
 import marshmallow
+import requests
+from flask import redirect
+from requests.auth import HTTPBasicAuth
 from sqlalchemy import select, delete, or_
 from sqlalchemy.exc import ProgrammingError
 
-from kokon.orm import Host, Language
+from kokon.orm import Host, Language, HostVerificationSession
+from kokon.orm.enums import VerificationStatus
 from kokon.serializers import HostSchema, HostSchemaFull
+from kokon.settings import AUTHOLOGIC_URL, AUTHOLOGIC_USER, AUTHOLOGIC_PASS
 from kokon.utils.functions import Request, JSONResponse
 from kokon.utils.query import filter_stmt, paginate, sort_stmt
 
@@ -45,13 +52,93 @@ def handle_add_host(request: Request):
     data = request.get_json()
 
     with request.db.acquire() as session:
-        host = host_schema_full.load(data, session=session)
-        session.add(host)
-        session.commit()
-        session.refresh(host)
-        response = host_schema_full.dump(host)
+        response = add_entry_with_post_data(data, host_schema_full, session)
 
     return JSONResponse(response, status=201)
+
+
+def start_conversation(user_id: str, host_url: str):
+    response = requests.post(
+        AUTHOLOGIC_URL,
+        json={
+            "userKey": user_id,
+            "returnUrl": f"{host_url}/registration?conversation={'conversationId'}",
+            "strategy": "salamlab:general",
+            "query": {
+                "identity": {
+                    "fields": {
+                        "mandatory": [
+                            "PERSON_NAME_FIRSTNAME",
+                            "PERSON_NAME_LASTNAME",
+                            "PERSON_CONTACT_PHONE",
+                            "PERSON_CONTACT_EMAIL",
+                        ]
+                    }
+                }
+            },
+        },
+        headers={
+            "Accept": "application/vnd.authologic.v1.1+json",
+            "Content-Type": "application/vnd.authologic.v1.1+json",
+        },
+        auth=HTTPBasicAuth(AUTHOLOGIC_USER, AUTHOLOGIC_PASS),
+    )
+
+    pprint.pprint("Conversation response")
+    pprint.pprint(response.json())
+
+    # TODO: handle other response codes
+    if response.status_code == 200:
+        return response.json()["id"]
+
+
+def handle_registration(request: Request):
+    pprint.pprint("Handling registration")
+    data = request.get_json()
+
+    pprint.pprint(data)
+
+    with request.db.acquire() as session:
+        host_schema_full = HostSchemaFull()
+        host = host_schema_full.load(data, session=session)
+        result = (
+            session.query(Host).where(Host.phone_number == data["phoneNumber"]).first()
+        )  # TODO: is this where clause ok? is phone formatted corectly always?
+        if result is None:
+            session.add(host)
+            session.commit()
+            session.refresh(host)
+            host = start_host_verification(host, session, request.host_url)
+            response = host_schema_full.dump(host)
+            return JSONResponse(response, status=201)
+        else:
+            return redirect("/")  # TODO: where to redirect?
+
+
+def start_host_verification(host, session, host_url):
+    host_verification = start_verification_session(host, host_url)
+    host.verifications.append(host_verification)
+    session.add(host_verification)
+    session.commit()
+    session.refresh(host)
+    return host
+
+
+def start_verification_session(host, host_url):
+    host_verification = HostVerificationSession()
+    host_verification.state = VerificationStatus.CREATED
+    host_verification.conversation_id = start_conversation(str(host.guid), host_url)
+    host.verifications.append(host_verification)
+    return host_verification
+
+
+def add_entry_with_post_data(data, schema_full, session):
+    host = schema_full.load(data, session=session)
+    session.add(host)
+    session.commit()
+    session.refresh(host)
+    response = schema_full.dump(host)
+    return response
 
 
 def handle_get_host_by_id(request: Request):

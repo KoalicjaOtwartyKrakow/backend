@@ -132,6 +132,13 @@ def get_all_users(request):
     return user.handle_get_all_users(request)
 
 
+@functions_framework.http
+@function_wrapper
+def registration(request):
+    """HTTP Cloud Function for host registration."""
+    return host.handle_registration(request)
+
+
 if __name__ == "__main__":
     from kokon.commands import cli
 
