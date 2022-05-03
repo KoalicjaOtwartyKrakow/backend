@@ -40,6 +40,7 @@ def function_wrapper(fn=None, public=False):
         def wrapper(request: FlaskRequest):
             try:
                 db = DB()
+                request.db = db
 
                 if not public:
                     # https://cloud.google.com/endpoints/docs/openapi/migrate-to-esp-v2#receiving_auth_results_in_your_api
@@ -47,7 +48,6 @@ def function_wrapper(fn=None, public=False):
                         "X-Endpoint-API-UserInfo", ""
                     )
                     request.user = upsert_user_from_jwt(db, jwt_header_encoded)
-                request.db = db
 
                 return func(request)
             except ValidationError as e:

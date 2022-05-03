@@ -10,4 +10,3 @@ services:
       - 5432:5432
     volumes:
       - ./scripts/create_databases.sql:/docker-entrypoint-initdb.d/create_databases.sql
-    command: [ "postgres", "-c", "log_statement=all" ] # for debugging purposes

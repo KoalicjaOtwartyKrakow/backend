@@ -3,12 +3,20 @@ import json
 
 from unittest.mock import Mock
 
+from kokon.utils.db import DB
 from kokon.utils.functions import function_wrapper
 
 
 @function_wrapper
 def handle_example(request):
-    assert request.user
+    assert request.user.email
+    assert isinstance(request.db, DB)
+    return "ok"
+
+
+@function_wrapper(public=True)
+def handle_example_public(request):
+    assert isinstance(request.db, DB)
     return "ok"
 
 
@@ -61,3 +69,9 @@ def test_jwt_auth__unauthorized():
     res = handle_example(request)
     assert res.status_code == 401
     assert res.json == {"message": "Unauthorized."}
+
+
+def test_no_jwt_auth_required_in_public_endpoint():
+    request = Mock()
+    res = handle_example_public(request)
+    assert res == "ok"
