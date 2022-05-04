@@ -1,12 +1,14 @@
 import http
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
+from kokon.utils import authologic
 from kokon.functions.host import (
     handle_add_host,
     handle_delete_host,
     handle_get_all_hosts,
     handle_get_host_by_id,
     handle_update_host,
+    handle_registration,
 )
 from kokon.orm import Host, Language
 from kokon.utils.db import DB
@@ -112,6 +114,28 @@ def test_create_read_update_delete_host(db):
 
     response = handle_delete_host(request)
     assert response.status_code == 204
+
+
+@patch("kokon.functions.host.start_conversation")
+def test_host_registration(test_patch):
+    request = Mock()
+    request.db = DB()
+    test_patch.return_value = {
+        "id": "782962fc-dc11-4a33-8f08-b7da532dd40d",
+        "url": "http://take.me.there/",
+    }
+    request.user = UserMock(guid="782962fc-dc11-4a33-8f08-b7da532dd40d")
+    request.get_json.return_value = {
+        "phoneNumber": "123123123",
+        "fullName": "Marian Koniuszko",
+        "email": "koniuszko@dummy.dum",
+    }
+    request.host_url = "http://dummy.dum/"
+
+    response = handle_registration(request)
+
+    assert response.status_code == 201  # TODO: assertions
+    assert response.get_json()["status"] == "CREATED"
 
 
 def test_get_edit_delete_host_missing_host_id_parameter():

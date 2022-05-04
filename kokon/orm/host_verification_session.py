@@ -19,9 +19,14 @@ class HostVerificationSession(Base):
         sa.ForeignKey("hosts.guid", name="fk_host_verification_sessions_host_id"),
         nullable=False,
     )
-    conversation_id = sa.Column("conversation_id", sa.String(36), nullable=False)
+    conversation_id = sa.Column(
+        "conversation_id", sa.String(36), nullable=False, unique=True
+    )
     first_name = sa.Column("first_name", sa.String(100), nullable=True)
     last_name = sa.Column("last_name", sa.String(100), nullable=True)
+    phone_number = sa.Column("phone_number", sa.String(100), nullable=True)
+    email = sa.Column("email", sa.String(100), nullable=True)
+    url = sa.Column("url", sa.String(200), nullable=True)
     created_at = sa.Column(
         "created_at",
         TIMESTAMP(timezone=True),

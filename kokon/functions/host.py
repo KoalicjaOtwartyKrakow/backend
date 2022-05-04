@@ -1,18 +1,15 @@
 """Module containing function handlers for host requests."""
-import pprint
 
 import flask
 import marshmallow
-import requests
 from flask import redirect
-from requests.auth import HTTPBasicAuth
 from sqlalchemy import select, delete, or_
 from sqlalchemy.exc import ProgrammingError
 
+from kokon.utils.authologic import start_conversation
 from kokon.orm import Host, Language, HostVerificationSession
 from kokon.orm.enums import VerificationStatus
 from kokon.serializers import HostSchema, HostSchemaFull
-from kokon.settings import AUTHOLOGIC_URL, AUTHOLOGIC_USER, AUTHOLOGIC_PASS
 from kokon.utils.functions import Request, JSONResponse
 from kokon.utils.query import filter_stmt, paginate, sort_stmt
 
@@ -57,46 +54,8 @@ def handle_add_host(request: Request):
     return JSONResponse(response, status=201)
 
 
-def start_conversation(user_id: str, host_url: str):
-    response = requests.post(
-        AUTHOLOGIC_URL,
-        json={
-            "userKey": user_id,
-            "returnUrl": f"{host_url}/registration?conversation={'conversationId'}",
-            "strategy": "salamlab:general",
-            "query": {
-                "identity": {
-                    "fields": {
-                        "mandatory": [
-                            "PERSON_NAME_FIRSTNAME",
-                            "PERSON_NAME_LASTNAME",
-                            "PERSON_CONTACT_PHONE",
-                            "PERSON_CONTACT_EMAIL",
-                        ]
-                    }
-                }
-            },
-        },
-        headers={
-            "Accept": "application/vnd.authologic.v1.1+json",
-            "Content-Type": "application/vnd.authologic.v1.1+json",
-        },
-        auth=HTTPBasicAuth(AUTHOLOGIC_USER, AUTHOLOGIC_PASS),
-    )
-
-    pprint.pprint("Conversation response")
-    pprint.pprint(response.json())
-
-    # TODO: handle other response codes
-    if response.status_code == 200:
-        return response.json()["id"]
-
-
 def handle_registration(request: Request):
-    pprint.pprint("Handling registration")
     data = request.get_json()
-
-    pprint.pprint(data)
 
     with request.db.acquire() as session:
         host_schema_full = HostSchemaFull()
@@ -127,7 +86,9 @@ def start_host_verification(host, session, host_url):
 def start_verification_session(host, host_url):
     host_verification = HostVerificationSession()
     host_verification.state = VerificationStatus.CREATED
-    host_verification.conversation_id = start_conversation(str(host.guid), host_url)
+    conversation_result = start_conversation(str(host.guid), host_url)
+    host_verification.conversation_id = conversation_result["id"]
+    host_verification.url = conversation_result["url"]
     host.verifications.append(host_verification)
     return host_verification
 
