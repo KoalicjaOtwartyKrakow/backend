@@ -21,13 +21,29 @@ def upgrade():
         "host_verification_sessions",
         sa.Column("url", sa.String(length=200), nullable=True),
     )
+    op.add_column(  # pylint: disable=no-member
+        "host_verification_sessions",
+        sa.Column("phone_number", sa.String(length=200), nullable=True),
+    )
+    op.add_column(  # pylint: disable=no-member
+        "host_verification_sessions",
+        sa.Column("email", sa.String(length=200), nullable=True),
+    )
     op.create_unique_constraint(  # pylint: disable=no-member
-        "unique_conversation_id", "host_verification_sessions", ["conversation_id"]
+        "host_verification_sessions_conversation_id_key",
+        "host_verification_sessions",
+        ["conversation_id"],
     )
 
 
 def downgrade():
     op.drop_constraint(  # pylint: disable=no-member
-        "unique_conversation_id", "host_verification_sessions", type_="unique"
+        "host_verification_sessions_conversation_id_key",
+        "host_verification_sessions",
+        type_="unique",
     )
     op.drop_column("host_verification_sessions", "url")  # pylint: disable=no-member
+    op.drop_column(  # pylint: disable=no-member
+        "host_verification_sessions", "phone_number"
+    )
+    op.drop_column("host_verification_sessions", "email")  # pylint: disable=no-member

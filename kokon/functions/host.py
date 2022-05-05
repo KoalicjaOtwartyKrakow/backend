@@ -62,7 +62,7 @@ def handle_registration(request: Request):
         host = host_schema_full.load(data, session=session)
         result = (
             session.query(Host).where(Host.phone_number == data["phoneNumber"]).first()
-        )  # TODO: is this where clause ok? is phone formatted corectly always?
+        )
         if result is None:
             session.add(host)
             session.commit()
@@ -71,7 +71,7 @@ def handle_registration(request: Request):
             response = host_schema_full.dump(host)
             return JSONResponse(response, status=201)
         else:
-            return redirect("/")  # TODO: where to redirect?
+            return redirect("/")  # TODO: set correct redirect address
 
 
 def start_host_verification(host, session, host_url):
