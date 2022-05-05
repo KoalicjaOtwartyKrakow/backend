@@ -134,7 +134,7 @@ def test_host_registration(test_patch):
 
     response = handle_registration(request)
 
-    assert response.status_code == 201  # TODO: assertions
+    assert response.status_code == 201
     assert response.get_json()["status"] == "CREATED"
 
 
