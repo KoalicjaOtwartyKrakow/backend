@@ -1,10 +1,14 @@
 """Module containing function handlers for host requests."""
+
 import flask
 import marshmallow
+from flask import redirect
 from sqlalchemy import select, delete, or_
 from sqlalchemy.exc import ProgrammingError
 
-from kokon.orm import Host, Language
+from kokon.utils.authologic import start_conversation
+from kokon.orm import Host, Language, HostVerificationSession
+from kokon.orm.enums import VerificationStatus
 from kokon.serializers import HostSchema, HostSchemaFull
 from kokon.utils.functions import Request, JSONResponse
 from kokon.utils.query import filter_stmt, paginate, sort_stmt
@@ -61,13 +65,57 @@ def handle_add_host(request: Request):
     data = request.get_json()
 
     with request.db.acquire() as session:
-        host = host_schema_full.load(data, session=session)
-        session.add(host)
-        session.commit()
-        session.refresh(host)
-        response = host_schema_full.dump(host)
+        response = add_entry_with_post_data(data, host_schema_full, session)
 
     return JSONResponse(response, status=201)
+
+
+def handle_registration(request: Request):
+    data = request.get_json()
+
+    with request.db.acquire() as session:
+        host_schema_full = HostSchemaFull()
+        host = host_schema_full.load(data, session=session)
+        result = (
+            session.query(Host).where(Host.phone_number == data["phoneNumber"]).first()
+        )
+        if result is None:
+            session.add(host)
+            session.commit()
+            session.refresh(host)
+            host = start_host_verification(host, session, request.host_url)
+            response = host_schema_full.dump(host)
+            return JSONResponse(response, status=201)
+        else:
+            return redirect("/")  # TODO: set correct redirect address
+
+
+def start_host_verification(host, session, host_url):
+    host_verification = start_verification_session(host, host_url)
+    host.verifications.append(host_verification)
+    session.add(host_verification)
+    session.commit()
+    session.refresh(host)
+    return host
+
+
+def start_verification_session(host, host_url):
+    host_verification = HostVerificationSession()
+    host_verification.state = VerificationStatus.CREATED
+    conversation_result = start_conversation(str(host.guid), host_url)
+    host_verification.conversation_id = conversation_result["id"]
+    host_verification.url = conversation_result["url"]
+    host.verifications.append(host_verification)
+    return host_verification
+
+
+def add_entry_with_post_data(data, schema_full, session):
+    host = schema_full.load(data, session=session)
+    session.add(host)
+    session.commit()
+    session.refresh(host)
+    response = schema_full.dump(host)
+    return response
 
 
 def handle_get_host_by_id(request: Request):
