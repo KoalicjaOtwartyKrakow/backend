@@ -54,6 +54,13 @@ def public_accommodation_function(request):
     return accommodation.public_accommodation_function(request)
 
 
+@functions_framework.http
+@function_wrapper
+def registration(request):
+    """HTTP Cloud Function for host registration."""
+    return host.handle_registration(request)
+
+
 if __name__ == "__main__":
     from kokon.commands import cli
 

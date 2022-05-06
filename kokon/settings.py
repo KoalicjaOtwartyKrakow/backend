@@ -26,3 +26,7 @@ SENTRY_DSN = os.getenv("sentry_dsn")
 SENTRY_TRACES_SAMPLE_RATE = os.getenv("sentry_traces_sample_rate", 0)
 
 AUTHORIZED_EMAILS = os.getenv("authorized_emails", "*@example.com,*@example.com")
+
+AUTHOLOGIC_URL = os.getenv("authologic_url", default="")
+AUTHOLOGIC_USER = os.getenv("authologic_user")
+AUTHOLOGIC_PASS = os.getenv("authologic_pass")
