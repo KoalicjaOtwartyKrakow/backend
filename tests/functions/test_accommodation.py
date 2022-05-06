@@ -7,8 +7,10 @@ from kokon.functions.accommodation import (
     handle_get_accommodation_by_id,
     handle_get_all_accommodations,
     handle_update_accommodation,
+    handle_public_add_accommodation,
 )
 from kokon.utils.db import DB
+from kokon.utils.functions import function_wrapper
 
 from tests.helpers import UserMock
 
@@ -110,3 +112,110 @@ def test_get_edit_delete_accommodation_not_found_accommodation():
 
     response = handle_delete_accommodation(request)
     assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+
+def test_self_create_accommodations(db):
+    request = Mock()
+    request.db = DB()
+    request.args = {"conversationId": "9449e8d2-d0f8-455e-a181-1f35616d107d"}
+    request.get_json.return_value = [
+        {
+            "vacanciesTotal": 1,
+            "zip": "12345",
+            "addressLine": "Address 1",
+        },
+        {
+            "vacanciesTotal": 1,
+            "zip": "12345",
+            "addressLine": "Address 2",
+        },
+    ]
+    response = handle_public_add_accommodation(request)
+    assert response.status_code == http.HTTPStatus.CREATED
+    created_accommodations = response.json["items"]
+    assert [
+        accommodation["addressLine"] for accommodation in created_accommodations
+    ] == [
+        "Address 1",
+        "Address 2",
+    ]
+    assert [accommodation["hostId"] for accommodation in created_accommodations] == [
+        "dc6d05bb-9bd6-4e9d-a8e9-8b88d29adee5",
+        "dc6d05bb-9bd6-4e9d-a8e9-8b88d29adee5",
+    ]
+
+
+def test_self_create_accommodations_for_the_second_time_fails(db):
+    request = Mock()
+    request.db = DB()
+    request.args = {"conversationId": "9449e8d2-d0f8-455e-a181-1f35616d107d"}
+    request.get_json.return_value = [
+        {
+            "vacanciesTotal": 1,
+            "zip": "12345",
+            "addressLine": "Address 1",
+        }
+    ]
+    response = handle_public_add_accommodation(request)
+    assert response.status_code == http.HTTPStatus.CREATED
+    request.get_json.return_value = [
+        {
+            "vacanciesTotal": 1,
+            "zip": "12345",
+            "addressLine": "Address 2",
+        }
+    ]
+    response = handle_public_add_accommodation(request)
+    assert response.status_code == http.HTTPStatus.CONFLICT
+
+
+def test_self_create_accommodations_missing_conversation_id_parameter(db):
+    request = Mock()
+    request.db = DB()
+    request.args = {}
+
+    response = handle_public_add_accommodation(request)
+    assert response.status_code == http.HTTPStatus.BAD_REQUEST
+
+
+def test_self_create_accommodations_invalid_conversation_id_parameter(db):
+    request = Mock()
+    request.db = DB()
+    request.args = {"conversationId": "invalidUUID"}
+
+    response = handle_public_add_accommodation(request)
+    assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+
+def test_self_create_accommodations_not_found_conversation(db):
+    request = Mock()
+    request.db = DB()
+    request.args = {"conversationId": "882962fc-dc11-4a33-8f08-b7da532dd40d"}
+
+    response = handle_public_add_accommodation(request)
+    assert response.status_code == http.HTTPStatus.NOT_FOUND
+
+
+def test_self_create_accommodations_single_element_instead_of_list(db):
+    request = Mock()
+    request.db = DB()
+    request.args = {"conversationId": "9449e8d2-d0f8-455e-a181-1f35616d107d"}
+    request.get_json.return_value = {
+        "vacanciesTotal": 1,
+        "zip": "12345",
+        "addressLine": "Address 2",
+    }
+    response = handle_public_add_accommodation(request)
+    assert response.status_code == http.HTTPStatus.CREATED
+
+
+def test_self_create_accommodations_missing_parameters(db):
+    request = Mock()
+    request.db = DB()
+    request.args = {"conversationId": "9449e8d2-d0f8-455e-a181-1f35616d107d"}
+    request.get_json.return_value = [
+        {"vacanciesTotal": 1, "zip": "12345"},
+    ]
+    # public function wrapper used as it is responsible for handling Marshmallow validation errors
+    response = function_wrapper(handle_public_add_accommodation, public=True)(request)
+    assert response.status_code == http.HTTPStatus.UNPROCESSABLE_ENTITY

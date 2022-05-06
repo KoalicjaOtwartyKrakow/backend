@@ -9,7 +9,6 @@ from kokon.functions import accommodation, guest, host, user
 from kokon import settings
 from kokon.utils.functions import function_wrapper
 
-
 # See https://github.com/getsentry/sentry-python/issues/1081
 sentry_sdk.init(  # pylint: disable=abstract-class-instantiated # noqa: E0110
     settings.SENTRY_DSN,
@@ -46,6 +45,13 @@ def host_function(request):
 def get_all_users(request):
     """HTTP Cloud Function for getting all users."""
     return user.handle_get_all_users(request)
+
+
+@functions_framework.http
+@function_wrapper(public=True)
+def public_accommodation_function(request):
+    """HTTP Cloud Function for self handling accommodations."""
+    return accommodation.public_accommodation_function(request)
 
 
 @functions_framework.http

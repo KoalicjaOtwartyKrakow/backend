@@ -86,7 +86,8 @@ class GuestSchema(CamelCaseSchema):
     def validate_accommodation_unit_id(self, data, **kwargs):
         if (
             data.get("accommodation_unit_id") is None
-            and data.get("priority_status", "") == GuestPriorityStatus.ACCOMMODATION_FOUND
+            and data.get("priority_status", "")
+            == GuestPriorityStatus.ACCOMMODATION_FOUND
         ):
             raise ValidationError(
                 message="Accommodation unit is required.",
@@ -106,6 +107,14 @@ class GuestSchemaFull(CamelCaseSchema):
         )
 
     accommodation_unit = fields.Nested("AccommodationUnitSchema")
+
+
+class SelfCreateAccommodationUnitSchema(CamelCaseSchema):
+    class Meta:
+        model = AccommodationUnit
+        include_fk = True
+        load_instance = True
+        exclude = ("host", "guests", "versions")
 
 
 class AccommodationUnitSchema(CamelCaseSchema):

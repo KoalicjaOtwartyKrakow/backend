@@ -8,13 +8,17 @@ VALUES ('Ewelina Głuszek', '443 143 258', 'wdonx.e@o2.pl', '17:30', '18:00', ''
        ('Edmund Królikowski', '550.343.606', 'dqova@poczta.onet.pl', '7:10', '8:00', '',
         '2078dad6-5dc9-4e5a-8ee0-d69c44f460e2');
 
+INSERT into host_verification_sessions("host_id", "conversation_id", "first_name", "last_name")
+VALUES ('dc6d05bb-9bd6-4e9d-a8e9-8b88d29adee5', '9449e8d2-d0f8-455e-a181-1f35616d107d', 'Ewelina', 'Głuszek');
+
 TRUNCATE accommodation_units_version RESTART IDENTITY;
 TRUNCATE accommodation_units RESTART IDENTITY CASCADE;
 
 INSERT INTO accommodation_units("guid", "address_line", "city", "zip", "voivodeship", "vacancies_total",
                                 "vacancies_free", "host_id", "pets_present")
-VALUES('008c0243-0060-4d11-9775-0258ddac7620', 'ul. Zimna 19m.28', 'Lublin', '06-631',
-       'LUBELSKIE', 5, 5, '2078dad6-5dc9-4e5a-8ee0-d69c44f460e2', 'f');
+VALUES ('008c0243-0060-4d11-9775-0258ddac7620', 'ul. Zimna 19m.28', 'Lublin', '06-631',
+        'LUBELSKIE', 5, 5, '2078dad6-5dc9-4e5a-8ee0-d69c44f460e2', 'f');
+
 
 TRUNCATE users RESTART IDENTITY CASCADE;
 

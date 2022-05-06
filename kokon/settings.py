@@ -1,8 +1,14 @@
+import logging
 import os
-
 
 IS_LOCAL_DB = os.getenv("IS_LOCAL_DB", "False").lower() == "true"
 
+# setting global logging level
+logging.basicConfig(level=logging.INFO if IS_LOCAL_DB else logging.ERROR)
+
+if IS_LOCAL_DB:
+    # setting logging level for SQL Alchemy running on local db
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 DB_USER = os.getenv("db_user", default="app_user")
 DB_PASS = os.getenv("db_pass", default="postgres")
