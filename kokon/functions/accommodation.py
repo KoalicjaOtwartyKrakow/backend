@@ -182,7 +182,7 @@ def handle_public_add_accommodation(request: Request):
     try:
         conversation_id = request.args["conversationId"]
     except KeyError:
-        return flask.Response("No conversation id supplied!", status=400)
+        return JSONResponse({"message": "Conversation id not supplied"}, status=400)
 
     schema = SelfCreateAccommodationUnitSchema(many=True)
     schema_full = AccommodationUnitSchemaFull(many=True)
@@ -196,14 +196,16 @@ def handle_public_add_accommodation(request: Request):
             )
         ).scalar()
         if host_verification_session is None:
-            return flask.Response("Not found conversation", status=404)
+            return JSONResponse({"message": "Conversation not found"}, status=404)
         count = (
             session.query(AccommodationUnit)
             .where(AccommodationUnit.host_id == host_verification_session.host_id)
             .count()
         )
         if count:
-            return JSONResponse("Already exists accommodation", status=409)
+            return JSONResponse(
+                {"message": "The accommodations were already created"}, status=409
+            )
         if isinstance(data, dict):
             data = [data]
         for obj in data:
